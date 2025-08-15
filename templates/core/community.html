@@ -15,7 +15,20 @@
             <span>
                 in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
                 by {{ post.author.username }}
-                · {{ post.score }}
+                ·
+                <button hx-post="{% url 'vote_post' post.pk %}"
+                        hx-target="#post-score-{{ post.pk }}"
+                        hx-swap="outerHTML"
+                        hx-include="[name='v']">
+                    ▲<input type="hidden" name="v" value="1">
+                </button>
+                <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
+                <button hx-post="{% url 'vote_post' post.pk %}"
+                        hx-target="#post-score-{{ post.pk }}"
+                        hx-swap="outerHTML"
+                        hx-include="[name='v']">
+                    ▼<input type="hidden" name="v" value="-1">
+                </button>
                 · {{ post.created_at|timesince }} ago
             </span>
         </li>

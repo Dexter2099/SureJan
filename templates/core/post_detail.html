@@ -13,7 +13,20 @@
     <p>
         in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
         by {{ post.author.username }}
-        · {{ post.score }}
+        ·
+        <button hx-post="{% url 'vote_post' post.pk %}"
+                hx-target="#post-score-{{ post.pk }}"
+                hx-swap="outerHTML"
+                hx-include="[name='v']">
+            ▲<input type="hidden" name="v" value="1">
+        </button>
+        <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
+        <button hx-post="{% url 'vote_post' post.pk %}"
+                hx-target="#post-score-{{ post.pk }}"
+                hx-swap="outerHTML"
+                hx-include="[name='v']">
+            ▼<input type="hidden" name="v" value="-1">
+        </button>
         · {{ post.created_at|timesince }} ago
     </p>
     <h2>Comments</h2>
@@ -21,7 +34,24 @@
         {% for comment in comments %}
         <li>
             <p>{{ comment.body }}</p>
-            <small>by {{ comment.author.username }} · {{ comment.created_at|timesince }} ago</small>
+            <small>
+                by {{ comment.author.username }}
+                ·
+                <button hx-post="{% url 'vote_comment' comment.pk %}"
+                        hx-target="#comment-score-{{ comment.pk }}"
+                        hx-swap="outerHTML"
+                        hx-include="[name='v']">
+                    ▲<input type="hidden" name="v" value="1">
+                </button>
+                <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
+                <button hx-post="{% url 'vote_comment' comment.pk %}"
+                        hx-target="#comment-score-{{ comment.pk }}"
+                        hx-swap="outerHTML"
+                        hx-include="[name='v']">
+                    ▼<input type="hidden" name="v" value="-1">
+                </button>
+                · {{ comment.created_at|timesince }} ago
+            </small>
         </li>
         {% empty %}
         <li>No comments yet.</li>

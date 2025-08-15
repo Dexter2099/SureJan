@@ -13,6 +13,8 @@ urlpatterns = [
     path("", core_views.home, name="home"),
     path("post/<int:pk>/", core_views.post_detail, name="post_detail"),
     path("post/<int:pk>/comment/", core_views.add_comment, name="add_comment"),
+    path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
+    path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
     path("r/<slug:name>/submit/", core_views.submit_post, name="submit_post"),
     path("r/<slug:name>/", core_views.community, name="community"),
 ]
