@@ -31,8 +31,8 @@
             {% if form.post_type.errors %}<div>{{ form.post_type.errors }}</div>{% endif %}
         </div>
         <div>
-            <label for="id_file">Image:</label>
-            <input type="file" name="file" id="id_file">
+            {{ form.file.label_tag }} {{ form.file }}
+            {% if form.file.errors %}<div>{{ form.file.errors }}</div>{% endif %}
         </div>
         <button type="submit">Submit</button>
     </form>
