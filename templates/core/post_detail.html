@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ post.title }}</title>
+    <link rel="stylesheet" href="/static/css/old.css">
+</head>
+<body>
+    <h1>{{ post.title }}</h1>
+    {% if post.body %}
+    <p>{{ post.body }}</p>
+    {% endif %}
+    <p>
+        in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
+        by {{ post.author.username }}
+        · {{ post.score }}
+        · {{ post.created_at|timesince }} ago
+    </p>
+    <h2>Comments</h2>
+    <ul>
+        {% for comment in comments %}
+        <li>
+            <p>{{ comment.body }}</p>
+            <small>by {{ comment.author.username }} · {{ comment.created_at|timesince }} ago</small>
+        </li>
+        {% empty %}
+        <li>No comments yet.</li>
+        {% endfor %}
+    </ul>
+    <h3>Add comment</h3>
+    <form method="post" action="{% url 'add_comment' post.pk %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Comment</button>
+    </form>
+</body>
+</html>
