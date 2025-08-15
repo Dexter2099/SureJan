@@ -1,1 +1,13 @@
-a { color: blue; }
+body{background:#fafafa;color:#111;font:14px/1.4 Arial, Helvetica, sans-serif}
+.page{width:980px;margin:0 auto}
+a{color:#1a0dab;text-decoration:none}
+a:hover{text-decoration:underline}
+.postrow{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #eee}
+.votes{width:36px;text-align:center}
+.votes .up,.votes .down{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;display:block;margin:6px auto}
+.votes .up{border-bottom:14px solid #ff8b60}
+.votes .down{border-top:14px solid #9494ff}
+.title{font-size:15px;margin:0}
+.meta{color:#6a6a6a;font-size:12px;margin-top:3px}
+.thumb{width:70px;height:auto;vertical-align:middle;margin-right:6px}
+.comment{border-left:2px solid #eee;margin:8px 0 8px 10px;padding-left:8px}
