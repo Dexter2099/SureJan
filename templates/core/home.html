@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
   <meta charset="utf-8">
   <title>SureJan — Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,42 +10,5 @@
     <h1 style="margin:0 0 12px;">SureJan</h1>
     <p>It boots! 🎉 Next up: communities, posts, comments, and voting.</p>
   </div>
-=======
-    <meta charset="utf-8">
-    <title>Home</title>
-</head>
-<body>
-<header><a href="/">SureJan</a></header>
-<div class="page">
-    {% for post in posts %}
-    <div class="postrow">
-        <div class="votes">
-            <button hx-post="{% url 'vote_post' post.id %}"
-                    hx-vals='{"v": 1}'
-                    hx-target="#post-score-{{ post.id }}"
-                    hx-swap="outerHTML">▲</button>
-            <button hx-post="{% url 'vote_post' post.id %}"
-                    hx-vals='{"v": -1}'
-                    hx-target="#post-score-{{ post.id }}"
-                    hx-swap="outerHTML">▼</button>
-        </div>
-        {% if post.media and post.media.thumb %}
-        <a href="{% url 'post_detail' post.id %}"><img src="{{ post.media.thumb.url }}" alt=""></a>
-        {% endif %}
-        <div>
-            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-            <div class="meta">
-                <a href="{% url 'community' post.community.name %}">{{ post.community.title }}</a>
-                · {{ post.author.username }}
-                · {{ post.created_at|timesince }} ago
-                · <span id="post-score-{{ post.id }}">{{ post.score }}</span>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <p>No posts yet.</p>
-    {% endfor %}
-</div>
->>>>>>> e519127d299e92c16c01fb19bd5dd78662494972
 </body>
 </html>
