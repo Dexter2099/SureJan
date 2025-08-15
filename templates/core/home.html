@@ -3,37 +3,38 @@
 <head>
     <meta charset="utf-8">
     <title>Home</title>
-    <link rel="stylesheet" href="/static/css/old.css">
 </head>
 <body>
-    <h1>Home</h1>
-    <ul>
-        {% for post in posts %}
-        <li>
-            <a href="{% url 'post_detail' post.pk %}" style="color: blue;">{{ post.title }}</a>
-            <span>
-                in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
-                by {{ post.author.username }}
-                ·
-                <button hx-post="{% url 'vote_post' post.pk %}"
-                        hx-target="#post-score-{{ post.pk }}"
-                        hx-swap="outerHTML"
-                        hx-include="[name='v']">
-                    ▲<input type="hidden" name="v" value="1">
-                </button>
-                <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
-                <button hx-post="{% url 'vote_post' post.pk %}"
-                        hx-target="#post-score-{{ post.pk }}"
-                        hx-swap="outerHTML"
-                        hx-include="[name='v']">
-                    ▼<input type="hidden" name="v" value="-1">
-                </button>
+<header><a href="/">SureJan</a></header>
+<div class="page">
+    {% for post in posts %}
+    <div class="postrow">
+        <div class="votes">
+            <button hx-post="{% url 'vote_post' post.id %}"
+                    hx-vals='{"v": 1}'
+                    hx-target="#post-score-{{ post.id }}"
+                    hx-swap="outerHTML">▲</button>
+            <button hx-post="{% url 'vote_post' post.id %}"
+                    hx-vals='{"v": -1}'
+                    hx-target="#post-score-{{ post.id }}"
+                    hx-swap="outerHTML">▼</button>
+        </div>
+        {% if post.media and post.media.thumb %}
+        <a href="{% url 'post_detail' post.id %}"><img src="{{ post.media.thumb.url }}" alt=""></a>
+        {% endif %}
+        <div>
+            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+            <div class="meta">
+                <a href="{% url 'community' post.community.name %}">{{ post.community.title }}</a>
+                · {{ post.author.username }}
                 · {{ post.created_at|timesince }} ago
-            </span>
-        </li>
-        {% empty %}
-        <li>No posts yet.</li>
-        {% endfor %}
-    </ul>
+                · <span id="post-score-{{ post.id }}">{{ post.score }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No posts yet.</p>
+    {% endfor %}
+</div>
 </body>
 </html>
