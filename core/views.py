@@ -1,8 +1,14 @@
 """Core application views."""
 
-from django.shortcuts import get_object_or_404, render
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Community, Post
+from .forms import PostForm
+from .models import Community, Media, Post
+
+from io import BytesIO
+import uuid
+from PIL import Image
 
 
 def home(request):
@@ -26,4 +32,53 @@ def community(request, name):
     )
     context = {"community": community, "posts": posts}
     return render(request, "core/community.html", context)
+
+
+def submit_post(request, name):
+    """Submit a new post to a community."""
+
+    community = get_object_or_404(Community, name=name)
+
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.community = community
+            post.author = request.user
+
+            uploaded = request.FILES.get("file")
+            if uploaded:
+                image = Image.open(uploaded)
+                image = image.convert("RGB")
+                image.thumbnail((2560, 2560))
+
+                buffer = BytesIO()
+                image.save(buffer, format="WEBP", quality=82)
+                buffer.seek(0)
+
+                media = Media(kind="image")
+                base = uuid.uuid4().hex
+                media.file.save(f"{base}.webp", ContentFile(buffer.read()), save=False)
+
+                width, height = image.size
+                thumb_img = image.copy()
+                if thumb_img.width > 256:
+                    thumb_height = int(thumb_img.height * 256 / thumb_img.width)
+                    thumb_img = thumb_img.resize((256, thumb_height))
+                buffer_thumb = BytesIO()
+                thumb_img.save(buffer_thumb, format="WEBP", quality=82)
+                buffer_thumb.seek(0)
+                media.thumb.save(f"{base}_thumb.webp", ContentFile(buffer_thumb.read()), save=False)
+                media.width = width
+                media.height = height
+                media.save()
+                post.media = media
+
+            post.save()
+            return redirect("post_detail", pk=post.pk)
+    else:
+        form = PostForm()
+
+    context = {"form": form, "community": community}
+    return render(request, "core/submit_post.html", context)
 

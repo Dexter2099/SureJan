@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Submit Post</title>
+    <link rel="stylesheet" href="/static/css/old.css">
+</head>
+<body>
+    <h1>Submit to {{ community.title }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            {{ form.title.label_tag }} {{ form.title }}
+            {% if form.title.errors %}<div>{{ form.title.errors }}</div>{% endif %}
+        </div>
+        <div>
+            {{ form.body.label_tag }} {{ form.body }}
+            {% if form.body.errors %}<div>{{ form.body.errors }}</div>{% endif %}
+        </div>
+        <div>
+            {{ form.url.label_tag }} {{ form.url }}
+            {% if form.url.errors %}<div>{{ form.url.errors }}</div>{% endif %}
+        </div>
+        <div>
+            <label>Post type:</label>
+            {% with pt=form.post_type.value %}
+            {% for value, label in form.post_type.field.choices %}
+                <label><input type="radio" name="post_type" value="{{ value }}" {% if pt == value %}checked{% endif %}>{{ label }}</label>
+            {% endfor %}
+            {% endwith %}
+            {% if form.post_type.errors %}<div>{{ form.post_type.errors }}</div>{% endif %}
+        </div>
+        <div>
+            <label for="id_file">Image:</label>
+            <input type="file" name="file" id="id_file">
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
