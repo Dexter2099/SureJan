@@ -1,10 +1,14 @@
 """Core application views."""
 
+from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+from django.db.models import F
 
 from .forms import PostForm, CommentForm
-from .models import Community, Media, Post, Comment
+from .models import Community, Media, Post, Comment, Vote
 
 from io import BytesIO
 import uuid
@@ -119,4 +123,64 @@ def add_comment(request, pk):
             parent=parent,
         )
     return redirect("post_detail", pk=post.pk)
+
+
+@login_required
+@require_POST
+def vote_post(request, pk):
+    """Handle voting on a post."""
+
+    try:
+        value = int(request.POST.get("v"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+    if value not in (-1, 1):
+        return HttpResponseBadRequest("Invalid vote")
+
+    post = get_object_or_404(Post, pk=pk)
+    vote, created = Vote.objects.get_or_create(
+        user=request.user,
+        target_type="post",
+        target_id=pk,
+        defaults={"value": value},
+    )
+    if created:
+        Post.objects.filter(pk=pk).update(score=F("score") + value)
+    elif vote.value != value:
+        diff = value - vote.value
+        vote.value = value
+        vote.save(update_fields=["value"])
+        Post.objects.filter(pk=pk).update(score=F("score") + diff)
+    post.refresh_from_db(fields=["score"])
+    return HttpResponse(f"<span id='post-score-{pk}'>{post.score}</span>")
+
+
+@login_required
+@require_POST
+def vote_comment(request, pk):
+    """Handle voting on a comment."""
+
+    try:
+        value = int(request.POST.get("v"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+    if value not in (-1, 1):
+        return HttpResponseBadRequest("Invalid vote")
+
+    comment = get_object_or_404(Comment, pk=pk)
+    vote, created = Vote.objects.get_or_create(
+        user=request.user,
+        target_type="comment",
+        target_id=pk,
+        defaults={"value": value},
+    )
+    if created:
+        Comment.objects.filter(pk=pk).update(score=F("score") + value)
+    elif vote.value != value:
+        diff = value - vote.value
+        vote.value = value
+        vote.save(update_fields=["value"])
+        Comment.objects.filter(pk=pk).update(score=F("score") + diff)
+    comment.refresh_from_db(fields=["score"])
+    return HttpResponse(f"<span id='comment-score-{pk}'>{comment.score}</span>")
 
