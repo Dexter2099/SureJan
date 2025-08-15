@@ -3,8 +3,8 @@
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm
-from .models import Community, Media, Post
+from .forms import PostForm, CommentForm
+from .models import Community, Media, Post, Comment
 
 from io import BytesIO
 import uuid
@@ -81,4 +81,42 @@ def submit_post(request, name):
 
     context = {"form": form, "community": community}
     return render(request, "core/submit_post.html", context)
+
+
+def post_detail(request, pk):
+    """Display a single post and its comments."""
+
+    post = get_object_or_404(
+        Post.objects.select_related("community", "author"), pk=pk
+    )
+    comments = (
+        Comment.objects.filter(post=post)
+        .select_related("author")
+        .order_by("created_at")
+    )
+    form = CommentForm()
+    context = {"post": post, "comments": comments, "form": form}
+    return render(request, "core/post_detail.html", context)
+
+
+def add_comment(request, pk):
+    """Add a comment to a post."""
+
+    post = get_object_or_404(Post, pk=pk)
+    if request.method != "POST":
+        return redirect("post_detail", pk=post.pk)
+
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        parent_id = request.POST.get("parent")
+        parent = None
+        if parent_id:
+            parent = Comment.objects.filter(pk=parent_id, post=post).first()
+        Comment.objects.create(
+            post=post,
+            author=request.user,
+            body=form.cleaned_data["body"],
+            parent=parent,
+        )
+    return redirect("post_detail", pk=post.pk)
 
