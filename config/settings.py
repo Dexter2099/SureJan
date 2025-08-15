@@ -23,7 +23,7 @@ INSTALLED_APPS = [
 
     # third-party
     'django_htmx',
-    'ratelimit',
+    'django_ratelimit',
     'csp',
 
     # local
@@ -101,3 +101,5 @@ CSP_DEFAULT_SRC = ("'self'",)
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
 CSP_IMG_SRC = ("'self'", "data:")
 CSP_SCRIPT_SRC = ("'self'",)
+
+SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
