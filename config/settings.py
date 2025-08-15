@@ -23,7 +23,7 @@ INSTALLED_APPS = [
 ]
 
 # third-party and local apps
-INSTALLED_APPS += ["django_htmx", "ratelimit", "csp", "core"]
+INSTALLED_APPS += ["django_htmx", "django_ratelimit", "csp", "core"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -97,4 +97,4 @@ CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
 CSP_IMG_SRC = ("'self'", "data:")
 CSP_SCRIPT_SRC = ("'self'",)
 
-SILENCED_SYSTEM_CHECKS = ["ratelimit.E003", "ratelimit.W001"]
+SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
