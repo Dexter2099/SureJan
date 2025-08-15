@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ community.title }}</title>
+    <link rel="stylesheet" href="/static/css/old.css">
+</head>
+<body>
+    <h1>{{ community.title }}</h1>
+    <p>{{ community.description }}</p>
+    <ul>
+        {% for post in posts %}
+        <li>
+            <a href="#" style="color: blue;">{{ post.title }}</a>
+            <span>
+                in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
+                by {{ post.author.username }}
+                · {{ post.score }}
+                · {{ post.created_at|timesince }} ago
+            </span>
+        </li>
+        {% empty %}
+        <li>No posts yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
