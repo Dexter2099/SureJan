@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Submit to {{ community.title }}</title>
+</head>
+<body>
+<header><a href="/">SureJan</a></header>
+<div class="page">
+    <h1>Submit to {{ community.title }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="text" name="title" value="{{ form.title.value|default_if_none:'' }}" placeholder="Title">
+        {% if form.title.errors %}<div>{{ form.title.errors }}</div>{% endif %}
+        {% with pt=form.post_type.value|default:'text' %}
+        <select name="post_type" id="post_type">
+            <option value="text" {% if pt == 'text' %}selected{% endif %}>text</option>
+            <option value="link" {% if pt == 'link' %}selected{% endif %}>link</option>
+            <option value="image" {% if pt == 'image' %}selected{% endif %}>image</option>
+        </select>
+        {% if form.post_type.errors %}<div>{{ form.post_type.errors }}</div>{% endif %}
+        <textarea name="body" id="field-body"{% if pt != 'text' %} style="display:none"{% endif %}>{{ form.body.value|default_if_none:'' }}</textarea>
+        {% if form.body.errors %}<div>{{ form.body.errors }}</div>{% endif %}
+        <input type="url" name="url" id="field-url" value="{{ form.url.value|default_if_none:'' }}"{% if pt != 'link' %} style="display:none"{% endif %}>
+        {% if form.url.errors %}<div>{{ form.url.errors }}</div>{% endif %}
+        <input type="file" name="file" id="field-file"{% if pt != 'image' %} style="display:none"{% endif %}>
+        {% if form.file.errors %}<div>{{ form.file.errors }}</div>{% endif %}
+        {% endwith %}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+<script>
+const sel=document.getElementById('post_type');
+const bodyField=document.getElementById('field-body');
+const urlField=document.getElementById('field-url');
+const fileField=document.getElementById('field-file');
+function update(){const v=sel.value;bodyField.style.display=v==='text'?'':'none';urlField.style.display=v==='link'?'':'none';fileField.style.display=v==='image'?'':'none';}
+sel.addEventListener('change',update);update();
+</script>
+</body>
+</html>

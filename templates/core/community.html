@@ -1,23 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
-  <meta charset="utf-8">
-  <title>SureJan — Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="font:14px/1.4 Arial; background:#fafafa; color:#111">
-  <div style="width:980px; margin:24px auto">
-    <h1 style="margin:0 0 12px;">SureJan</h1>
-    <p>It boots! 🎉 Next up: communities, posts, comments, and voting.</p>
-  </div>
-=======
     <meta charset="utf-8">
-    <title>Home</title>
+    <title>{{ community.title }}</title>
 </head>
 <body>
 <header><a href="/">SureJan</a></header>
 <div class="page">
+    <h1>{{ community.title }}</h1>
     {% for post in posts %}
     <div class="postrow">
         <div class="votes">
@@ -47,6 +37,5 @@
     <p>No posts yet.</p>
     {% endfor %}
 </div>
->>>>>>> e519127d299e92c16c01fb19bd5dd78662494972
 </body>
 </html>

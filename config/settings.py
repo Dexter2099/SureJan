@@ -24,6 +24,9 @@ INSTALLED_APPS = [
 # third-party and local apps
 INSTALLED_APPS += ["django_htmx", "django_ratelimit", "csp", "core"]
 
+# third-party and local apps
+INSTALLED_APPS += ["django_htmx", "django_ratelimit", "csp", "core"]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -90,7 +93,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default PK type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+<<<<<<< HEAD
 # CSP v4+ format
+=======
+# Basic CSP for dev (tighten for production)
+>>>>>>> e519127d299e92c16c01fb19bd5dd78662494972
 CSP_DIRECTIVES = {
     "default-src": ("'self'",),
     "style-src": ("'self'", "'unsafe-inline'"),
@@ -98,7 +105,11 @@ CSP_DIRECTIVES = {
     "script-src": ("'self'",),
 }
 
+<<<<<<< HEAD
 # Silence specific system checks for django_ratelimit
 SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
 
 
+=======
+SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
+>>>>>>> e519127d299e92c16c01fb19bd5dd78662494972
