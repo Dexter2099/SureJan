@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = 'django-insecure-d9we^%!#4i-nnbx@3fje$kc$(m^gzdobmbr)d81rh&2@tm-2t('
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -92,9 +92,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Basic CSP for dev (tighten for production)
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_SCRIPT_SRC = ("'self'",)
+CSP_DIRECTIVES = {
+    "default-src": ("'self'",),
+    "style-src": ("'self'", "'unsafe-inline'"),
+    "img-src": ("'self'", "data:"),
+    "script-src": ("'self'",),
+}
 
 SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
