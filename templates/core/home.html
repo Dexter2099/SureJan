@@ -13,10 +13,22 @@
       <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong>
       · {{ post.author.username }}
       · {{ post.created_at }}
+      <div>
+        <button hx-post="{% url 'vote_post' post.pk %}"
+                hx-vals='{"v":1}'
+                hx-target="#post-score-{{post.pk}}"
+                hx-swap="outerHTML">▲</button>
+        <span id="post-score-{{post.pk}}">{{ post.score }}</span>
+        <button hx-post="{% url 'vote_post' post.pk %}"
+                hx-vals='{"v":-1}'
+                hx-target="#post-score-{{post.pk}}"
+                hx-swap="outerHTML">▼</button>
+      </div>
     </div>
   {% empty %}
     <p>No posts yet.</p>
   {% endfor %}
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </body>
 </html>
 
