@@ -24,3 +24,26 @@ class Post(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["community", "-created_at"])]
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    body = models.TextField()
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+    )
+    score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    target_type = models.CharField(
+        max_length=10, choices=[("post", "post"), ("comment", "comment")]
+    )
+    target_id = models.PositiveIntegerField()
+    value = models.SmallIntegerField()
+
+    class Meta:
+        unique_together = ("user", "target_type", "target_id")

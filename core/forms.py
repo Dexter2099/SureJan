@@ -4,13 +4,9 @@ from .models import Comment, Post
 
 
 class PostForm(forms.ModelForm):
-    file = forms.ImageField(required=False, label="Image")
-
     class Meta:
         model = Post
         fields = ["post_type", "title", "body", "url"]
-
-    MAX_UPLOAD_SIZE = 8 * 1024 * 1024
 
     def clean(self):
         cleaned_data = super().clean()
@@ -35,21 +31,8 @@ class PostForm(forms.ModelForm):
         elif post_type == "text":
             if url:
                 self.add_error("url", "URL must be empty for text posts.")
-        elif post_type == "image":
-            if body:
-                self.add_error("body", "Body must be empty for image posts.")
-            if url:
-                self.add_error("url", "URL must be empty for image posts.")
 
         return cleaned_data
-
-    def clean_file(self):
-        uploaded = self.cleaned_data.get("file")
-        if not uploaded:
-            return uploaded
-        if uploaded.size > self.MAX_UPLOAD_SIZE:
-            raise forms.ValidationError("Image file must be 8MB or smaller.")
-        return uploaded
 
 
 class CommentForm(forms.ModelForm):
