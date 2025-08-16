@@ -12,10 +12,10 @@ urlpatterns = [
     path("", core_views.home, name="home"),
     path("r/<slug:name>/", core_views.community, name="community"),
     path("r/<slug:name>/submit/", core_views.submit_post, name="submit_post"),
-    path("p/<int:pk>/", core_views.post_detail, name="post_detail"),
-    path("p/<int:pk>/comment/", core_views.add_comment, name="add_comment"),
-    path("p/<int:pk>/vote/", core_views.vote_post, name="vote_post"),
-    path("c/<int:pk>/vote/", core_views.vote_comment, name="vote_comment"),
+    path("post/<int:pk>/", core_views.post_detail, name="post_detail"),
+    path("post/<int:pk>/comment/", core_views.add_comment, name="add_comment"),
+    path("post/<int:pk>/vote/", core_views.vote_post, name="vote_post"),
+    path("comment/<int:pk>/vote/", core_views.vote_comment, name="vote_comment"),
     path("admin/", admin.site.urls),
 ]
 

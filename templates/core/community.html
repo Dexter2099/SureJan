@@ -9,7 +9,7 @@
 <p>{{ community.description }}</p>
 {% for post in posts %}
   <div>
-    <strong>{{ post.title }}</strong>
+    <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong>
     · {{ post.author.username }}
     · {{ post.created_at }}
   </div>

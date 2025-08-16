@@ -10,7 +10,7 @@
   {% for post in posts %}
     <div>
       <a href="/r/{{ post.community.name }}/">/r/{{ post.community.name }}/</a>
-      <strong>{{ post.title }}</strong>
+      <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong>
       · {{ post.author.username }}
       · {{ post.created_at }}
     </div>
