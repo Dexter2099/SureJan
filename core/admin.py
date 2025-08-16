@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Community, Post
+from .models import Community, Post, Comment
 
 
 @admin.register(Community)
@@ -14,3 +14,8 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ("id", "community", "author", "post_type", "title", "score", "created_at")
     list_filter = ("post_type", "community")
     search_fields = ("title", "body")
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ("id", "post", "author", "score", "created_at")

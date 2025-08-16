@@ -7,8 +7,10 @@
 </head>
 <body>
     <h1>{{ post.title }}</h1>
-    {% if post.body %}
+    {% if post.post_type == 'text' and post.body %}
     <p>{{ post.body }}</p>
+    {% elif post.post_type == 'link' %}
+    <p><a href="{{ post.url }}">{{ post.url }}</a></p>
     {% endif %}
     <p>
         in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
