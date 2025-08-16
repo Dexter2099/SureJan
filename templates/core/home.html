@@ -5,10 +5,18 @@
   <title>SureJan — Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body style="font:14px/1.4 Arial; background:#fafafa; color:#111">
-  <div style="width:980px; margin:24px auto">
-    <h1 style="margin:0 0 12px;">SureJan</h1>
-    <p>It boots! 🎉 Next up: communities, posts, comments, and voting.</p>
-  </div>
+<body>
+  <h1>SureJan</h1>
+  {% for post in posts %}
+    <div>
+      <a href="/r/{{ post.community.name }}/">/r/{{ post.community.name }}/</a>
+      <strong>{{ post.title }}</strong>
+      · {{ post.author.username }}
+      · {{ post.created_at }}
+    </div>
+  {% empty %}
+    <p>No posts yet.</p>
+  {% endfor %}
 </body>
 </html>
+

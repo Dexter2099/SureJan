@@ -22,7 +22,7 @@ def home(request):
 
     posts = (
         Post.objects.select_related("community", "author")
-        .order_by("-score", "-created_at")[:100]
+        .order_by("-created_at")[:50]
     )
     return render(request, "core/home.html", {"posts": posts})
 
@@ -32,9 +32,8 @@ def community(request, name):
 
     community = get_object_or_404(Community, name=name)
     posts = (
-        Post.objects.filter(community=community)
-        .select_related("community", "author")
-        .order_by("-score", "-created_at")[:100]
+        community.posts.select_related("author")
+        .order_by("-created_at")[:50]
     )
     context = {"community": community, "posts": posts}
     return render(request, "core/community.html", context)
@@ -199,9 +198,3 @@ def vote_comment(request, pk):
         Comment.objects.filter(pk=pk).update(score=F("score") + diff)
     comment.refresh_from_db(fields=["score"])
     return HttpResponse(f"<span id='comment-score-{pk}'>{comment.score}</span>")
-
-<<<<<<< HEAD
-def home(request):
-    return render(request, "core/home.html")# Create your views here.
-=======
->>>>>>> e519127d299e92c16c01fb19bd5dd78662494972
