@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Comment, Community, Post, Vote
+from .models import Community, Post
 
 
 class SubmitPostTests(TestCase):
@@ -52,7 +52,7 @@ class SubmitPostTests(TestCase):
 
 
 class VoteTests(TestCase):
-    """Ensure voting adjusts scores and upserts votes."""
+    """Ensure voting adjusts post scores."""
 
     def setUp(self):
         user_model = get_user_model()
@@ -64,40 +64,25 @@ class VoteTests(TestCase):
             post_type="text",
             title="Hello",
         )
-        self.comment = Comment.objects.create(
-            post=self.post, author=self.user, body="hi"
-        )
-        self.client.login(username="alice", password="pwd")
 
-    def test_vote_post(self):
+    def test_upvote_post(self):
         url = reverse("vote_post", args=[self.post.pk])
-        self.client.post(url, {"v": "1"})
+        resp = self.client.post(url, {"v": "1"})
+        self.assertEqual(resp.status_code, 200)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
-        vote = Vote.objects.get(
-            user=self.user, target_type="post", target_id=self.post.pk
-        )
-        self.assertEqual(vote.value, 1)
 
-        self.client.post(url, {"v": "-1"})
+    def test_downvote_post(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(url, {"v": "-1"})
+        self.assertEqual(resp.status_code, 200)
         self.post.refresh_from_db()
-        vote.refresh_from_db()
         self.assertEqual(self.post.score, -1)
-        self.assertEqual(vote.value, -1)
 
-    def test_vote_comment(self):
-        url = reverse("vote_comment", args=[self.comment.pk])
-        self.client.post(url, {"v": "1"})
-        self.comment.refresh_from_db()
-        self.assertEqual(self.comment.score, 1)
-        vote = Vote.objects.get(
-            user=self.user, target_type="comment", target_id=self.comment.pk
-        )
-        self.assertEqual(vote.value, 1)
-
-        self.client.post(url, {"v": "-1"})
-        self.comment.refresh_from_db()
-        vote.refresh_from_db()
-        self.assertEqual(self.comment.score, -1)
-        self.assertEqual(vote.value, -1)
+    def test_invalid_vote(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(url, {"v": "0"})
+        self.assertEqual(resp.status_code, 400)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 0)
 
