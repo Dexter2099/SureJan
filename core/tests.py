@@ -1,10 +1,54 @@
-"""Tests for voting endpoints."""
+"""Tests for post submission and voting endpoints."""
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Comment, Community, Post, Vote
+
+
+class SubmitPostTests(TestCase):
+    """Ensure users can submit text and link posts."""
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user("alice", password="pwd")
+        self.community = Community.objects.create(name="t", title="Test")
+        self.client.login(username="alice", password="pwd")
+
+    def test_submit_text_post(self):
+        url = reverse("submit_post", args=[self.community.name])
+        resp = self.client.post(
+            url,
+            {
+                "post_type": "text",
+                "title": "Hello",
+                "body": "Body",
+                "url": "",
+            },
+        )
+        self.assertRedirects(resp, reverse("community", args=[self.community.name]))
+        post = Post.objects.get()
+        self.assertEqual(post.post_type, "text")
+        self.assertEqual(post.body, "Body")
+        self.assertEqual(post.url, "")
+
+    def test_submit_link_post(self):
+        url = reverse("submit_post", args=[self.community.name])
+        resp = self.client.post(
+            url,
+            {
+                "post_type": "link",
+                "title": "Link",
+                "body": "",
+                "url": "https://example.com",
+            },
+        )
+        self.assertRedirects(resp, reverse("community", args=[self.community.name]))
+        post = Post.objects.get()
+        self.assertEqual(post.post_type, "link")
+        self.assertEqual(post.url, "https://example.com")
+        self.assertEqual(post.body, "")
 
 
 class VoteTests(TestCase):

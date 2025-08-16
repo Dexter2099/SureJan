@@ -1,7 +1,6 @@
 """Core application views."""
 
 from django.contrib.auth.decorators import login_required
-from django.core.files.base import ContentFile
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -10,11 +9,7 @@ from django.db.models import F
 from django_ratelimit.decorators import ratelimit
 
 from .forms import PostForm, CommentForm
-from .models import Community, Media, Post, Comment, Vote
-
-from io import BytesIO
-import uuid
-from PIL import Image, UnidentifiedImageError
+from .models import Community, Post, Comment, Vote
 
 
 def home(request):
@@ -39,59 +34,19 @@ def community(request, name):
     return render(request, "core/community.html", context)
 
 
-@ratelimit(key="user_or_ip", rate="5/h", block=True)
 def submit_post(request, name):
     """Submit a new post to a community."""
 
     community = get_object_or_404(Community, name=name)
 
     if request.method == "POST":
-        form = PostForm(request.POST, request.FILES)
+        form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
             post.community = community
             post.author = request.user
-
-            uploaded = form.cleaned_data.get("file")
-            if uploaded:
-                try:
-                    image = Image.open(uploaded)
-                except (UnidentifiedImageError, OSError):
-                    form.add_error("file", "Invalid image file.")
-                else:
-                    image = image.convert("RGB")
-                    image.thumbnail((2560, 2560))
-
-                    buffer = BytesIO()
-                    image.save(buffer, format="WEBP", quality=82)
-                    buffer.seek(0)
-
-                    media = Media(kind="image")
-                    base = uuid.uuid4().hex
-                    media.file.save(f"{base}.webp", ContentFile(buffer.read()), save=False)
-
-                    width, height = image.size
-                    thumb_img = image.copy()
-                    if thumb_img.width > 256:
-                        thumb_height = int(thumb_img.height * 256 / thumb_img.width)
-                        thumb_img = thumb_img.resize((256, thumb_height))
-                    buffer_thumb = BytesIO()
-                    thumb_img.save(buffer_thumb, format="WEBP", quality=82)
-                    buffer_thumb.seek(0)
-                    media.thumb.save(
-                        f"{base}_thumb.webp", ContentFile(buffer_thumb.read()), save=False
-                    )
-                    media.width = width
-                    media.height = height
-                    media.save()
-                    post.media = media
-
-            if form.errors:
-                context = {"form": form, "community": community}
-                return render(request, "core/submit_post.html", context)
-
             post.save()
-            return redirect("post_detail", pk=post.pk)
+            return redirect("community", name=community.name)
     else:
         form = PostForm()
 
