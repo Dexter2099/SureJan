@@ -1,13 +1,14 @@
 """Core application views."""
 
 from django.contrib.auth.decorators import login_required
+from django_ratelimit.decorators import ratelimit
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import CommentForm, PostForm
-from .models import Comment, Community, Post
+from .models import Comment, Community, Post, apply_vote
 
 
 def home(request):
@@ -76,7 +77,9 @@ def add_comment(request, pk):
     return redirect("post_detail", pk=post.pk)
 
 
+@login_required
 @require_POST
+@ratelimit(key="user_or_ip", rate="20/m", block=True)
 def vote_post(request, pk):
     """Handle voting on a post."""
 
@@ -84,12 +87,29 @@ def vote_post(request, pk):
         value = int(request.POST.get("v"))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
-    if value not in (-1, 1):
+
+    try:
+        new_score = apply_vote(request.user, "post", pk, value)
+    except ValueError:
         return HttpResponseBadRequest("Invalid vote")
 
-    post = get_object_or_404(Post, pk=pk)
-    post.score += value
-    post.save(update_fields=["score"])
-    return HttpResponse(
-        f"<span id='post-score-{post.pk}'>{post.score}</span>"
-    )
+    return HttpResponse(f"<span id='post-score-{pk}'>{new_score}</span>")
+
+
+@login_required
+@require_POST
+@ratelimit(key="user_or_ip", rate="20/m", block=True)
+def vote_comment(request, pk):
+    """Handle voting on a comment."""
+
+    try:
+        value = int(request.POST.get("v"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+
+    try:
+        new_score = apply_vote(request.user, "comment", pk, value)
+    except ValueError:
+        return HttpResponseBadRequest("Invalid vote")
+
+    return HttpResponse(f"<span id='comment-score-{pk}'>{new_score}</span>")
