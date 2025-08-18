@@ -94,6 +94,13 @@ class VotePostTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, -1)
 
+    def test_switch_post_vote_back_up(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        self.client.post(url, {"v": "-1"})
+        self.client.post(url, {"v": "1"})
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 1)
+
     def test_invalid_vote(self):
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(url, {"v": "0"})
@@ -153,4 +160,24 @@ class VoteCommentTests(TestCase):
         self.client.post(url, {"v": "-1"})
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, -1)
+
+    def test_switch_comment_vote_back_up(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        self.client.post(url, {"v": "-1"})
+        self.client.post(url, {"v": "1"})
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 1)
+
+    def test_invalid_comment_vote(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": "0"})
+        self.assertEqual(resp.status_code, 400)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 0)
+
+    def test_comment_vote_requires_login(self):
+        self.client.logout()
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": "1"})
+        self.assertEqual(resp.status_code, 302)
 
