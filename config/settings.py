@@ -90,6 +90,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default PK type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Authentication redirects
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
 # Basic CSP for dev (tighten for production)
 CSP_DIRECTIVES = {
     "default-src": ("'self'",),

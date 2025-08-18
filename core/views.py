@@ -30,7 +30,7 @@ def community(request, name):
     context = {"community": community, "posts": posts}
     return render(request, "core/community.html", context)
 
-
+@login_required
 def submit_post(request, name):
     """Submit a new post to a community."""
 
