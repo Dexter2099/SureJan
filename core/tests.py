@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Community, Post
+from .models import Comment, Community, Post
 
 
 class SubmitPostTests(TestCase):
@@ -51,8 +51,8 @@ class SubmitPostTests(TestCase):
         self.assertEqual(post.body, "")
 
 
-class VoteTests(TestCase):
-    """Ensure voting adjusts post scores."""
+class VotePostTests(TestCase):
+    """Ensure voting adjusts post scores per user."""
 
     def setUp(self):
         user_model = get_user_model()
@@ -64,6 +64,7 @@ class VoteTests(TestCase):
             post_type="text",
             title="Hello",
         )
+        self.client.login(username="alice", password="pwd")
 
     def test_upvote_post(self):
         url = reverse("vote_post", args=[self.post.pk])
@@ -79,10 +80,77 @@ class VoteTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, -1)
 
+    def test_toggle_off_post_vote(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        self.client.post(url, {"v": "1"})
+        self.client.post(url, {"v": "1"})
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 0)
+
+    def test_switch_post_vote_direction(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        self.client.post(url, {"v": "1"})
+        self.client.post(url, {"v": "-1"})
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, -1)
+
     def test_invalid_vote(self):
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(url, {"v": "0"})
         self.assertEqual(resp.status_code, 400)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 0)
+
+    def test_requires_login(self):
+        self.client.logout()
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(url, {"v": "1"})
+        self.assertEqual(resp.status_code, 302)
+
+
+class VoteCommentTests(TestCase):
+    """Ensure voting works for comments."""
+
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user("alice", password="pwd")
+        self.community = Community.objects.create(name="t", title="Test")
+        self.post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="text",
+            title="Hello",
+        )
+        self.comment = Comment.objects.create(
+            post=self.post, author=self.user, body="Hi"
+        )
+        self.client.login(username="alice", password="pwd")
+
+    def test_upvote_comment(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": "1"})
+        self.assertEqual(resp.status_code, 200)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 1)
+
+    def test_downvote_comment(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": "-1"})
+        self.assertEqual(resp.status_code, 200)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, -1)
+
+    def test_toggle_off_comment_vote(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        self.client.post(url, {"v": "1"})
+        self.client.post(url, {"v": "1"})
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 0)
+
+    def test_switch_comment_vote_direction(self):
+        url = reverse("vote_comment", args=[self.comment.pk])
+        self.client.post(url, {"v": "1"})
+        self.client.post(url, {"v": "-1"})
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, -1)
 

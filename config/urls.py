@@ -15,6 +15,7 @@ urlpatterns = [
     path("post/<int:pk>/", core_views.post_detail, name="post_detail"),
     path("post/<int:pk>/comment/", core_views.add_comment, name="add_comment"),
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
+    path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
     path("admin/", admin.site.urls),
 ]
 

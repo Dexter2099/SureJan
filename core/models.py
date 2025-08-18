@@ -44,3 +44,39 @@ class Vote(models.Model):
 
     class Meta:
         unique_together = ("user", "target_type", "target_id")
+
+
+def apply_vote(user, target_type, target_id, value):
+    """Apply a vote to a post or comment and return the new score."""
+    if value not in (-1, 1):
+        raise ValueError("Invalid vote value")
+
+    if target_type == "post":
+        model = Post
+    elif target_type == "comment":
+        model = Comment
+    else:
+        raise ValueError("Invalid target type")
+
+    target = model.objects.get(pk=target_id)
+    vote, created = Vote.objects.get_or_create(
+        user=user,
+        target_type=target_type,
+        target_id=target_id,
+        defaults={"value": value},
+    )
+
+    if created:
+        target.score += value
+    else:
+        if vote.value == value:
+            target.score -= value
+            vote.delete()
+        else:
+            delta = value - vote.value
+            vote.value = value
+            vote.save(update_fields=["value"])
+            target.score += delta
+
+    target.save(update_fields=["score"])
+    return target.score
