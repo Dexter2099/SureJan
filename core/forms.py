@@ -1,6 +1,7 @@
 from django import forms
+from django.utils.text import slugify
 
-from .models import Comment, Post
+from .models import Comment, Post, Community
 
 
 class PostForm(forms.ModelForm):
@@ -46,3 +47,17 @@ class CommentForm(forms.ModelForm):
         if not body:
             raise forms.ValidationError("Comment cannot be empty.")
         return body
+
+
+class CommunityCreateForm(forms.ModelForm):
+    class Meta:
+        model = Community
+        fields = ["name", "title", "description"]
+
+    def clean_name(self):
+        name = slugify(self.cleaned_data.get("name", ""))
+        if not name:
+            raise forms.ValidationError("Name is required.")
+        if Community.objects.filter(name=name).exists():
+            raise forms.ValidationError("Community with this name already exists.")
+        return name

@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+import math
+from django.utils import timezone
 
 
 class Community(models.Model):
@@ -9,7 +11,7 @@ class Community(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return f"r/{self.name}"
+        return f"c/{self.name}"
 
 
 class Post(models.Model):
@@ -21,9 +23,25 @@ class Post(models.Model):
     url = models.URLField(blank=True)
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    hot_rank = models.FloatField(default=0, db_index=True)
 
     class Meta:
         indexes = [models.Index(fields=["community", "-created_at"])]
+
+    def save(self, *args, **kwargs):
+        recompute = kwargs.pop("recompute_hot", True)
+        super().save(*args, **kwargs)
+        if recompute and not kwargs.get("update_fields"):
+            self.recompute_hot()
+
+    def recompute_hot(self):
+        now = timezone.now()
+        age_hours = max((now - self.created_at).total_seconds() / 3600, 0.5)
+        hot = self.score / math.pow(age_hours + 2, 1.8)
+        self.hot_rank = hot
+        Post = self.__class__
+        Post.objects.filter(pk=self.pk).update(hot_rank=hot)
+        return hot
 
 
 class Comment(models.Model):
@@ -79,4 +97,6 @@ def apply_vote(user, target_type, target_id, value):
             target.score += delta
 
     target.save(update_fields=["score"])
+    if target_type == "post":
+        target.recompute_hot()
     return target.score

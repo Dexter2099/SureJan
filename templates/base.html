@@ -7,6 +7,12 @@
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 </head>
 <body>
+  <nav>
+    <a href="/">SureJan</a>
+    {% if request.user.is_staff %}
+      <a href="{% url 'community_create' %}">Create community</a>
+    {% endif %}
+  </nav>
   {% block content %}{% endblock %}
 </body>
 </html>

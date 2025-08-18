@@ -105,5 +105,4 @@ CSP_DIRECTIVES = {
     "script-src": ("'self'",),
 }
 
-# Silence specific system checks for django_ratelimit
-SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
+SILENCED_SYSTEM_CHECKS = ['django_ratelimit.E003', 'django_ratelimit.W001']
