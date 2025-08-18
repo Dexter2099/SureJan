@@ -1,10 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>{{ community.title }}</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
 {% for post in posts %}
@@ -27,7 +22,4 @@
 {% empty %}
   <p>No posts yet.</p>
 {% endfor %}
-<script src="https://unpkg.com/htmx.org@1.9.10"></script>
-</body>
-</html>
-
+{% endblock %}

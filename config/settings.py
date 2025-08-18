@@ -20,9 +20,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_htmx",
+    "django_ratelimit",
+    "csp",
+    "core",
 ]
-# third-party and local apps
-INSTALLED_APPS += ["django_htmx", "django_ratelimit", "csp", "core"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -89,6 +91,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default PK type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication redirects
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 # Basic CSP for dev (tighten for production)
 CSP_DIRECTIVES = {
