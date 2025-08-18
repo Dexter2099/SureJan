@@ -1,36 +1,91 @@
 """Core application views."""
 
 from django.contrib.auth.decorators import login_required
-from django_ratelimit.decorators import ratelimit
+from django.views.decorators.http import require_POST, require_http_methods
+from django_ratelimit.decorators import ratelimit, is_ratelimited
+from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
 
-from .forms import CommentForm, PostForm
+from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, apply_vote
+from .pagination import PAGE_SIZE, build_cursor, parse_cursor
+
+
+def _render_posts(request, posts, next_before, show_community=False, sort_query=""):
+    html = render_to_string(
+        "core/partials/post_list.html",
+        {"posts": posts, "show_community": show_community},
+        request=request,
+    )
+    if next_before:
+        next_url = f"{request.path}?before={next_before}{sort_query}"
+        html += render_to_string(
+            "core/partials/load_more.html", {"next_url": next_url}, request=request
+        )
+    return HttpResponse(html)
 
 
 def home(request):
     """Display the latest posts across all communities."""
 
-    posts = (
-        Post.objects.select_related("community", "author")
-        .order_by("-created_at")[:50]
+    sort = request.GET.get("sort")
+    qs = Post.objects.select_related("community", "author")
+    qs = parse_cursor(qs, request.GET.get("before"))
+    qs = qs.order_by("-created_at", "-id")
+    posts = list(qs[: PAGE_SIZE + 1 ])
+    next_before = None
+    if len(posts) > PAGE_SIZE:
+        next_before = build_cursor(posts[PAGE_SIZE - 1])
+        posts = posts[:PAGE_SIZE]
+    if sort == "hot":
+        posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
+        sort_query = "&sort=hot"
+    else:
+        sort_query = ""
+    context = {
+        "posts": posts,
+        "next_before": next_before,
+        "sort_query": sort_query,
+    }
+    if request.headers.get("HX-Request") == "true":
+        return _render_posts(request, posts, next_before, show_community=True, sort_query=sort_query)
+    return render(
+        request,
+        "core/home.html",
+        {**context},
     )
-    return render(request, "core/home.html", {"posts": posts})
 
 
 def community(request, name):
     """Display posts for a specific community."""
 
     community = get_object_or_404(Community, name=name)
-    posts = (
-        community.posts.select_related("author")
-        .order_by("-created_at")[:50]
-    )
-    context = {"community": community, "posts": posts}
+    sort = request.GET.get("sort")
+    qs = community.posts.select_related("author")
+    qs = parse_cursor(qs, request.GET.get("before"))
+    qs = qs.order_by("-created_at", "-id")
+    posts = list(qs[: PAGE_SIZE + 1 ])
+    next_before = None
+    if len(posts) > PAGE_SIZE:
+        next_before = build_cursor(posts[PAGE_SIZE - 1])
+        posts = posts[:PAGE_SIZE]
+    if sort == "hot":
+        posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
+        sort_query = "&sort=hot"
+    else:
+        sort_query = ""
+    context = {
+        "community": community,
+        "posts": posts,
+        "next_before": next_before,
+        "sort_query": sort_query,
+    }
+    if request.headers.get("HX-Request") == "true":
+        return _render_posts(request, posts, next_before, sort_query=sort_query)
     return render(request, "core/community.html", context)
+
 
 @login_required
 def submit_post(request, name):
@@ -113,3 +168,22 @@ def vote_comment(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     return HttpResponse(f"<span id='comment-score-{pk}'>{new_score}</span>")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
+def create_community(request):
+    if not request.user.is_staff:
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
+    if request.method == "POST":
+        if is_ratelimited(request, group="community-create", key="user", rate="5/m", method=["POST"], increment=True):
+            return HttpResponse(status=429)
+        form = CommunityCreateForm(request.POST)
+        if form.is_valid():
+            community = form.save()
+            return redirect("community", name=community.name)
+    else:
+        form = CommunityCreateForm()
+    return render(request, "communities/create.html", {"form": form})

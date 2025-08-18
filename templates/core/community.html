@@ -2,24 +2,14 @@
 {% block content %}
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
-{% for post in posts %}
-  <div>
-    <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong>
-    · {{ post.author.username }}
-    · {{ post.created_at }}
-    <div>
-      <button hx-post="{% url 'vote_post' post.pk %}"
-              hx-vals='{"v":1}'
-              hx-target="#post-score-{{post.pk}}"
-              hx-swap="outerHTML">▲</button>
-      <span id="post-score-{{post.pk}}">{{ post.score }}</span>
-      <button hx-post="{% url 'vote_post' post.pk %}"
-              hx-vals='{"v":-1}'
-              hx-target="#post-score-{{post.pk}}"
-              hx-swap="outerHTML">▼</button>
-    </div>
-  </div>
-{% empty %}
-  <p>No posts yet.</p>
-{% endfor %}
+<div>
+  <a href="{% url 'community' community.name %}">New</a>
+  <a href="{% url 'community' community.name %}?sort=hot">Hot</a>
+</div>
+<div id="feed-list">
+  {% include "core/partials/post_list.html" with posts=posts %}
+</div>
+{% if next_before %}
+  {% include "core/partials/load_more.html" with next_url=request.path|add:'?before='|add:next_before|add:sort_query %}
+{% endif %}
 {% endblock %}
