@@ -20,9 +20,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_htmx",
+    "django_ratelimit",
+    "csp",
+    "core",
 ]
-# third-party and local apps
-INSTALLED_APPS += ["django_htmx", "django_ratelimit", "csp", "core"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

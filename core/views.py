@@ -1,12 +1,13 @@
 """Core application views."""
 
 from django.contrib.auth.decorators import login_required
+
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import PostForm, CommentForm
-from .models import Community, Post, Comment
+from .forms import CommentForm, PostForm
+from .models import Comment, Community, Post
 
 
 def home(request):
