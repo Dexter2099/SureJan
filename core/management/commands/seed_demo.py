@@ -1,13 +1,26 @@
+"""Seed the database with demo content.
+
+Usage:
+    python manage.py seed_demo
+"""
+
 from __future__ import annotations
 
 import random
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from core.models import Community, Post
+
+from core.models import Community, Post, Comment, Vote
+from core.ranking import recompute_post_ranks
 
 
 class Command(BaseCommand):
-    help = "Seed the database with demo users, communities, and posts."
+    """Management command to populate the database with demo data."""
+
+    help = (
+        "Seed the database with demo users, communities, posts, comments, and votes."
+    )
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -16,6 +29,8 @@ class Command(BaseCommand):
         user_specs = [
             ("alice", "alice@example.com"),
             ("bob", "bob@example.com"),
+            ("carol", "carol@example.com"),
+            ("dave", "dave@example.com"),
         ]
         users = []
         for username, email in user_specs:
@@ -30,9 +45,8 @@ class Command(BaseCommand):
 
         # Communities
         community_specs = [
-            ("news", "News", "Latest news"),
-            ("pics", "Pics", "Photos and images"),
-            ("tech", "Tech", "Technology discussions"),
+            ("news", "News", "General news"),
+            ("brisbane", "Brisbane", "Local discussions"),
         ]
         communities = []
         for slug, name, description in community_specs:
@@ -49,33 +63,68 @@ class Command(BaseCommand):
                 self.stdout.write(f"Created community {slug}")
             communities.append(community)
 
-        # Posts
-        post_types = [pt[0] for pt in Post._meta.get_field("post_type").choices]
         posts = []
-        for i in range(30):
-            community = random.choice(communities)
-            author = random.choice(users)
-            post_type = random.choice(post_types)
-            title = f"Post {i + 1}"
-            body = ""
-            url = ""
-            if post_type == "text":
-                body = "Sample body"
-            elif post_type == "link":
-                url = f"https://example.com/{i + 1}"
-            post = Post.objects.create(
-                community=community,
-                author=author,
-                post_type=post_type,
-                title=title,
-                body=body,
-                url=url,
-                score=random.randint(0, 100),
-            )
-            posts.append(post)
+        for community in communities:
+            for i in range(random.randint(10, 20)):
+                author = random.choice(users)
+                post_type = random.choice(["text", "link"])
+                title = f"{community.slug.capitalize()} Post {i + 1}"
+                body = "Sample body" if post_type == "text" else ""
+                url = (
+                    f"https://example.com/{community.slug}/{i + 1}"
+                    if post_type == "link"
+                    else ""
+                )
+                post = Post.objects.create(
+                    community=community,
+                    author=author,
+                    post_type=post_type,
+                    title=title,
+                    body=body,
+                    url=url,
+                )
+                posts.append(post)
+
+                # Comments
+                roots: list[Comment] = []
+                for _ in range(random.randint(0, 3)):
+                    c = Comment.objects.create(
+                        post=post,
+                        author=random.choice(users),
+                        body="Sample comment",
+                    )
+                    roots.append(c)
+                for root in roots:
+                    for _ in range(random.randint(0, 2)):
+                        Comment.objects.create(
+                            post=post,
+                            author=random.choice(users),
+                            parent=root,
+                            body="Sample reply",
+                        )
+
+                # Votes
+                voters = random.sample(users, k=random.randint(0, len(users)))
+                for voter in voters:
+                    value = random.choice([1, -1])
+                    Vote.objects.create(
+                        user=voter,
+                        target_type="post",
+                        target_id=post.pk,
+                        value=value,
+                    )
+
+                up = Vote.objects.filter(
+                    target_type="post", target_id=post.pk, value=1
+                ).count()
+                down = Vote.objects.filter(
+                    target_type="post", target_id=post.pk, value=-1
+                ).count()
+                recompute_post_ranks(post, up, down)
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"Created {len(users)} users, {len(communities)} communities, and {len(posts)} posts."
             )
         )
+
