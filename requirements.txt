@@ -1,0 +1,6 @@
+Django
+django-htmx
+django-ratelimit
+csp
+pytest
+pytest-django
