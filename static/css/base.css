@@ -1,72 +1,293 @@
+/* ---------------------------------------------------------------------
+   Base styles for SureJan - mimicking 2008-era old.reddit.com vibes
+   ------------------------------------------------------------------ */
+
+/* Typography and body ------------------------------------------------ */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-.site-header .header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 8px;
-  background: #fbfbfb;
-  border-bottom: 1px solid #ccc;
-}
-
-.subreddit-bar {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.subreddit-bar a {
-  white-space: nowrap;
+  padding: 0;
+  background: #f6f7f8;
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
   color: #000;
+}
+
+/* Link colours ------------------------------------------------------- */
+a {
+  color: #3366cc;
   text-decoration: none;
-  padding: 2px 4px;
+}
+
+a:visited {
+  color: #551a8b;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Header ------------------------------------------------------------- */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
+}
+
+.header-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo img {
+  display: block;
+  height: 40px;
+  width: auto;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: 11px;
+  color: #777;
 }
 
-.user-info .avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ccc;
-  display: inline-block;
+.user-info a {
+  color: #3366cc;
 }
 
 .tab-bar {
-  display: flex;
-  gap: 8px;
-  padding: 4px 8px;
-  background: #f6f6f6;
-  border-bottom: 1px solid #ccc;
-}
-
-.tab-bar a {
-  color: #336699;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.container {
   max-width: 960px;
   margin: 0 auto;
   display: flex;
-  gap: 16px;
-  padding: 16px;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #fff;
 }
 
-.feed {
+.tab-bar a {
+  padding: 4px 6px;
+  border-bottom: 1px solid #eee;
+  color: #3366cc;
+}
+
+.tab-bar a.active {
+  font-weight: bold;
+  border-bottom: 2px solid #3366cc;
+}
+
+/* Subreddit bar ------------------------------------------------------ */
+.subreddit-bar {
+  background: #f2f2f2;
+  border-bottom: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+.subreddit-bar a {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 4px 6px;
+  color: #3366cc;
+}
+
+/* Layout ------------------------------------------------------------- */
+.layout {
+  max-width: 960px;
+  margin: 16px auto;
+  display: flex;
+  gap: 16px;
+}
+
+.main {
   flex: 1;
   max-width: 640px;
 }
 
 .sidebar {
-  width: 300px;
+  flex: 0 0 300px;
 }
+
+/* Thing (post) card -------------------------------------------------- */
+.post-row {
+  display: flex;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.vote-col {
+  width: 40px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.vote-col button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 0;
+  font-size: 16px;
+}
+
+.vote-col span {
+  display: block;
+  margin: 4px 0;
+  font-weight: bold;
+}
+
+.post-body {
+  flex: 1;
+}
+
+.post-body h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.post-body .domain {
+  margin-left: 4px;
+  color: #777;
+  font-size: 10px;
+}
+
+.post-body .meta {
+  margin-top: 4px;
+  color: #777;
+  font-size: 11px;
+}
+
+.post-body .meta a {
+  color: #3366cc;
+}
+
+.post-body .actions {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.post-body .actions a {
+  color: #3366cc;
+  margin-right: 4px;
+  position: relative;
+}
+
+.post-body .actions a + a:before {
+  content: "\2022";
+  color: #aaa;
+  position: absolute;
+  left: -6px;
+}
+
+/* Sidebar ------------------------------------------------------------ */
+.sidebar {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-size: 11px;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  font-size: 12px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.sidebar li {
+  margin: 4px 0;
+}
+
+.sidebar a {
+  color: #3366cc;
+}
+
+/* Comments ----------------------------------------------------------- */
+.comment {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  margin: 8px 0;
+  font-size: 11px;
+}
+
+.comment .meta {
+  color: #777;
+  margin-bottom: 4px;
+}
+
+/* Forms -------------------------------------------------------------- */
+input[type="text"],
+input[type="password"],
+textarea {
+  border: 1px solid #ccc;
+  padding: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: #3366cc;
+  outline: none;
+}
+
+/* Misc --------------------------------------------------------------- */
+.button {
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  background: #eee;
+  color: #000;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.button:hover {
+  background: #ddd;
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid #ddd;
+  margin: 8px 0;
+}
+
+/* Responsive --------------------------------------------------------- */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .tab-bar,
+  .subreddit-bar {
+    overflow-x: auto;
+  }
+}
+
