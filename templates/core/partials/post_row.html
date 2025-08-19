@@ -1,0 +1,24 @@
+{% load url_domain %}
+<div class="post-row">
+  <div class="vote-col">
+    <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML">▲</button>
+    <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
+    <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML">▼</button>
+  </div>
+  <div class="post-body">
+    <h2>
+    {% if post.url %}
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      <span class="domain">({{ post.url|domain }})</span>
+    {% else %}
+      <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
+    {% endif %}
+    </h2>
+    <p class="meta">
+      <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}/</a>
+      · {{ post.author.username }}
+      · {{ post.created_at|timesince }} ago
+      · <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.comment_count }} comments</a>
+    </p>
+  </div>
+</div>
