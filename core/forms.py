@@ -52,12 +52,12 @@ class CommentForm(forms.ModelForm):
 class CommunityCreateForm(forms.ModelForm):
     class Meta:
         model = Community
-        fields = ["name", "title", "description"]
+        fields = ["slug", "name", "title", "description"]
 
-    def clean_name(self):
-        name = slugify(self.cleaned_data.get("name", ""))
-        if not name:
-            raise forms.ValidationError("Name is required.")
-        if Community.objects.filter(name=name).exists():
-            raise forms.ValidationError("Community with this name already exists.")
-        return name
+    def clean_slug(self):
+        slug = slugify(self.cleaned_data.get("slug", ""))
+        if not slug:
+            raise forms.ValidationError("Slug is required.")
+        if Community.objects.filter(slug=slug).exists():
+            raise forms.ValidationError("Community with this slug already exists.")
+        return slug

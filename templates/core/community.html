@@ -3,8 +3,8 @@
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
 <div>
-  <a href="{% url 'community' community.name %}">New</a>
-  <a href="{% url 'community' community.name %}?sort=hot">Hot</a>
+  <a href="{% url 'community' community.slug %}">New</a>
+  <a href="{% url 'community' community.slug %}?sort=hot">Hot</a>
 </div>
 <div id="feed-list">
   {% include "core/partials/post_list.html" with posts=posts %}

@@ -13,11 +13,13 @@ class SubmitPostTests(TestCase):
     def setUp(self):
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
-        self.community = Community.objects.create(name="t", title="Test")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
         self.client.login(username="alice", password="pwd")
 
     def test_submit_text_post(self):
-        url = reverse("submit_post", args=[self.community.name])
+        url = reverse("submit_post", args=[self.community.slug])
         resp = self.client.post(
             url,
             {
@@ -27,14 +29,14 @@ class SubmitPostTests(TestCase):
                 "url": "",
             },
         )
-        self.assertRedirects(resp, reverse("community", args=[self.community.name]))
+        self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         post = Post.objects.get()
         self.assertEqual(post.post_type, "text")
         self.assertEqual(post.body, "Body")
         self.assertEqual(post.url, "")
 
     def test_submit_link_post(self):
-        url = reverse("submit_post", args=[self.community.name])
+        url = reverse("submit_post", args=[self.community.slug])
         resp = self.client.post(
             url,
             {
@@ -44,7 +46,7 @@ class SubmitPostTests(TestCase):
                 "url": "https://example.com",
             },
         )
-        self.assertRedirects(resp, reverse("community", args=[self.community.name]))
+        self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         post = Post.objects.get()
         self.assertEqual(post.post_type, "link")
         self.assertEqual(post.url, "https://example.com")
@@ -57,7 +59,9 @@ class VotePostTests(TestCase):
     def setUp(self):
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
-        self.community = Community.objects.create(name="t", title="Test")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
         self.post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -121,7 +125,9 @@ class VoteCommentTests(TestCase):
     def setUp(self):
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
-        self.community = Community.objects.create(name="t", title="Test")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
         self.post = Post.objects.create(
             community=self.community,
             author=self.user,

@@ -35,17 +35,22 @@ class Command(BaseCommand):
             ("tech", "Tech", "Technology discussions"),
         ]
         communities = []
-        for name, title, description in community_specs:
+        for slug, name, description in community_specs:
             community, created = Community.objects.get_or_create(
-                name=name,
-                defaults={"title": title, "description": description},
+                slug=slug,
+                defaults={
+                    "name": name,
+                    "title": name,
+                    "description": description,
+                    "created_by": users[0],
+                },
             )
             if created:
-                self.stdout.write(f"Created community {name}")
+                self.stdout.write(f"Created community {slug}")
             communities.append(community)
 
         # Posts
-        post_types = [pt[0] for pt in Post.POST_TYPES]
+        post_types = [pt[0] for pt in Post._meta.get_field("post_type").choices]
         posts = []
         for i in range(30):
             community = random.choice(communities)

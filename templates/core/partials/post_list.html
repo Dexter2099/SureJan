@@ -1,7 +1,7 @@
 {% for post in posts %}
   <div>
     {% if show_community %}
-      <a href="{% url 'community' post.community.name %}">/c/{{ post.community.name }}/</a>
+      <a href="{% url 'community' post.community.slug %}">/c/{{ post.community.slug }}/</a>
     {% endif %}
     <strong><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></strong>
     · {{ post.author.username }}
