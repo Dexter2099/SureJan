@@ -1,0 +1,72 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.site-header .header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: #fbfbfb;
+  border-bottom: 1px solid #ccc;
+}
+
+.subreddit-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.subreddit-bar a {
+  white-space: nowrap;
+  color: #000;
+  text-decoration: none;
+  padding: 2px 4px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.user-info .avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ccc;
+  display: inline-block;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  padding: 4px 8px;
+  background: #f6f6f6;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab-bar a {
+  color: #336699;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.feed {
+  flex: 1;
+  max-width: 640px;
+}
+
+.sidebar {
+  width: 300px;
+}
