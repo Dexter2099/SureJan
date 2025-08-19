@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ community.title }} wiki</h1>
+{% if community.wiki_html %}
+  <div class="wiki" id="community-wiki">{{ community.wiki_html|safe }}</div>
+{% else %}
+  <p>Community wiki coming soon.</p>
+{% endif %}
+{% endblock %}
+

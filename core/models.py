@@ -12,6 +12,7 @@ class Community(models.Model):
     name = models.CharField(max_length=80)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
+    wiki_html = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="communities"
     )
