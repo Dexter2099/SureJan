@@ -3,13 +3,14 @@ Django settings for config project (SureJan MVP).
 """
 
 from pathlib import Path
+import os
 
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = 'django-insecure-d9we^%!#4i-nnbx@3fje$kc$(m^gzdobmbr)d81rh&2@tm-2t('
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', '1') in ('1', 'true', 'True')
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 # Application definition
