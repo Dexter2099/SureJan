@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 
 from .ranking import recompute_post_ranks
@@ -102,50 +102,6 @@ class Vote(models.Model):
         unique_together = ("user", "target_type", "target_id")
 
 
-def apply_vote(user, target_type, target_id, value):
-    """Apply a vote to a post or comment and return the new score."""
-    if value not in (-1, 1):
-        raise ValueError("Invalid vote value")
-
-    if target_type == "post":
-        model = Post
-    elif target_type == "comment":
-        model = Comment
-    else:
-        raise ValueError("Invalid target type")
-
-    target = model.objects.get(pk=target_id)
-    vote, created = Vote.objects.get_or_create(
-        user=user,
-        target_type=target_type,
-        target_id=target_id,
-        defaults={"value": value},
-    )
-
-    if created:
-        target.score += value
-    else:
-        if vote.value == value:
-            target.score -= value
-            vote.delete()
-        else:
-            delta = value - vote.value
-            vote.value = value
-            vote.save(update_fields=["value"])
-            target.score += delta
-
-    target.save(update_fields=["score"])
-    if target_type == "post":
-        up = Vote.objects.filter(
-            target_type="post", target_id=target_id, value=1
-        ).count()
-        down = Vote.objects.filter(
-            target_type="post", target_id=target_id, value=-1
-        ).count()
-        recompute_post_ranks(target, up, down)
-    return target.score
-
-
 class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
@@ -163,3 +119,60 @@ def get_points(user):
     if hasattr(user, "points_cached"):
         return user.points_cached
     return getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0
+
+
+# -- Vote side effects ------------------------------------------------------
+
+
+@receiver(pre_save, sender=Vote)
+def _store_old_vote_value(sender, instance, **kwargs):
+    """Store the previous vote value on the instance before saving."""
+    if instance.pk:
+        instance._old_value = (
+            Vote.objects.filter(pk=instance.pk).values_list("value", flat=True).first()
+            or 0
+        )
+    else:
+        instance._old_value = 0
+
+
+def _apply_vote_delta(instance, delta):
+    """Apply the vote delta to the target object and author points."""
+    if delta == 0:
+        return
+    if instance.target_type == "post":
+        Post.objects.filter(pk=instance.target_id).update(score=F("score") + delta)
+        post = Post.objects.get(pk=instance.target_id)
+        # recompute ranking based on current vote counts
+        up = Vote.objects.filter(
+            target_type="post", target_id=instance.target_id, value=1
+        ).count()
+        down = Vote.objects.filter(
+            target_type="post", target_id=instance.target_id, value=-1
+        ).count()
+        recompute_post_ranks(post, up, down)
+        UserProfile.objects.filter(user=post.author_id).update(
+            points_cached=F("points_cached") + delta
+        )
+    else:
+        Comment.objects.filter(pk=instance.target_id).update(score=F("score") + delta)
+        comment = Comment.objects.get(pk=instance.target_id)
+        UserProfile.objects.filter(user=comment.author_id).update(
+            points_cached=F("points_cached") + delta
+        )
+
+
+@receiver(post_save, sender=Vote)
+def _update_scores_on_vote_save(sender, instance, created, **kwargs):
+    old = getattr(instance, "_old_value", 0)
+    delta = instance.value - old
+    _apply_vote_delta(instance, delta)
+
+
+@receiver(post_delete, sender=Vote)
+def _update_scores_on_vote_delete(sender, instance, **kwargs):
+    _apply_vote_delta(instance, -instance.value)
+
+
+# Re-export apply_vote for backwards compatibility
+from .votes import apply_vote  # noqa: E402

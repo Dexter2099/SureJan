@@ -9,7 +9,8 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, apply_vote
+from .models import Comment, Community, Post
+from .votes import apply_vote
 from .pagination import PAGE_SIZE, build_cursor, parse_cursor
 
 
@@ -144,11 +145,12 @@ def vote_post(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     try:
-        new_score = apply_vote(request.user, "post", pk, value)
+        apply_vote(request.user, "post", pk, value)
     except ValueError:
         return HttpResponseBadRequest("Invalid vote")
 
-    return HttpResponse(f"<span id='post-score-{pk}'>{new_score}</span>")
+    score = Post.objects.get(pk=pk).score
+    return HttpResponse(f"<span id='post-score-{pk}'>{score}</span>")
 
 
 @login_required
@@ -163,11 +165,12 @@ def vote_comment(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     try:
-        new_score = apply_vote(request.user, "comment", pk, value)
+        apply_vote(request.user, "comment", pk, value)
     except ValueError:
         return HttpResponseBadRequest("Invalid vote")
 
-    return HttpResponse(f"<span id='comment-score-{pk}'>{new_score}</span>")
+    score = Comment.objects.get(pk=pk).score
+    return HttpResponse(f"<span id='comment-score-{pk}'>{score}</span>")
 
 
 @login_required
