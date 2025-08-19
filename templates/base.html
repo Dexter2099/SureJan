@@ -1,18 +1,51 @@
+{% load static points %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SureJan</title>
-  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <link rel="icon" href="{% static 'favicon.ico' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32.png' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <header>
-    <a href="/">SureJan</a>
-    <input type="text" placeholder="Search" />
-    {% include "partials/user_box.html" %}
+  <header class="site-header">
+    <div class="header-top">
+      <nav class="subreddit-bar">
+        <a href="/r/news/">News</a>
+        <a href="/r/brisbane/">Brisbane</a>
+        <a href="#">More ▾</a>
+      </nav>
+      <div class="user-info">
+        {% if request.user.is_authenticated %}
+          <span class="username">{{ request.user.username }}</span>
+          <span class="points">{{ request.user|get_points }} points</span>
+        {% else %}
+          <a href="{% url 'admin:login' %}">login</a>
+        {% endif %}
+        <span class="avatar"></span>
+      </div>
+    </div>
+    <nav class="tab-bar">
+      <a href="#">Best</a>
+      <a href="#">Hot</a>
+      <a href="#">New</a>
+      <a href="#">Rising</a>
+      <a href="#">Controversial</a>
+      <a href="#">Top</a>
+      <a href="#">Wiki</a>
+    </nav>
   </header>
-  {% include "partials/subreddit_bar.html" %}
-  {% block content %}{% endblock %}
+  <main class="container">
+    <div class="feed">
+      {% block content %}{% endblock %}
+    </div>
+    <aside class="sidebar">
+      {% block sidebar %}{% endblock %}
+    </aside>
+  </main>
 </body>
 </html>
