@@ -236,9 +236,11 @@ def vote_comment(request, pk):
 
 
 def community_wiki(request, slug):
-    """Placeholder view for community wiki."""
+    """Render the community wiki if available, otherwise show a stub."""
 
-    return HttpResponse("wiki")
+    community = get_object_or_404(Community, slug=slug)
+    context = {"community": community}
+    return render(request, "core/community_wiki.html", context)
 
 
 def _get_profile_user(username):
