@@ -58,10 +58,10 @@ def home(request):
     )
 
 
-def community(request, name):
+def community(request, slug):
     """Display posts for a specific community."""
 
-    community = get_object_or_404(Community, name=name)
+    community = get_object_or_404(Community, slug=slug)
     sort = request.GET.get("sort")
     qs = community.posts.select_related("author")
     qs = parse_cursor(qs, request.GET.get("before"))
@@ -88,10 +88,10 @@ def community(request, name):
 
 
 @login_required
-def submit_post(request, name):
+def submit_post(request, slug):
     """Submit a new post to a community."""
 
-    community = get_object_or_404(Community, name=name)
+    community = get_object_or_404(Community, slug=slug)
 
     if request.method == "POST":
         form = PostForm(request.POST)
@@ -100,7 +100,7 @@ def submit_post(request, name):
             post.community = community
             post.author = request.user
             post.save()
-            return redirect("community", name=community.name)
+            return redirect("community", slug=community.slug)
     else:
         form = PostForm()
 
@@ -182,8 +182,10 @@ def create_community(request):
             return HttpResponse(status=429)
         form = CommunityCreateForm(request.POST)
         if form.is_valid():
-            community = form.save()
-            return redirect("community", name=community.name)
+            community = form.save(commit=False)
+            community.created_by = request.user
+            community.save()
+            return redirect("community", slug=community.slug)
     else:
         form = CommunityCreateForm()
     return render(request, "communities/create.html", {"form": form})

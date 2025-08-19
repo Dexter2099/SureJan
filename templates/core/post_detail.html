@@ -8,7 +8,7 @@
 <p><a href="{{ post.url }}">{{ post.url }}</a></p>
 {% endif %}
 <p>
-    in <a href="{% url 'community' post.community.name %}" style="color: blue;">{{ post.community.title }}</a>
+    in <a href="{% url 'community' post.community.slug %}" style="color: blue;">{{ post.community.title }}</a>
     by {{ post.author.username }}
     ·
     <button hx-post="{% url 'vote_post' post.pk %}"

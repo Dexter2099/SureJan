@@ -11,8 +11,8 @@ from core import views as core_views
 urlpatterns = [
     path("", core_views.home, name="home"),
     path("c/new/", core_views.create_community, name="community_create"),
-    path("c/<slug:name>/", core_views.community, name="community"),
-    path("c/<slug:name>/submit/", core_views.submit_post, name="submit_post"),
+    path("c/<slug:slug>/", core_views.community, name="community"),
+    path("c/<slug:slug>/submit/", core_views.submit_post, name="submit_post"),
     path("post/<int:pk>/", core_views.post_detail, name="post_detail"),
     path("post/<int:pk>/comment/", core_views.add_comment, name="add_comment"),
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),

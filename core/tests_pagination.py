@@ -10,7 +10,9 @@ class PaginationTests(TestCase):
     def setUp(self):
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
-        self.community = Community.objects.create(name="t", title="Test")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
         for i in range(40):
             Post.objects.create(
                 community=self.community,

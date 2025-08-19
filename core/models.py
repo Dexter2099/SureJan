@@ -1,32 +1,50 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import F
 import math
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Community(models.Model):
-    name = models.SlugField(max_length=32, unique=True, db_index=True)
+    slug = models.SlugField(max_length=32, unique=True, db_index=True)
+    name = models.CharField(max_length=80)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="communities"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return f"c/{self.name}"
+        return f"c/{self.slug}"
 
 
 class Post(models.Model):
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="posts")
+    community = models.ForeignKey(
+        Community, on_delete=models.CASCADE, related_name="posts"
+    )
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     post_type = models.CharField(max_length=10, choices=[("text", "text"), ("link", "link")])
     title = models.CharField(max_length=300)
-    body = models.TextField(blank=True)
-    url = models.URLField(blank=True)
+    body = models.TextField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
     score = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
     hot_rank = models.FloatField(default=0, db_index=True)
+    rising_rank = models.FloatField(default=0, db_index=True)
+    controversy = models.FloatField(default=0, db_index=True)
+    best_rank = models.FloatField(default=0, db_index=True)
+    comment_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        indexes = [models.Index(fields=["community", "-created_at"])]
+        indexes = [
+            models.Index(fields=["community", "-created_at", "-id"]),
+            models.Index(fields=["-hot_rank", "-created_at"]),
+            models.Index(fields=["-score", "-created_at"]),
+            models.Index(fields=["-controversy", "-created_at"]),
+        ]
 
     def save(self, *args, **kwargs):
         recompute = kwargs.pop("recompute_hot", True)
@@ -47,9 +65,29 @@ class Post(models.Model):
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children"
+    )
+    path = models.TextField(db_index=True, blank=True, default="")
     body = models.TextField()
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["post", "path"])]
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+        if is_new:
+            if self.parent:
+                self.path = f"{self.parent.path}/{self.pk:04d}"
+            else:
+                self.path = f"{self.pk:04d}"
+            Comment.objects.filter(pk=self.pk).update(path=self.path)
+            Post.objects.filter(pk=self.post_id).update(
+                comment_count=F("comment_count") + 1
+            )
 
 
 class Vote(models.Model):
@@ -57,7 +95,7 @@ class Vote(models.Model):
     target_type = models.CharField(
         max_length=10, choices=[("post", "post"), ("comment", "comment")]
     )
-    target_id = models.PositiveIntegerField()
+    target_id = models.PositiveBigIntegerField()
     value = models.SmallIntegerField()
 
     class Meta:
@@ -100,3 +138,22 @@ def apply_vote(user, target_type, target_id, value):
     if target_type == "post":
         target.recompute_hot()
     return target.score
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
+    points_cached = models.IntegerField(default=0, db_index=True)
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+def get_points(user):
+    if hasattr(user, "points_cached"):
+        return user.points_cached
+    return getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0

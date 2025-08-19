@@ -1,17 +1,26 @@
 from django.contrib import admin
 
-from .models import Community, Post, Comment
+from .models import Community, Post, Comment, UserProfile
 
 
 @admin.register(Community)
 class CommunityAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "title", "created_at")
-    search_fields = ("name", "title")
+    list_display = ("id", "slug", "name", "title", "created_at")
+    search_fields = ("slug", "name", "title")
 
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ("id", "community", "author", "post_type", "title", "score", "created_at")
+    list_display = (
+        "id",
+        "community",
+        "author",
+        "post_type",
+        "title",
+        "score",
+        "hot_rank",
+        "created_at",
+    )
     list_filter = ("post_type", "community")
     search_fields = ("title", "body")
 
@@ -19,3 +28,8 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "post", "author", "score", "created_at")
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "points_cached")
