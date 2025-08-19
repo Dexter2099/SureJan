@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>SureJan</h1>
-  <div>
-    <a href="{% url 'home' %}?t=best">Best</a>
-    <a href="{% url 'home' %}?t=hot">Hot</a>
-    <a href="{% url 'home' %}?t=new">New</a>
-    <a href="{% url 'home' %}?t=rising">Rising</a>
-    <a href="{% url 'home' %}?t=controversial">Controversial</a>
-    <a href="{% url 'home' %}?t=top">Top</a>
-  </div>
+  {% include "core/partials/tab_bar.html" %}
   <div id="feed-list">
-    {% include "core/partials/post_list.html" with posts=posts show_community=True %}
+    {% include "core/partials/post_list.html" with posts=posts %}
   </div>
   {% if next_page %}
     {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}

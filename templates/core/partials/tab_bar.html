@@ -1,0 +1,11 @@
+{% comment %}Feed tab bar{% endcomment %}
+{% with current=tab|default:'best' %}
+<nav class="tab-bar">
+  <a href="{{ request.path }}?t=best" class="{% if current == 'best' %}active{% endif %}">Best</a>
+  <a href="{{ request.path }}?t=hot" class="{% if current == 'hot' %}active{% endif %}">Hot</a>
+  <a href="{{ request.path }}?t=new" class="{% if current == 'new' %}active{% endif %}">New</a>
+  <a href="{{ request.path }}?t=rising" class="{% if current == 'rising' %}active{% endif %}">Rising</a>
+  <a href="{{ request.path }}?t=controversial" class="{% if current == 'controversial' %}active{% endif %}">Controversial</a>
+  <a href="{{ request.path }}?t=top" class="{% if current == 'top' %}active{% endif %}">Top</a>
+</nav>
+{% endwith %}

@@ -2,14 +2,7 @@
 {% block content %}
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
-<div>
-  <a href="{% url 'community' community.slug %}?t=best">Best</a>
-  <a href="{% url 'community' community.slug %}?t=hot">Hot</a>
-  <a href="{% url 'community' community.slug %}?t=new">New</a>
-  <a href="{% url 'community' community.slug %}?t=rising">Rising</a>
-  <a href="{% url 'community' community.slug %}?t=controversial">Controversial</a>
-  <a href="{% url 'community' community.slug %}?t=top">Top</a>
-</div>
+{% include "core/partials/tab_bar.html" %}
 <div id="feed-list">
   {% include "core/partials/post_list.html" with posts=posts %}
 </div>
