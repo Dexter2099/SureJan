@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F
-import math
-from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from .ranking import recompute_post_ranks
 
 
 class Community(models.Model):
@@ -53,13 +53,13 @@ class Post(models.Model):
             self.recompute_hot()
 
     def recompute_hot(self):
-        now = timezone.now()
-        age_hours = max((now - self.created_at).total_seconds() / 3600, 0.5)
-        hot = self.score / math.pow(age_hours + 2, 1.8)
-        self.hot_rank = hot
-        Post = self.__class__
-        Post.objects.filter(pk=self.pk).update(hot_rank=hot)
-        return hot
+        up = Vote.objects.filter(
+            target_type="post", target_id=self.pk, value=1
+        ).count()
+        down = Vote.objects.filter(
+            target_type="post", target_id=self.pk, value=-1
+        ).count()
+        return recompute_post_ranks(self, up, down)
 
 
 class Comment(models.Model):
@@ -136,7 +136,13 @@ def apply_vote(user, target_type, target_id, value):
 
     target.save(update_fields=["score"])
     if target_type == "post":
-        target.recompute_hot()
+        up = Vote.objects.filter(
+            target_type="post", target_id=target_id, value=1
+        ).count()
+        down = Vote.objects.filter(
+            target_type="post", target_id=target_id, value=-1
+        ).count()
+        recompute_post_ranks(target, up, down)
     return target.score
 
 
