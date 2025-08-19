@@ -1,6 +1,7 @@
-Django
-django-htmx
-django-ratelimit
-csp
-pytest
-pytest-django
+
+Django>=5.2,<6
+django-htmx>=1.23
+django-ratelimit>=4,<5
+django-csp>=4,<5
+psycopg[binary,pool]>=3.2,<4
+gunicorn>=22,<23
