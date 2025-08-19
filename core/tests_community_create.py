@@ -38,7 +38,11 @@ class CommunityCreateTests(TestCase):
             {"slug": "dup", "name": "Dup", "title": "Another", "description": ""},
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertFormError(resp, "form", "slug", "Community with this slug already exists.")
+        self.assertFormError(
+            resp.context["form"],
+            "slug",
+            "Community with this slug already exists.",
+        )
 
     def test_d_rate_limit(self):
         self.client.login(username="staff", password="pwd")

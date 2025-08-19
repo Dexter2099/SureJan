@@ -76,19 +76,6 @@ class Comment(models.Model):
     class Meta:
         indexes = [models.Index(fields=["post", "path"])]
 
-    def save(self, *args, **kwargs):
-        is_new = self._state.adding
-        super().save(*args, **kwargs)
-        if is_new:
-            if self.parent:
-                self.path = f"{self.parent.path}/{self.pk:04d}"
-            else:
-                self.path = f"{self.pk:04d}"
-            Comment.objects.filter(pk=self.pk).update(path=self.path)
-            Post.objects.filter(pk=self.post_id).update(
-                comment_count=F("comment_count") + 1
-            )
-
 
 class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

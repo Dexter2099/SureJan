@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
+from django.db.models import F
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post
@@ -124,7 +125,7 @@ def post_detail(request, slug, post_id, post_slug):
     """Display a single post and its comments."""
 
     post = get_object_or_404(Post, pk=post_id, community__slug=slug)
-    comments = post.comments.select_related("author").order_by("created_at")
+    comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
     context = {"post": post, "comments": comments, "form": form}
     return render(request, "core/post_detail.html", context)
@@ -136,15 +137,35 @@ def comment_reply(request, post_id):
     """Reply to a post or comment."""
 
     post = get_object_or_404(Post, pk=post_id)
-    parent_id = request.POST.get("parent_id")
     form = CommentForm(request.POST)
-    if form.is_valid():
-        Comment.objects.create(
-            post=post,
-            author=request.user,
-            body=form.cleaned_data["body"],
-            parent_id=parent_id or None,
+    if not form.is_valid():
+        return HttpResponseBadRequest("Invalid comment")
+
+    parent_id = request.POST.get("parent_id")
+    parent = None
+    if parent_id:
+        parent = get_object_or_404(Comment, pk=parent_id, post=post)
+        child_seq = parent.children.count() + 1
+        path = f"{parent.path}/{child_seq:04d}"
+    else:
+        root_seq = post.comments.filter(parent__isnull=True).count() + 1
+        path = f"{root_seq:04d}"
+
+    comment = Comment.objects.create(
+        post=post,
+        author=request.user,
+        parent=parent,
+        body=form.cleaned_data["body"],
+        path=path,
+    )
+    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
+
+    if request.headers.get("HX-Request") == "true":
+        html = render_to_string(
+            "core/partials/comment.html", {"comment": comment}, request=request
         )
+        return HttpResponse(html)
+
     return redirect(
         "post_detail",
         slug=post.community.slug,
