@@ -11,19 +11,13 @@
     in <a href="{% url 'community' post.community.slug %}" style="color: blue;">{{ post.community.title }}</a>
     by {{ post.author.username }}
     ·
-    <button hx-post="{% url 'vote_post' post.pk %}"
+    <button hx-post="{% url 'vote_post' post.pk %}?v=1"
             hx-target="#post-score-{{ post.pk }}"
-            hx-swap="outerHTML"
-            hx-include="[name='v']">
-        ▲<input type="hidden" name="v" value="1">
-    </button>
+            hx-swap="outerHTML">▲</button>
     <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
-    <button hx-post="{% url 'vote_post' post.pk %}"
+    <button hx-post="{% url 'vote_post' post.pk %}?v=-1"
             hx-target="#post-score-{{ post.pk }}"
-            hx-swap="outerHTML"
-            hx-include="[name='v']">
-        ▼<input type="hidden" name="v" value="-1">
-    </button>
+            hx-swap="outerHTML">▼</button>
     · {{ post.created_at|timesince }} ago
 </p>
 <h2>Comments</h2>
@@ -34,19 +28,13 @@
         <small>
             by {{ comment.author.username }}
             ·
-            <button hx-post="{% url 'vote_comment' comment.pk %}"
+            <button hx-post="{% url 'vote_comment' comment.pk %}?v=1"
                     hx-target="#comment-score-{{ comment.pk }}"
-                    hx-swap="outerHTML"
-                    hx-include="[name='v']">
-                ▲<input type="hidden" name="v" value="1">
-            </button>
+                    hx-swap="outerHTML">▲</button>
             <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
-            <button hx-post="{% url 'vote_comment' comment.pk %}"
+            <button hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
                     hx-target="#comment-score-{{ comment.pk }}"
-                    hx-swap="outerHTML"
-                    hx-include="[name='v']">
-                ▼<input type="hidden" name="v" value="-1">
-            </button>
+                    hx-swap="outerHTML">▼</button>
             · {{ comment.created_at|timesince }} ago
         </small>
     </li>
@@ -55,7 +43,7 @@
     {% endfor %}
 </ul>
 <h3>Add comment</h3>
-<form method="post" action="{% url 'add_comment' post.pk %}">
+<form method="post" action="{% url 'comment_reply' post.pk %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Comment</button>
