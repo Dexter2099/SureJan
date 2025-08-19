@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>u/{{ profile_user.username }}</h1>
+{% include "core/partials/user_tab_bar.html" %}
+<div id="feed-list">
+  {% include "core/partials/post_list.html" with posts=posts %}
+</div>
+{% endblock %}
+

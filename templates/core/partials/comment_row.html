@@ -1,0 +1,10 @@
+{% comment %}Row for displaying a single comment in user profile views{% endcomment %}
+<div class="comment-row">
+  <p>{{ comment.body }}</p>
+  <small>
+    in <a href="{% url 'community' comment.post.community.slug %}">/r/{{ comment.post.community.slug }}/</a>
+    on <a href="{% url 'post_detail' comment.post.community.slug comment.post.pk comment.post.title|slugify %}">{{ comment.post.title }}</a>
+    · {{ comment.created_at|timesince }} ago
+  </small>
+</div>
+

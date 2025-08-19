@@ -1,0 +1,9 @@
+{% comment %}Tab bar for user profile pages{% endcomment %}
+{% with current=tab %}
+<nav class="tab-bar">
+  <a href="{% url 'user_overview' profile_user.username %}" class="{% if current == 'overview' %}active{% endif %}">Overview</a>
+  <a href="{% url 'user_comments' profile_user.username %}" class="{% if current == 'comments' %}active{% endif %}">Comments</a>
+  <a href="{% url 'user_submitted' profile_user.username %}" class="{% if current == 'submitted' %}active{% endif %}">Submitted</a>
+</nav>
+{% endwith %}
+

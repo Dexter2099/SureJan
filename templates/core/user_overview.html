@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>u/{{ profile_user.username }}</h1>
+{% include "core/partials/user_tab_bar.html" %}
+{% for item in activity %}
+  {% if item.type == 'post' %}
+    {% include "core/partials/post_row.html" with post=item.obj %}
+  {% else %}
+    {% include "core/partials/comment_row.html" with comment=item.obj %}
+  {% endif %}
+{% empty %}
+  <p>No activity yet.</p>
+{% endfor %}
+{% endblock %}
+

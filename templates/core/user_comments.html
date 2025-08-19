@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>u/{{ profile_user.username }}</h1>
+{% include "core/partials/user_tab_bar.html" %}
+{% for comment in comments %}
+  {% include "core/partials/comment_row.html" %}
+{% empty %}
+  <p>No comments yet.</p>
+{% endfor %}
+{% endblock %}
+

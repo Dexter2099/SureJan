@@ -238,22 +238,77 @@ def community_wiki(request, slug):
     return HttpResponse("wiki")
 
 
-def user_overview(request, username):
-    """User overview page stub."""
+def _get_profile_user(username):
+    """Return the user object for the given username or 404."""
 
-    return HttpResponse(f"Profile for {username}")
+    from django.contrib.auth import get_user_model
+
+    return get_object_or_404(get_user_model(), username=username)
+
+
+def user_overview(request, username):
+    """Display recent activity for a user."""
+
+    profile_user = _get_profile_user(username)
+    posts = list(
+        Post.objects.filter(author=profile_user)
+        .select_related("community")
+        .order_by("-created_at")[:10]
+    )
+    comments = list(
+        Comment.objects.filter(author=profile_user)
+        .select_related("post__community")
+        .order_by("-created_at")[:10]
+    )
+
+    activity = [
+        {"type": "post", "obj": p, "created_at": p.created_at} for p in posts
+    ] + [
+        {"type": "comment", "obj": c, "created_at": c.created_at} for c in comments
+    ]
+    activity.sort(key=lambda a: a["created_at"], reverse=True)
+    activity = activity[:20]
+
+    context = {
+        "profile_user": profile_user,
+        "activity": activity,
+        "tab": "overview",
+    }
+    return render(request, "core/user_overview.html", context)
 
 
 def user_comments(request, username):
-    """User comments page stub."""
+    """Display all comments made by a user."""
 
-    return HttpResponse(f"Comments by {username}")
+    profile_user = _get_profile_user(username)
+    comments = (
+        Comment.objects.filter(author=profile_user)
+        .select_related("post__community")
+        .order_by("-created_at")
+    )
+    context = {
+        "profile_user": profile_user,
+        "comments": comments,
+        "tab": "comments",
+    }
+    return render(request, "core/user_comments.html", context)
 
 
 def user_submitted(request, username):
-    """User submitted posts page stub."""
+    """Display all posts submitted by a user."""
 
-    return HttpResponse(f"Submissions by {username}")
+    profile_user = _get_profile_user(username)
+    posts = (
+        Post.objects.filter(author=profile_user)
+        .select_related("community")
+        .order_by("-created_at")
+    )
+    context = {
+        "profile_user": profile_user,
+        "posts": posts,
+        "tab": "submitted",
+    }
+    return render(request, "core/user_submitted.html", context)
 
 
 @login_required
