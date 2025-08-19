@@ -5,11 +5,14 @@
     <a href="{% url 'home' %}?t=best">Best</a>
     <a href="{% url 'home' %}?t=hot">Hot</a>
     <a href="{% url 'home' %}?t=new">New</a>
+    <a href="{% url 'home' %}?t=rising">Rising</a>
+    <a href="{% url 'home' %}?t=controversial">Controversial</a>
+    <a href="{% url 'home' %}?t=top">Top</a>
   </div>
   <div id="feed-list">
     {% include "core/partials/post_list.html" with posts=posts show_community=True %}
   </div>
-  {% if next_before %}
-    {% include "core/partials/load_more.html" with next_url=request.path|add:'?before='|add:next_before|add:sort_query %}
+  {% if next_page %}
+    {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}
   {% endif %}
 {% endblock %}

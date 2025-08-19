@@ -6,11 +6,14 @@
   <a href="{% url 'community' community.slug %}?t=best">Best</a>
   <a href="{% url 'community' community.slug %}?t=hot">Hot</a>
   <a href="{% url 'community' community.slug %}?t=new">New</a>
+  <a href="{% url 'community' community.slug %}?t=rising">Rising</a>
+  <a href="{% url 'community' community.slug %}?t=controversial">Controversial</a>
+  <a href="{% url 'community' community.slug %}?t=top">Top</a>
 </div>
 <div id="feed-list">
   {% include "core/partials/post_list.html" with posts=posts %}
 </div>
-{% if next_before %}
-  {% include "core/partials/load_more.html" with next_url=request.path|add:'?before='|add:next_before|add:sort_query %}
+{% if next_page %}
+  {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}
 {% endif %}
 {% endblock %}

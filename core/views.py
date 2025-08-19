@@ -12,17 +12,31 @@ from django.utils.text import slugify
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post
 from .votes import apply_vote
-from .pagination import PAGE_SIZE, build_cursor, parse_cursor
+from .pagination import PAGE_SIZE
 
 
-def _render_posts(request, posts, next_before, show_community=False, sort_query=""):
+# Mapping of feed tabs to their ordering in the database.  Each ordering
+# includes ``-id`` as the final column to guarantee deterministic results.
+FEED_ORDER = {
+    "best": ["-best_rank", "-created_at", "-id"],
+    "hot": ["-hot_rank", "-created_at", "-id"],
+    "new": ["-created_at", "-id"],
+    "rising": ["-rising_rank", "-created_at", "-id"],
+    "controversial": ["-controversy", "-created_at", "-id"],
+    "top": ["-score", "-created_at", "-id"],
+}
+
+
+def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
+    """Render a list of posts and optional pagination link."""
+
     html = render_to_string(
         "core/partials/post_list.html",
         {"posts": posts, "show_community": show_community},
         request=request,
     )
-    if next_before:
-        next_url = f"{request.path}?before={next_before}{sort_query}"
+    if next_page:
+        next_url = f"{request.path}?page={next_page}{sort_query}"
         html += render_to_string(
             "core/partials/load_more.html", {"next_url": next_url}, request=request
         )
@@ -30,37 +44,31 @@ def _render_posts(request, posts, next_before, show_community=False, sort_query=
 
 
 def home(request):
-    """Display the latest posts across all communities."""
+    """Display a feed of posts across all communities."""
 
     tab = request.GET.get("t", "best")
-    qs = Post.objects.select_related("community", "author")
-    qs = parse_cursor(qs, request.GET.get("before"))
-    qs = qs.order_by("-created_at", "-id")
-    posts = list(qs[: PAGE_SIZE + 1 ])
-    next_before = None
-    if len(posts) > PAGE_SIZE:
-        next_before = build_cursor(posts[PAGE_SIZE - 1])
-        posts = posts[:PAGE_SIZE]
-    if tab == "hot":
-        posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
-        sort_query = "&t=hot"
-    else:
-        sort_query = f"&t={tab}" if tab and tab != "best" else ""
+    order = FEED_ORDER.get(tab, FEED_ORDER["best"])
+    page = int(request.GET.get("page", "1") or 1)
+
+    qs = Post.objects.select_related("community", "author").order_by(*order)
+
+    offset = (page - 1) * PAGE_SIZE
+    posts = list(qs[offset : offset + PAGE_SIZE + 1])
+    next_page = page + 1 if len(posts) > PAGE_SIZE else None
+    posts = posts[:PAGE_SIZE]
+
+    sort_query = f"&t={tab}" if tab and tab != "best" else ""
     context = {
         "posts": posts,
-        "next_before": next_before,
+        "next_page": next_page,
         "sort_query": sort_query,
         "tab": tab,
     }
     if request.headers.get("HX-Request") == "true":
         return _render_posts(
-            request, posts, next_before, show_community=True, sort_query=sort_query
+            request, posts, next_page, show_community=True, sort_query=sort_query
         )
-    return render(
-        request,
-        "core/home.html",
-        {**context},
-    )
+    return render(request, "core/home.html", context)
 
 
 def community(request, slug):
@@ -68,28 +76,25 @@ def community(request, slug):
 
     community = get_object_or_404(Community, slug=slug)
     tab = request.GET.get("t", "best")
-    qs = community.posts.select_related("author")
-    qs = parse_cursor(qs, request.GET.get("before"))
-    qs = qs.order_by("-created_at", "-id")
-    posts = list(qs[: PAGE_SIZE + 1 ])
-    next_before = None
-    if len(posts) > PAGE_SIZE:
-        next_before = build_cursor(posts[PAGE_SIZE - 1])
-        posts = posts[:PAGE_SIZE]
-    if tab == "hot":
-        posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
-        sort_query = "&t=hot"
-    else:
-        sort_query = f"&t={tab}" if tab and tab != "best" else ""
+    order = FEED_ORDER.get(tab, FEED_ORDER["best"])
+    page = int(request.GET.get("page", "1") or 1)
+
+    qs = community.posts.select_related("author").order_by(*order)
+    offset = (page - 1) * PAGE_SIZE
+    posts = list(qs[offset : offset + PAGE_SIZE + 1])
+    next_page = page + 1 if len(posts) > PAGE_SIZE else None
+    posts = posts[:PAGE_SIZE]
+
+    sort_query = f"&t={tab}" if tab and tab != "best" else ""
     context = {
         "community": community,
         "posts": posts,
-        "next_before": next_before,
+        "next_page": next_page,
         "sort_query": sort_query,
         "tab": tab,
     }
     if request.headers.get("HX-Request") == "true":
-        return _render_posts(request, posts, next_before, sort_query=sort_query)
+        return _render_posts(request, posts, next_page, sort_query=sort_query)
     return render(request, "core/community.html", context)
 
 
