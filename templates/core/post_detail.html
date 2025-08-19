@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="/static/css/old.css">
 <h1>{{ post.title }}</h1>
 {% if post.post_type == 'text' and post.body %}
-<p>{{ post.body }}</p>
+<p>{{ post.body|linebreaksbr }}</p>
 {% elif post.post_type == 'link' %}
 <p><a href="{{ post.url }}">{{ post.url }}</a></p>
 {% endif %}
@@ -21,20 +21,19 @@
     · {{ post.created_at|timesince }} ago
 </p>
 <h2>Comments</h2>
-<ul id="comment-list">
-    {% for comment in comments %}
-        {% include "core/partials/comment.html" %}
-    {% empty %}
-    <li>No comments yet.</li>
-    {% endfor %}
-</ul>
-<h3>Add comment</h3>
 <form hx-post="{% url 'comment_reply' post.pk %}"
       hx-target="#comment-list"
       hx-swap="beforeend">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Comment</button>
-</form>
+    </form>
+<div id="comment-list">
+    {% for c in comments %}
+        {% include "core/partials/comment.html" with comment=c %}
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+</div>
 {% include "core/_htmx_csrf.html" %}
 {% endblock %}

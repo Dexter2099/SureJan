@@ -132,11 +132,27 @@ def post_detail(request, slug, post_id, post_slug):
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "POST"])
 def comment_reply(request, post_id):
-    """Reply to a post or comment."""
+    """Reply to a post or comment or render the reply form."""
 
     post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "GET":
+        if request.headers.get("HX-Request") != "true":
+            return HttpResponseBadRequest("Invalid request")
+        parent_id = request.GET.get("parent_id")
+        if not parent_id:
+            return HttpResponseBadRequest("Missing parent_id")
+        parent = get_object_or_404(Comment, pk=parent_id, post=post)
+        form = CommentForm()
+        html = render_to_string(
+            "core/partials/reply_form.html",
+            {"form": form, "parent": parent, "post": post},
+            request=request,
+        )
+        return HttpResponse(html)
+
     form = CommentForm(request.POST)
     if not form.is_valid():
         return HttpResponseBadRequest("Invalid comment")

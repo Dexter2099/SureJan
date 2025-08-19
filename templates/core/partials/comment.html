@@ -1,4 +1,4 @@
-<li id="comment-{{ comment.pk }}">
+<div id="comment-{{ comment.pk }}" style="margin-left: {% widthratio comment.depth 1 20 %}px">
     <p>{{ comment.body }}</p>
     <small>
         by {{ comment.author.username }} ·
@@ -9,7 +9,9 @@
         <button hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
                 hx-target="#comment-score-{{ comment.pk }}"
                 hx-swap="outerHTML">▼</button>
-        · {{ comment.created_at|timesince }} ago
+        · {{ comment.created_at|timesince }} ago ·
+        <button hx-get="{% url 'comment_reply' comment.post.pk %}?parent_id={{ comment.pk }}"
+                hx-target="#comment-{{ comment.pk }}"
+                hx-swap="afterend">reply</button>
     </small>
-    <ul id="replies-{{ comment.pk }}"></ul>
-</li>
+</div>
