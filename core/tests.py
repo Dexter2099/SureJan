@@ -1,6 +1,7 @@
 """Tests for post submission and voting endpoints."""
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -11,6 +12,7 @@ class SubmitPostTests(TestCase):
     """Ensure users can submit text and link posts."""
 
     def setUp(self):
+        cache.clear()
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(
@@ -52,11 +54,34 @@ class SubmitPostTests(TestCase):
         self.assertEqual(post.url, "https://example.com")
         self.assertEqual(post.body, "")
 
+    def test_requires_login(self):
+        self.client.logout()
+        url = reverse("submit_post", args=[self.community.slug])
+        resp = self.client.post(
+            url,
+            {"post_type": "text", "title": "Hello", "body": "", "url": ""},
+        )
+        self.assertEqual(resp.status_code, 302)
+
+    def test_rate_limit(self):
+        url = reverse("submit_post", args=[self.community.slug])
+        for i in range(3):
+            self.client.post(
+                url,
+                {"post_type": "text", "title": f"H{i}", "body": "", "url": ""},
+            )
+        resp = self.client.post(
+            url,
+            {"post_type": "text", "title": "H3", "body": "", "url": ""},
+        )
+        self.assertEqual(resp.status_code, 429)
+
 
 class VotePostTests(TestCase):
     """Ensure voting adjusts post scores per user."""
 
     def setUp(self):
+        cache.clear()
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(
@@ -118,11 +143,20 @@ class VotePostTests(TestCase):
         resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 302)
 
+    def test_rate_limit(self):
+        url = reverse("vote_post", args=[self.post.pk])
+        for _ in range(20):
+            resp = self.client.post(url + "?v=1")
+            self.assertEqual(resp.status_code, 200)
+        resp = self.client.post(url + "?v=1")
+        self.assertEqual(resp.status_code, 429)
+
 
 class VoteCommentTests(TestCase):
     """Ensure voting works for comments."""
 
     def setUp(self):
+        cache.clear()
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(

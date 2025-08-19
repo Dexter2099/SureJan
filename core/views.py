@@ -3,7 +3,7 @@
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
-from django_ratelimit.decorators import ratelimit, is_ratelimited
+from django_ratelimit.decorators import ratelimit as dratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -13,6 +13,7 @@ from django.db.models import F
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post
+from .ratelimit import ratelimit
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 
@@ -101,6 +102,7 @@ def community(request, slug):
 
 
 @login_required
+@ratelimit(action="post", limit=3)
 def submit_post(request, slug):
     """Submit a new post to a community."""
 
@@ -133,6 +135,7 @@ def post_detail(request, slug, post_id, post_slug):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@ratelimit(action="comment", limit=10)
 def comment_reply(request, post_id):
     """Reply to a post or comment or render the reply form."""
 
@@ -193,7 +196,7 @@ def comment_reply(request, post_id):
 @login_required
 @require_POST
 @csrf_protect
-@ratelimit(key="user_or_ip", rate="20/m", block=True)
+@ratelimit(action="vote", limit=20)
 def vote_post(request, pk):
     """Handle voting on a post."""
 
@@ -214,7 +217,7 @@ def vote_post(request, pk):
 @login_required
 @require_POST
 @csrf_protect
-@ratelimit(key="user_or_ip", rate="20/m", block=True)
+@ratelimit(action="vote", limit=20)
 def vote_comment(request, pk):
     """Handle voting on a comment."""
 
@@ -313,7 +316,7 @@ def user_submitted(request, username):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
+@dratelimit(key="user", rate="5/m", method=["POST"], block=False)
 def create_community(request):
     if not request.user.is_staff:
         from django.core.exceptions import PermissionDenied

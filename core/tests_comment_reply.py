@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -7,6 +8,7 @@ from .models import Comment, Community, Post
 
 class CommentReplyTests(TestCase):
     def setUp(self):
+        cache.clear()
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(
@@ -48,3 +50,9 @@ class CommentReplyTests(TestCase):
         self.client.logout()
         resp = self.client.post(self.url, {"body": "Hi"})
         self.assertEqual(resp.status_code, 302)
+
+    def test_rate_limit(self):
+        for i in range(10):
+            self.client.post(self.url, {"body": f"c{i}"}, HTTP_HX_REQUEST="true")
+        resp = self.client.post(self.url, {"body": "c10"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 429)
