@@ -2,8 +2,9 @@
 {% block content %}
   <h1>SureJan</h1>
   <div>
-    <a href="{% url 'home' %}">New</a>
-    <a href="{% url 'home' %}?sort=hot">Hot</a>
+    <a href="{% url 'home' %}?t=best">Best</a>
+    <a href="{% url 'home' %}?t=hot">Hot</a>
+    <a href="{% url 'home' %}?t=new">New</a>
   </div>
   <div id="feed-list">
     {% include "core/partials/post_list.html" with posts=posts show_community=True %}

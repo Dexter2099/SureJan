@@ -67,5 +67,5 @@ class HotRankTests(TestCase):
             score=2,
         )
         p2.recompute_hot()
-        resp = self.client.get(reverse("home") + "?sort=hot")
+        resp = self.client.get(reverse("home") + "?t=hot")
         self.assertEqual(resp.context["posts"][0].pk, p1.pk)

@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.text import slugify
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post
@@ -31,7 +32,7 @@ def _render_posts(request, posts, next_before, show_community=False, sort_query=
 def home(request):
     """Display the latest posts across all communities."""
 
-    sort = request.GET.get("sort")
+    tab = request.GET.get("t", "best")
     qs = Post.objects.select_related("community", "author")
     qs = parse_cursor(qs, request.GET.get("before"))
     qs = qs.order_by("-created_at", "-id")
@@ -40,18 +41,21 @@ def home(request):
     if len(posts) > PAGE_SIZE:
         next_before = build_cursor(posts[PAGE_SIZE - 1])
         posts = posts[:PAGE_SIZE]
-    if sort == "hot":
+    if tab == "hot":
         posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
-        sort_query = "&sort=hot"
+        sort_query = "&t=hot"
     else:
-        sort_query = ""
+        sort_query = f"&t={tab}" if tab and tab != "best" else ""
     context = {
         "posts": posts,
         "next_before": next_before,
         "sort_query": sort_query,
+        "tab": tab,
     }
     if request.headers.get("HX-Request") == "true":
-        return _render_posts(request, posts, next_before, show_community=True, sort_query=sort_query)
+        return _render_posts(
+            request, posts, next_before, show_community=True, sort_query=sort_query
+        )
     return render(
         request,
         "core/home.html",
@@ -63,7 +67,7 @@ def community(request, slug):
     """Display posts for a specific community."""
 
     community = get_object_or_404(Community, slug=slug)
-    sort = request.GET.get("sort")
+    tab = request.GET.get("t", "best")
     qs = community.posts.select_related("author")
     qs = parse_cursor(qs, request.GET.get("before"))
     qs = qs.order_by("-created_at", "-id")
@@ -72,16 +76,17 @@ def community(request, slug):
     if len(posts) > PAGE_SIZE:
         next_before = build_cursor(posts[PAGE_SIZE - 1])
         posts = posts[:PAGE_SIZE]
-    if sort == "hot":
+    if tab == "hot":
         posts.sort(key=lambda p: (-p.hot_rank, -p.created_at.timestamp(), -p.id))
-        sort_query = "&sort=hot"
+        sort_query = "&t=hot"
     else:
-        sort_query = ""
+        sort_query = f"&t={tab}" if tab and tab != "best" else ""
     context = {
         "community": community,
         "posts": posts,
         "next_before": next_before,
         "sort_query": sort_query,
+        "tab": tab,
     }
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_before, sort_query=sort_query)
@@ -109,10 +114,10 @@ def submit_post(request, slug):
     return render(request, "core/submit_post.html", context)
 
 
-def post_detail(request, pk):
+def post_detail(request, slug, post_id, post_slug):
     """Display a single post and its comments."""
 
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post, pk=post_id, community__slug=slug)
     comments = post.comments.select_related("author").order_by("created_at")
     form = CommentForm()
     context = {"post": post, "comments": comments, "form": form}
@@ -121,16 +126,25 @@ def post_detail(request, pk):
 
 @login_required
 @require_POST
-def add_comment(request, pk):
-    """Add a comment to a post."""
+def comment_reply(request, post_id):
+    """Reply to a post or comment."""
 
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post, pk=post_id)
+    parent_id = request.POST.get("parent_id")
     form = CommentForm(request.POST)
     if form.is_valid():
         Comment.objects.create(
-            post=post, author=request.user, body=form.cleaned_data["body"]
+            post=post,
+            author=request.user,
+            body=form.cleaned_data["body"],
+            parent_id=parent_id or None,
         )
-    return redirect("post_detail", pk=post.pk)
+    return redirect(
+        "post_detail",
+        slug=post.community.slug,
+        post_id=post.pk,
+        post_slug=slugify(post.title),
+    )
 
 
 @login_required
@@ -140,7 +154,7 @@ def vote_post(request, pk):
     """Handle voting on a post."""
 
     try:
-        value = int(request.POST.get("v"))
+        value = int(request.GET.get("v"))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
 
@@ -160,7 +174,7 @@ def vote_comment(request, pk):
     """Handle voting on a comment."""
 
     try:
-        value = int(request.POST.get("v"))
+        value = int(request.GET.get("v"))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
 
@@ -171,6 +185,30 @@ def vote_comment(request, pk):
 
     score = Comment.objects.get(pk=pk).score
     return HttpResponse(f"<span id='comment-score-{pk}'>{score}</span>")
+
+
+def community_wiki(request, slug):
+    """Placeholder view for community wiki."""
+
+    return HttpResponse("wiki")
+
+
+def user_overview(request, username):
+    """User overview page stub."""
+
+    return HttpResponse(f"Profile for {username}")
+
+
+def user_comments(request, username):
+    """User comments page stub."""
+
+    return HttpResponse(f"Comments by {username}")
+
+
+def user_submitted(request, username):
+    """User submitted posts page stub."""
+
+    return HttpResponse(f"Submissions by {username}")
 
 
 @login_required

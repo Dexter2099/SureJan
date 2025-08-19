@@ -72,42 +72,42 @@ class VotePostTests(TestCase):
 
     def test_upvote_post(self):
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(url, {"v": "1"})
+        resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 200)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
 
     def test_downvote_post(self):
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(url, {"v": "-1"})
+        resp = self.client.post(url + "?v=-1")
         self.assertEqual(resp.status_code, 200)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, -1)
 
     def test_toggle_off_post_vote(self):
         url = reverse("vote_post", args=[self.post.pk])
-        self.client.post(url, {"v": "1"})
-        self.client.post(url, {"v": "1"})
+        self.client.post(url + "?v=1")
+        self.client.post(url + "?v=1")
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 0)
 
     def test_switch_post_vote_direction(self):
         url = reverse("vote_post", args=[self.post.pk])
-        self.client.post(url, {"v": "1"})
-        self.client.post(url, {"v": "-1"})
+        self.client.post(url + "?v=1")
+        self.client.post(url + "?v=-1")
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, -1)
 
     def test_switch_post_vote_back_up(self):
         url = reverse("vote_post", args=[self.post.pk])
-        self.client.post(url, {"v": "-1"})
-        self.client.post(url, {"v": "1"})
+        self.client.post(url + "?v=-1")
+        self.client.post(url + "?v=1")
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
 
     def test_invalid_vote(self):
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(url, {"v": "0"})
+        resp = self.client.post(url + "?v=0")
         self.assertEqual(resp.status_code, 400)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 0)
@@ -115,7 +115,7 @@ class VotePostTests(TestCase):
     def test_requires_login(self):
         self.client.logout()
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(url, {"v": "1"})
+        resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 302)
 
 
@@ -141,42 +141,42 @@ class VoteCommentTests(TestCase):
 
     def test_upvote_comment(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        resp = self.client.post(url, {"v": "1"})
+        resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 200)
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, 1)
 
     def test_downvote_comment(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        resp = self.client.post(url, {"v": "-1"})
+        resp = self.client.post(url + "?v=-1")
         self.assertEqual(resp.status_code, 200)
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, -1)
 
     def test_toggle_off_comment_vote(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        self.client.post(url, {"v": "1"})
-        self.client.post(url, {"v": "1"})
+        self.client.post(url + "?v=1")
+        self.client.post(url + "?v=1")
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, 0)
 
     def test_switch_comment_vote_direction(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        self.client.post(url, {"v": "1"})
-        self.client.post(url, {"v": "-1"})
+        self.client.post(url + "?v=1")
+        self.client.post(url + "?v=-1")
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, -1)
 
     def test_switch_comment_vote_back_up(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        self.client.post(url, {"v": "-1"})
-        self.client.post(url, {"v": "1"})
+        self.client.post(url + "?v=-1")
+        self.client.post(url + "?v=1")
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, 1)
 
     def test_invalid_comment_vote(self):
         url = reverse("vote_comment", args=[self.comment.pk])
-        resp = self.client.post(url, {"v": "0"})
+        resp = self.client.post(url + "?v=0")
         self.assertEqual(resp.status_code, 400)
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, 0)
@@ -184,6 +184,6 @@ class VoteCommentTests(TestCase):
     def test_comment_vote_requires_login(self):
         self.client.logout()
         url = reverse("vote_comment", args=[self.comment.pk])
-        resp = self.client.post(url, {"v": "1"})
+        resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 302)
 
