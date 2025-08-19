@@ -2,6 +2,7 @@
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_protect
 from django_ratelimit.decorators import ratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
@@ -154,6 +155,7 @@ def comment_reply(request, post_id):
 
 @login_required
 @require_POST
+@csrf_protect
 @ratelimit(key="user_or_ip", rate="20/m", block=True)
 def vote_post(request, pk):
     """Handle voting on a post."""
@@ -174,6 +176,7 @@ def vote_post(request, pk):
 
 @login_required
 @require_POST
+@csrf_protect
 @ratelimit(key="user_or_ip", rate="20/m", block=True)
 def vote_comment(request, pk):
     """Handle voting on a comment."""
