@@ -1,0 +1,8 @@
+{% load points %}
+<div class="user-box">
+  {% if request.user.is_authenticated %}
+    {{ request.user.username }} | Points: {{ request.user|get_points }} | <a href="{% url 'admin:logout' %}">logout</a>
+  {% else %}
+    <a href="{% url 'admin:login' %}">login</a> | <a href="#">register</a>
+  {% endif %}
+</div>
