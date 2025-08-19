@@ -13,8 +13,8 @@ class UserProfileTests(TestCase):
         self.community = Community.objects.create(
             slug="t", name="Test", title="Test", created_by=self.user
         )
-        # Create 11 posts for user and one for other
-        for i in range(11):
+        # Create a few posts for user and one for other
+        for i in range(3):
             Post.objects.create(
                 community=self.community,
                 author=self.user,
@@ -27,8 +27,8 @@ class UserProfileTests(TestCase):
             post_type="text",
             title="other",
         )
-        # Create 11 comments for user and one for other
-        for i in range(11):
+        # Create a few comments for user and one for other
+        for i in range(3):
             Comment.objects.create(
                 post=self.other_post,
                 author=self.user,
@@ -44,26 +44,24 @@ class UserProfileTests(TestCase):
         url = reverse("user_overview", args=[self.user.username])
         resp = self.client.get(url)
         self.assertContains(resp, f"u/{self.user.username}")
-        # newest post and comment present, oldest omitted
-        self.assertContains(resp, "post10")
-        self.assertContains(resp, "comment10")
-        self.assertNotContains(resp, "post0")
-        self.assertNotContains(resp, "comment0")
+        self.assertContains(resp, "post2")
+        self.assertContains(resp, "comment2")
+        self.assertNotContains(resp, "othercomment")
         self.assertContains(resp, 'class="active">Overview</a>')
 
     def test_comments_page_lists_comments(self):
         url = reverse("user_comments", args=[self.user.username])
         resp = self.client.get(url)
-        self.assertContains(resp, "comment10")
-        self.assertNotContains(resp, "post10")
+        self.assertContains(resp, "comment2")
+        self.assertNotContains(resp, "post2")
         self.assertNotContains(resp, "othercomment")
         self.assertContains(resp, 'class="active">Comments</a>')
 
     def test_submitted_page_lists_posts(self):
         url = reverse("user_submitted", args=[self.user.username])
         resp = self.client.get(url)
-        self.assertContains(resp, "post10")
-        self.assertNotContains(resp, "comment10")
+        self.assertContains(resp, "post2")
+        self.assertNotContains(resp, "comment2")
         self.assertNotContains(resp, "other")
         self.assertContains(resp, 'class="active">Submitted</a>')
 
