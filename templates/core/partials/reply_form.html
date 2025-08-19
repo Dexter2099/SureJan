@@ -1,0 +1,10 @@
+<div style="margin-left: {% widthratio parent.depth|add:'1' 1 20 %}px" hx-on="htmx:afterRequest:this.remove()">
+    <form hx-post="{% url 'comment_reply' post.pk %}"
+          hx-target="#comment-{{ parent.pk }}"
+          hx-swap="afterend">
+        {% csrf_token %}
+        {{ form.body }}
+        <input type="hidden" name="parent_id" value="{{ parent.pk }}">
+        <button type="submit">Reply</button>
+    </form>
+</div>

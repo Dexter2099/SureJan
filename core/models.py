@@ -76,6 +76,11 @@ class Comment(models.Model):
     class Meta:
         indexes = [models.Index(fields=["post", "path"])]
 
+    @property
+    def depth(self):
+        """Return the nesting depth based on the comment path."""
+        return self.path.count("/")
+
 
 class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
