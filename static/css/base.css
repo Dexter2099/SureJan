@@ -81,6 +81,9 @@ a:hover {
   gap: 4px;
   padding: 4px 6px;
   background: var(--panel);
+  position: sticky;
+  top: 32px;
+  z-index: 900;
 }
 
 .tab-bar a {
@@ -119,6 +122,10 @@ a:hover {
   background: #f2f2f2;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
+  position: sticky;
+  top: 0;
+  z-index: 901;
+  white-space: nowrap;
 }
 
 .subreddit-bar a {
@@ -352,15 +359,13 @@ hr {
     width: auto;
   }
 
-  .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+  .tab-bar {
+    overflow-x: auto;
   }
 
-  .tab-bar,
   .subreddit-bar {
     overflow-x: auto;
+    white-space: nowrap;
   }
 }
 
