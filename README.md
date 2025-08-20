@@ -12,7 +12,7 @@
 2. **Sign up / log in and see my username + points**
    - As a user, I can create an account, log in/out, and see my username top-right with points (karma-like).
    - **Acceptance criteria**
-     - Sign-up: unique username + password (email optional for MVP).
+     - Sign-up: unique username + password.
      - Log in/out rounds trip correctly; username displays top-right.
      - Points displayed (sum of post/comment scores authored by the user; negative points have no consequence yet).
 3. **Create posts and discuss (threaded comments)**
