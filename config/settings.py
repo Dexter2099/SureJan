@@ -141,4 +141,6 @@ CONTENT_SECURITY_POLICY = {
     }
 }
 
+CONTENT_SECURITY_POLICY["DIRECTIVES"]["font-src"] = ["'self'", "data:"]
+
 # No ratelimit system-check silences needed
