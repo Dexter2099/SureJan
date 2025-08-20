@@ -7,7 +7,7 @@ from .models import Comment, Post, Community
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["post_type", "title", "body", "url"]
+        fields = ["post_type", "title", "body", "url", "image"]
 
     def clean(self):
         cleaned_data = super().clean()

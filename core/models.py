@@ -31,6 +31,7 @@ class Post(models.Model):
     title = models.CharField(max_length=300)
     body = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to="posts/", blank=True, null=True)
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)

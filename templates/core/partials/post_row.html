@@ -14,6 +14,9 @@
       <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
     {% endif %}
     </h2>
+    {% if post.image %}
+      <img src="{{ post.image.url }}" alt="" class="post-image">
+    {% endif %}
     <p class="meta">
       <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}/</a>
       · {{ post.author.username }}

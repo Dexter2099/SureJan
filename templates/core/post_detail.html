@@ -1,95 +1,31 @@
 {% extends "base.html" %}
 
-{% block head_extra %}
-<style>
-.comment {
-  border-left: 1px solid #e5e5e5;
-  padding-left: 8px;
-}
-.comment .author {
-  color: #3366cc;
-}
-.comment .time {
-  color: #777;
-  font-size: 11px;
-}
-.comment .actions {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  font-size: 11px;
-}
-.comment .actions li {
-  display: inline;
-  margin-right: 4px;
-}
-.comment .actions li + li:before {
-  content: "\2022";
-  color: #aaa;
-  margin-right: 4px;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<article class="thing">
-  <div class="vote">
-    <button class="up" aria-label="upvote">▲</button>
-    <div class="score">123</div>
-    <button class="down" aria-label="downvote">▼</button>
-  </div>
-  <div class="entry">
-    <h3 class="title"><a href="#">Example post title</a> <span class="domain">(example.com)</span></h3>
-    <div class="byline">submitted 5 hours ago by <a href="#">username</a></div>
-    <ul class="flat-list actions">
-      <li><a href="#">123 comments</a></li>
-      <li><a href="#">share</a></li>
-      <li><a href="#">save</a></li>
-      <li><a href="#">hide</a></li>
-      <li><a href="#">report</a></li>
-    </ul>
-  </div>
+<article class="post">
+  <h1>{{ post.title }}</h1>
+  {% if post.image %}
+    <img src="{{ post.image.url }}" alt="" class="post-image">
+  {% endif %}
+  {% if post.body %}
+    <p>{{ post.body }}</p>
+  {% endif %}
+  {% if post.url %}
+    <p><a href="{{ post.url }}">{{ post.url }}</a></p>
+  {% endif %}
 </article>
-
-<section class="comments">
-  <div class="comment" style="margin-left:0">
-    <div class="meta"><a class="author" href="#">user1</a> <span class="time">2 hours ago</span></div>
-    <div class="text">Top-level comment text goes here.</div>
-    <ul class="flat-list actions">
-      <li><a href="#">reply</a></li>
-      <li><a href="#">parent</a></li>
-      <li><a href="#">report</a></li>
-    </ul>
-
-    <div class="comment" style="margin-left:16px">
-      <div class="meta"><a class="author" href="#">user2</a> <span class="time">1 hour ago</span></div>
-      <div class="text">Nested reply comment.</div>
-      <ul class="flat-list actions">
-        <li><a href="#">reply</a></li>
-        <li><a href="#">parent</a></li>
-        <li><a href="#">report</a></li>
-      </ul>
-
-      <div class="comment" style="margin-left:16px">
-        <div class="meta"><a class="author" href="#">user3</a> <span class="time">45 minutes ago</span></div>
-        <div class="text">Another level deeper.</div>
-        <ul class="flat-list actions">
-          <li><a href="#">reply</a></li>
-          <li><a href="#">parent</a></li>
-          <li><a href="#">report</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="comment" style="margin-left:0">
-    <div class="meta"><a class="author" href="#">user4</a> <span class="time">30 minutes ago</span></div>
-    <div class="text">Another top-level comment.</div>
-    <ul class="flat-list actions">
-      <li><a href="#">reply</a></li>
-      <li><a href="#">parent</a></li>
-      <li><a href="#">report</a></li>
-    </ul>
-  </div>
-</section>
+<div id="comments">
+  {% for comment in comments %}
+    {% include "core/partials/comment.html" %}
+  {% empty %}
+    <p>No comments yet.</p>
+  {% endfor %}
+</div>
+<div>
+  <form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comments" hx-swap="beforeend">
+    {% csrf_token %}
+    {{ form.body }}
+    <button type="submit">Comment</button>
+  </form>
+</div>
 {% endblock %}
+
