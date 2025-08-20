@@ -44,22 +44,45 @@ a:hover {
 .site-header {
   background: var(--panel);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.header-main {
+.header-inner {
   max-width: 960px;
   margin: 0 auto;
-  padding: 8px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 12px;
 }
 
-.logo img {
-  display: block;
-  height: 40px;
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.brand-logo {
+  height: 32px;
   width: auto;
+  display: block;
+}
+
+.brand-text {
+  font: 700 16px/1 Verdana, Arial, sans-serif;
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+.header-nav {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
 }
 
 .user-info {
@@ -75,15 +98,10 @@ a:hover {
 }
 
 .tab-bar {
-  max-width: 960px;
-  margin: 0 auto;
   display: flex;
   gap: 4px;
   padding: 4px 6px;
   background: var(--panel);
-  position: sticky;
-  top: 32px;
-  z-index: 900;
 }
 
 .tab-bar a {
@@ -122,9 +140,6 @@ a:hover {
   background: #f2f2f2;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
-  position: sticky;
-  top: 0;
-  z-index: 901;
   white-space: nowrap;
 }
 
@@ -350,6 +365,9 @@ hr {
 
 /* Responsive --------------------------------------------------------- */
 @media (max-width: 768px) {
+  .brand-logo { height: 24px; }
+  .brand-text { display: none; }
+  .header-inner { padding: 6px 10px; }
   .layout {
     flex-direction: column;
   }
