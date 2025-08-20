@@ -2,25 +2,38 @@
    Base styles for SureJan - mimicking 2008-era old.reddit.com vibes
    ------------------------------------------------------------------ */
 
+/* CSS Variables ------------------------------------------------------ */
+:root {
+  --bg: #f6f7f8;
+  --panel: #ffffff;
+  --border: #dddddd;
+  --text: #111111;
+  --muted: #777777;
+  --link: #3366cc;
+  --link-visited: #551a8b;
+  --accent: #ff8b60; /* upvote */
+  --accent-down: #5f99cf; /* downvote */
+}
+
 /* Typography and body ------------------------------------------------ */
 body {
   margin: 0;
   padding: 0;
-  background: #f6f7f8;
+  background: var(--bg);
   font-family: Verdana, Arial, sans-serif;
   font-size: 12px;
   line-height: 1.4;
-  color: #000;
+  color: var(--text);
 }
 
 /* Link colours ------------------------------------------------------- */
 a {
-  color: #3366cc;
+  color: var(--link);
   text-decoration: none;
 }
 
 a:visited {
-  color: #551a8b;
+  color: var(--link-visited);
 }
 
 a:hover {
@@ -29,8 +42,8 @@ a:hover {
 
 /* Header ------------------------------------------------------------- */
 .site-header {
-  background: #fff;
-  border-bottom: 1px solid #ddd;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -54,11 +67,11 @@ a:hover {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: #777;
+  color: var(--muted);
 }
 
 .user-info a {
-  color: #3366cc;
+  color: var(--link);
 }
 
 .tab-bar {
@@ -67,20 +80,20 @@ a:hover {
   display: flex;
   gap: 4px;
   padding: 4px 6px;
-  background: #fff;
+  background: var(--panel);
 }
 
 .tab-bar a {
   padding: 2px 4px;
   border-bottom: 2px solid transparent;
-  color: #777;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.02em;
   font-size: 11px;
 }
 
 .tab-bar a:visited {
-  color: #777;
+  color: var(--muted);
 }
 
 .tab-bar a:hover {
@@ -89,12 +102,12 @@ a:hover {
 
 .tab-bar a.active {
   font-weight: bold;
-  color: #000;
-  border-bottom: 2px solid #3366cc;
+  color: var(--text);
+  border-bottom: 2px solid var(--link);
 }
 
 .tab-bar a.active:visited {
-  color: #000;
+  color: var(--text);
 }
 
 .tab-bar a.active:hover {
@@ -104,7 +117,7 @@ a:hover {
 /* Subreddit bar ------------------------------------------------------ */
 .subreddit-bar {
   background: #f2f2f2;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   overflow-x: auto;
 }
 
@@ -112,7 +125,7 @@ a:hover {
   display: inline-block;
   white-space: nowrap;
   padding: 4px 6px;
-  color: #3366cc;
+  color: var(--link);
 }
 
 /* Layout ------------------------------------------------------------- */
@@ -135,8 +148,8 @@ a:hover {
 /* Thing (post) card -------------------------------------------------- */
 .post-row {
   display: flex;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--panel);
+  border: 1px solid var(--border);
   padding: 8px;
   margin-bottom: 8px;
 }
@@ -194,13 +207,13 @@ a:hover {
 .vote .up:hover,
 .vote .up:active,
 .vote .up[aria-pressed="true"] {
-  color: #ff4500;
+  color: var(--accent);
 }
 
 .vote .down:hover,
 .vote .down:active,
 .vote .down[aria-pressed="true"] {
-  color: #7193ff;
+  color: var(--accent-down);
 }
 
 .post-body {
@@ -215,18 +228,18 @@ a:hover {
 
 .post-body .domain {
   margin-left: 4px;
-  color: #777;
+  color: var(--muted);
   font-size: 10px;
 }
 
 .post-body .meta {
   margin-top: 4px;
-  color: #777;
+  color: var(--muted);
   font-size: 11px;
 }
 
 .post-body .meta a {
-  color: #3366cc;
+  color: var(--link);
 }
 
 .post-body .actions {
@@ -235,7 +248,7 @@ a:hover {
 }
 
 .post-body .actions a {
-  color: #3366cc;
+  color: var(--link);
   margin-right: 4px;
   position: relative;
 }
@@ -248,9 +261,10 @@ a:hover {
 }
 
 /* Sidebar ------------------------------------------------------------ */
+
 .sidebar {
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--panel);
+  border: 1px solid var(--border);
   padding: 8px;
   font-size: 11px;
 }
@@ -258,7 +272,7 @@ a:hover {
 .sidebar h3 {
   margin-top: 0;
   font-size: 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 4px;
 }
 
@@ -273,20 +287,20 @@ a:hover {
 }
 
 .sidebar a {
-  color: #3366cc;
+  color: var(--link);
 }
 
 /* Comments ----------------------------------------------------------- */
 .comment {
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--panel);
+  border: 1px solid var(--border);
   padding: 8px;
   margin: 8px 0;
   font-size: 11px;
 }
 
 .comment .meta {
-  color: #777;
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
@@ -303,7 +317,7 @@ textarea {
 input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus {
-  border-color: #3366cc;
+  border-color: var(--link);
   outline: none;
 }
 
@@ -312,18 +326,18 @@ textarea:focus {
   padding: 2px 6px;
   border: 1px solid #ccc;
   background: #eee;
-  color: #000;
+  color: var(--text);
   cursor: pointer;
   font-size: 11px;
 }
 
 .button:hover {
-  background: #ddd;
+  background: var(--border);
 }
 
 hr {
   border: none;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   margin: 8px 0;
 }
 
