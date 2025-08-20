@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% for _ in "12345"|make_list %}
+  <article class="thing">
+    <div class="vote">
+      <button class="up" aria-label="upvote">▲</button>
+      <div class="score">123</div>
+      <button class="down" aria-label="downvote">▼</button>
+    </div>
+    <div class="entry">
+      <h3 class="title"><a href="#">Example post title</a> <span class="domain">(example.com)</span></h3>
+      <div class="byline">submitted 5 hours ago by <a href="#">username</a> to <a href="#">r/brisbane</a></div>
+      <ul class="flat-list actions">
+        <li><a href="#">123 comments</a></li>
+        <li><a href="#">share</a></li>
+        <li><a href="#">save</a></li>
+        <li><a href="#">hide</a></li>
+        <li><a href="#">report</a></li>
+      </ul>
+    </div>
+  </article>
+  {% endfor %}
+  <div class="paginator">
+    <a href="#">prev</a> | <a href="#">next</a>
+  </div>
+{% endblock %}
