@@ -25,3 +25,22 @@
     <a href="#">prev</a> | <a href="#">next</a>
   </div>
 {% endblock %}
+
+{% block sidebar %}
+  <h3>About this community</h3>
+  <p>
+    A place to share and discuss the latest stories and happenings.
+  </p>
+
+  <h4>Moderators</h4>
+  <ul style="list-style: disc; padding-left: 16px; margin: 8px 0;">
+    <li><a href="#">u/mod1</a></li>
+    <li><a href="#">u/mod2</a></li>
+  </ul>
+
+  <h4>Rules</h4>
+  <ol style="padding-left: 16px; margin: 8px 0;">
+    <li>Be respectful to others.</li>
+    <li>No spam or self-promotion.</li>
+  </ol>
+{% endblock %}
