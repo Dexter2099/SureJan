@@ -1,5 +1,14 @@
-.venv
+.git
 __pycache__/
 *.pyc
-.git
-media
+*.pyo
+*.pyd
+.env
+venv/
+.venv/
+node_modules/
+media/
+staticfiles/
+dist/
+build/
+.DS_Store
