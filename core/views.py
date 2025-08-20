@@ -18,6 +18,11 @@ from .votes import apply_vote
 from .pagination import PAGE_SIZE
 
 
+def healthz(_request):
+    """Simple health check endpoint."""
+    return HttpResponse("ok", content_type="text/plain")
+
+
 # Mapping of feed tabs to their ordering in the database.  Each ordering
 # includes ``-id`` as the final column to guarantee deterministic results.
 FEED_ORDER = {

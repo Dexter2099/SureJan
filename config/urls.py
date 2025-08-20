@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.urls import path
 
 from core import views as core_views
+from core.views import healthz
 
 
 urlpatterns = [
@@ -27,6 +28,8 @@ urlpatterns = [
     path("u/<str:username>/submitted/", core_views.user_submitted, name="user_submitted"),
     path("admin/", admin.site.urls),
 ]
+
+urlpatterns += [path("healthz", healthz, name="healthz")]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
