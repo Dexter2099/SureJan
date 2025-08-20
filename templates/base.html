@@ -1,4 +1,5 @@
-{% load static points %}
+{% load static %}
+{% load points %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,33 +14,43 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="header-main">
-      <a href="/" class="logo">
-        <img src="{% static 'img/SureJanLogo.png' %}" alt="SureJan logo">
+    <div class="container header-inner">
+      <a href="/" class="brand" aria-label="SureJan home">
+        <img
+          src="{% static 'img/SureJanLogo.png' %}"
+          alt="SureJan"
+          class="brand-logo"
+          width="200"
+          height="100"
+          decoding="async"
+        />
+        <span class="brand-text">SureJan</span>
       </a>
-      <div class="user-info">
-        {% if request.user.is_authenticated %}
-          <span class="username">{{ request.user.username }}</span>
-          <span class="points">Points: {{ request.user|get_points }}</span>
-        {% else %}
-          <a href="{% url 'admin:login' %}">login</a>
-        {% endif %}
-      </div>
+      <nav class="header-nav">
+        <div class="user-info">
+          {% if request.user.is_authenticated %}
+            <span class="username">{{ request.user.username }}</span>
+            <span class="points">Points: {{ request.user|get_points }}</span>
+          {% else %}
+            <a href="{% url 'admin:login' %}">login</a>
+          {% endif %}
+        </div>
+        <nav class="tab-bar">
+          <a href="#" class="active" aria-current="page">Best</a>
+          <a href="#">Hot</a>
+          <a href="#">New</a>
+          <a href="#">Rising</a>
+          <a href="#">Controversial</a>
+          <a href="#">Top</a>
+          <a href="#">Wiki</a>
+        </nav>
+        <nav class="subreddit-bar">
+          <a href="/r/news/">News</a>
+          <a href="/r/brisbane/">Brisbane</a>
+          <a href="#">More ▾</a>
+        </nav>
+      </nav>
     </div>
-    <nav class="tab-bar">
-      <a href="#" class="active" aria-current="page">Best</a>
-      <a href="#">Hot</a>
-      <a href="#">New</a>
-      <a href="#">Rising</a>
-      <a href="#">Controversial</a>
-      <a href="#">Top</a>
-      <a href="#">Wiki</a>
-    </nav>
-    <nav class="subreddit-bar">
-      <a href="/r/news/">News</a>
-      <a href="/r/brisbane/">Brisbane</a>
-      <a href="#">More ▾</a>
-    </nav>
   </header>
   <main class="container layout">
     <div class="feed main">
