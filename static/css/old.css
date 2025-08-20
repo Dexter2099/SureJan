@@ -27,3 +27,6 @@ a:hover{text-decoration:underline}
 .meta{color:#6a6a6a;font-size:12px;margin-top:3px}
 .thumb{width:70px;height:auto;vertical-align:middle;margin-right:6px}
 .comment{border-left:2px solid #eee;margin:8px 0 8px 10px;padding-left:8px}
+.sort-tabs ul { list-style:none; padding:0; margin:0; display:flex; gap:16px; }
+.sort-tabs a { text-decoration:none; color:#1a1a1a; }
+.sort-tabs a.active { font-weight:700; border-bottom:3px solid #2b6cb0; padding-bottom:3px; }

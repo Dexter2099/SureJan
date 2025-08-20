@@ -2,7 +2,7 @@
 {% block content %}
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
-{% include "core/partials/tab_bar.html" %}
+{% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
 <div id="feed-list">
   {% include "core/partials/post_list.html" with posts=posts %}
 </div>

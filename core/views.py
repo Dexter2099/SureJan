@@ -29,6 +29,16 @@ FEED_ORDER = {
     "top": ["-score", "-created_at", "-id"],
 }
 
+SORT_TABS = [
+    ("best", "BEST"),
+    ("hot", "HOT"),
+    ("new", "NEW"),
+    ("rising", "RISING"),
+    ("controversial", "CONTROVERSIAL"),
+    ("top", "TOP"),
+    ("wiki", "WIKI"),
+]
+
 
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
@@ -48,9 +58,10 @@ def _render_posts(request, posts, next_page, show_community=False, sort_query=""
 
 def home(request):
     """Display a feed of posts across all communities."""
-
-    tab = request.GET.get("t", "best")
-    order = FEED_ORDER.get(tab, FEED_ORDER["best"])
+    sort = request.GET.get("sort", "best")
+    if sort not in FEED_ORDER:
+        sort = "best"
+    order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
     qs = Post.objects.select_related("community", "author").order_by(*order)
@@ -60,12 +71,13 @@ def home(request):
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
 
-    sort_query = f"&t={tab}" if tab and tab != "best" else ""
+    sort_query = f"&sort={sort}" if sort and sort != "best" else ""
     context = {
         "posts": posts,
         "next_page": next_page,
         "sort_query": sort_query,
-        "tab": tab,
+        "sort": sort,
+        "sort_tabs": SORT_TABS,
     }
     if request.headers.get("HX-Request") == "true":
         return _render_posts(
@@ -76,10 +88,11 @@ def home(request):
 
 def community(request, slug):
     """Display posts for a specific community."""
-
     community = get_object_or_404(Community, slug=slug)
-    tab = request.GET.get("t", "best")
-    order = FEED_ORDER.get(tab, FEED_ORDER["best"])
+    sort = request.GET.get("sort", "best")
+    if sort not in FEED_ORDER:
+        sort = "best"
+    order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
     qs = community.posts.select_related("author").order_by(*order)
@@ -88,13 +101,15 @@ def community(request, slug):
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
 
-    sort_query = f"&t={tab}" if tab and tab != "best" else ""
+    sort_query = f"&sort={sort}" if sort and sort != "best" else ""
     context = {
         "community": community,
+        "community_slug": community.slug,
         "posts": posts,
         "next_page": next_page,
         "sort_query": sort_query,
-        "tab": tab,
+        "sort": sort,
+        "sort_tabs": SORT_TABS,
     }
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_page, sort_query=sort_query)
