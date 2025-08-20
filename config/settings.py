@@ -4,6 +4,7 @@ Django settings for config project (SureJan MVP).
 
 from pathlib import Path
 import os
+import dj_database_url
 from csp.constants import SELF, UNSAFE_INLINE  # django-csp v4
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,21 +13,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")  # override in Render env
 DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
 
-# Hosts / CSRF for Render
-ALLOWED_HOSTS = ["surejan.onrender.com", "localhost", "127.0.0.1"]
-RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# Hosts / CSRF for Fly
+APP_NAME = os.getenv("FLY_APP_NAME", "")
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
+if APP_NAME:
+    ALLOWED_HOSTS.append(f"{APP_NAME}.fly.dev")
+# allow extra hosts from env
+ALLOWED_HOSTS += [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
+CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"] + [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 
-extra_hosts = [h for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h]
-ALLOWED_HOSTS += extra_hosts
-
-CSRF_TRUSTED_ORIGINS = []
-if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS += [f"https://{RENDER_EXTERNAL_HOSTNAME}", f"http://{RENDER_EXTERNAL_HOSTNAME}"]
-CSRF_TRUSTED_ORIGINS += [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
-
-# Let Django know HTTPS is terminated at Render’s proxy
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
@@ -75,27 +70,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database: Neon in prod via env, SQLite locally
-if os.environ.get("PGHOST"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("PGDATABASE"),
-            "USER": os.environ.get("PGUSER"),
-            "PASSWORD": os.environ.get("PGPASSWORD"),
-            "HOST": os.environ.get("PGHOST"),
-            "PORT": os.environ.get("PGPORT", "5432"),
-            "CONN_MAX_AGE": 60,  # keep-alive
-            "OPTIONS": {"sslmode": "require"},
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+# Database via DATABASE_URL with SQLite fallback
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
+        conn_max_age=60,
+        ssl_require=False,
+    )
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -123,6 +105,23 @@ STORAGES = {
 }
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+INSTALLED_APPS += ["storages"]
+USE_S3 = os.getenv("USE_S3") == "1"
+if USE_S3:
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("BUCKET_NAME")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL_S3")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
+    AWS_S3_ADDRESSING_STYLE = "virtual"
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    MEDIA_URL = os.getenv(
+        "MEDIA_URL",
+        f"https://{AWS_STORAGE_BUCKET_NAME}.fly.storage.tigris.dev/",
+    )
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
