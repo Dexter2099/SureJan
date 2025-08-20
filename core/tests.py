@@ -221,3 +221,49 @@ class VoteCommentTests(TestCase):
         resp = self.client.post(url + "?v=1")
         self.assertEqual(resp.status_code, 302)
 
+
+class SortTabsTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user("bob", password="pwd")
+        self.community = Community.objects.create(
+            slug="s", name="Sample", title="Sample", created_by=self.user
+        )
+
+    def test_home_sort_tabs_active(self):
+        resp = self.client.get(reverse("home"))
+        self.assertContains(resp, 'id="sort-tabs"', count=1)
+        self.assertContains(
+            resp, '<a href="/?sort=best" class="active">BEST</a>', html=True
+        )
+        resp = self.client.get(reverse("home") + "?sort=hot")
+        self.assertContains(
+            resp, '<a href="/?sort=hot" class="active">HOT</a>', html=True
+        )
+        resp = self.client.get(reverse("home") + "?sort=new")
+        self.assertContains(
+            resp, '<a href="/?sort=new" class="active">NEW</a>', html=True
+        )
+
+    def test_community_sort_tabs_active(self):
+        url = reverse("community", args=[self.community.slug])
+        resp = self.client.get(url)
+        self.assertContains(resp, 'id="sort-tabs"', count=1)
+        self.assertContains(
+            resp,
+            f'<a href="{url}?sort=best" class="active">BEST</a>',
+            html=True,
+        )
+        resp = self.client.get(url + "?sort=hot")
+        self.assertContains(
+            resp,
+            f'<a href="{url}?sort=hot" class="active">HOT</a>',
+            html=True,
+        )
+        resp = self.client.get(url + "?sort=new")
+        self.assertContains(
+            resp,
+            f'<a href="{url}?sort=new" class="active">NEW</a>',
+            html=True,
+        )
+
