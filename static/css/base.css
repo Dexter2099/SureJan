@@ -65,20 +65,40 @@ a:hover {
   max-width: 960px;
   margin: 0 auto;
   display: flex;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: 4px;
+  padding: 4px 6px;
   background: #fff;
 }
 
 .tab-bar a {
-  padding: 4px 6px;
-  border-bottom: 1px solid #eee;
-  color: #3366cc;
+  padding: 2px 4px;
+  border-bottom: 2px solid transparent;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 11px;
+}
+
+.tab-bar a:visited {
+  color: #777;
+}
+
+.tab-bar a:hover {
+  text-decoration: underline;
 }
 
 .tab-bar a.active {
   font-weight: bold;
+  color: #000;
   border-bottom: 2px solid #3366cc;
+}
+
+.tab-bar a.active:visited {
+  color: #000;
+}
+
+.tab-bar a.active:hover {
+  text-decoration: none;
 }
 
 /* Subreddit bar ------------------------------------------------------ */
