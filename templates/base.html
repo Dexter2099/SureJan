@@ -1,48 +1,21 @@
 {% load static %}
-{% load points %}
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SureJan</title>
-  <link rel="icon" href="{% static 'favicon.ico' %}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon-16.png' %}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32.png' %}">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  {% block head_extra %}{% endblock %}
-</head>
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="site-brand">
-        <a href="/"><img src="{% static 'img/SureJanLogo.png' %}" alt="SureJan logo" class="site-logo"></a>
-        <span class="site-title">SureJan</span>
-      </div>
-      <nav class="header-nav">
-        <div class="user-info">
-          {% if request.user.is_authenticated %}
-            <span class="username">{{ request.user.username }}</span>
-            <span class="points">Points: {{ request.user|get_points }}</span>
-          {% else %}
-            <a href="{% url 'admin:login' %}">login</a>
-          {% endif %}
-        </div>
-        <nav class="subreddit-bar">
-          <a href="/r/news/">News</a>
-          <a href="/r/brisbane/">Brisbane</a>
-          <a href="#">More ▾</a>
-        </nav>
-      </nav>
-    </div>
-  </header>
-  <main class="container layout">
-    <div class="feed main">
-      {% block content %}{% endblock %}
-    </div>
-    <aside class="sidebar">
-      {% block sidebar %}{% endblock %}
-    </aside>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{% block title %}SureJan{% endblock %}</title>
+
+    <!-- Favicon(s) — match your actual files -->
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'favicon-16x16.png' %}" type="image/png" sizes="16x16">
+
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+  </body>
 </html>
+
