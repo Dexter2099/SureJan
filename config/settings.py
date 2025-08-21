@@ -1,4 +1,4 @@
-# config/settings.py
+# config/settings.py  — GMFU (Good, Minimal, Fast, Understandable)
 import os
 from pathlib import Path
 import dj_database_url
@@ -23,12 +23,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # your app(s)
     "core",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static files
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -58,26 +59,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # -----------------------------------------------------------------------------
-# Database
+# Database (robust to empty/missing env; supports PG* vars; local fallback)
 # -----------------------------------------------------------------------------
 db_url = os.environ.get("DATABASE_URL", "").strip()
 
-# Support Fly Managed Postgres (PG* vars) if DATABASE_URL isn’t provided
-pg_host = os.environ.get("PGHOST")
-pg_port = os.environ.get("PGPORT", "5432")
-pg_user = os.environ.get("PGUSER")
-pg_pass = os.environ.get("PGPASSWORD")
-pg_db   = os.environ.get("PGDATABASE")
-
-if not db_url and all([pg_host, pg_user, pg_pass, pg_db]):
-    db_url = f"postgres://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+if not db_url:
+    pg_host = os.environ.get("PGHOST")
+    pg_port = os.environ.get("PGPORT", "5432")
+    pg_user = os.environ.get("PGUSER")
+    pg_pass = os.environ.get("PGPASSWORD")
+    pg_db   = os.environ.get("PGDATABASE")
+    if all([pg_host, pg_user, pg_pass, pg_db]):
+        db_url = f"postgres://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
 
 if db_url:
     DATABASES = {
         "default": dj_database_url.parse(db_url, conn_max_age=600, ssl_require=False)
     }
 else:
-    # Fallback to SQLite so the app boots even if DB is missing
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -104,11 +103,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -----------------------------------------------------------------------------
-# Hosts / CSRF (Render + Fly)
+# Hosts / CSRF (Fly + Render) with env override for Machines health checks
 # -----------------------------------------------------------------------------
 FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
 
-ALLOWED_HOSTS = [
+DEFAULT_HOSTS = [
     "localhost", "127.0.0.1",
     "surejan.onrender.com",
     "surejan.fly.dev",
@@ -116,14 +115,26 @@ ALLOWED_HOSTS = [
     ".fly.dev",
 ]
 
+env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
+if env_hosts:
+    if env_hosts == "*":
+        ALLOWED_HOSTS = ["*"]
+    else:
+        ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(",") if h.strip()]
+else:
+    ALLOWED_HOSTS = DEFAULT_HOSTS
+
 CSRF_TRUSTED_ORIGINS = [
     "https://surejan.onrender.com",
     "https://surejan.fly.dev",
     f"https://{FLY_APP_NAME}.fly.dev",
 ]
+extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
+if extra_csrf:
+    CSRF_TRUSTED_ORIGINS += [o.strip() for o in extra_csrf.split(",") if o.strip()]
 
+# Respect Fly's proxy for secure detection
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
