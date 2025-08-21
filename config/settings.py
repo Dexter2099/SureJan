@@ -1,40 +1,47 @@
 import os
 from pathlib import Path
-import dj_database_url
+from datetime import timedelta
+
+import dj_database_url  # make sure this is in requirements.txt
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-secret-key")
-DEBUG = os.environ.get("DEBUG", "False") == "True"
-ALLOWED_HOSTS = ["*"]
+# -----------------------------------------------------------------------------
+# Core
+# -----------------------------------------------------------------------------
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
+DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
+
+LANGUAGE_CODE = "en-au"
+TIME_ZONE = "Australia/Brisbane"
+USE_I18N = True
+USE_TZ = True
 
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_htmx",
-    "django_ratelimit",
-    "csp",
+    # Your app(s)
     "core",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise must be just after SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
-    "csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
 
 TEMPLATES = [
     {
@@ -52,43 +59,79 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = "config.wsgi.application"
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+# Uses DATABASE_URL if present (e.g., from Fly/Postgres/Neon); falls back to SQLite for local dev.
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
+        env="DATABASE_URL",
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=False,
     )
 }
 
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 10}}
-]
-
-LANGUAGE_CODE = "en-au"
-TIME_ZONE = "Australia/Brisbane"
-USE_I18N = True
-USE_TZ = True
-
+# -----------------------------------------------------------------------------
+# Static / Media
+# -----------------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# WhiteNoise: serve compressed, cached static files
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication redirects
-LOGIN_URL = "/admin/login/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+# -----------------------------------------------------------------------------
+# Security / Proxy / Hosts (Render + Fly)
+# -----------------------------------------------------------------------------
+# What the app is called on Fly; helps build hostnames below.
+FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
 
-# Content Security Policy (relaxed for dev, tighten later)
-CSP_DIRECTIVES = {
-    "default-src": ("'self'",),
-    "style-src": ("'self'", "'unsafe-inline'"),
-    "img-src": ("'self'", "data:"),
-    "script-src": ("'self'",),
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "surejan.onrender.com",
+    "surejan.fly.dev",
+    f"{FLY_APP_NAME}.fly.dev",
+    ".fly.dev",  # wildcard for preview hosts if you ever add them
+]
+
+# Trust both Render and Fly for CSRF (https only)
+CSRF_TRUSTED_ORIGINS = [
+    "https://surejan.onrender.com",
+    "https://surejan.fly.dev",
+    f"https://{FLY_APP_NAME}.fly.dev",
+]
+
+# When behind a proxy/edge (Fly), respect X-Forwarded-Proto for secure cookies/redirects
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# -----------------------------------------------------------------------------
+# Logging (kept simple; adjust as needed)
+# -----------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
 }
 
-SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
+# -----------------------------------------------------------------------------
+# Admin login redirects (optional, keep if you were using these)
+# -----------------------------------------------------------------------------
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
