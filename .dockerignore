@@ -12,5 +12,3 @@ staticfiles/
 dist/
 build/
 .DS_Store
-.tool-versions
-.mise.toml

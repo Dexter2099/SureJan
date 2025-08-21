@@ -1,6 +1,9 @@
 app = "surejan"
 primary_region = "syd"
 
+[build]
+  dockerfile = "Dockerfile"
+
 [env]
   PORT = "8000"
 
@@ -26,6 +29,3 @@ primary_region = "syd"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 256
-
-[build]
-  dockerfile = "Dockerfile"
