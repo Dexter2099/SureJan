@@ -1,21 +1,18 @@
-{% load static %}
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SureJan</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 
-    <title>{% block title %}SureJan{% endblock %}</title>
-
-    <!-- Favicon(s) — match your actual files -->
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
-    <link rel="icon" href="{% static 'favicon-16x16.png' %}" type="image/png" sizes="16x16">
-
-    {% block head_extra %}{% endblock %}
-  </head>
-  <body>
-    {% block content %}{% endblock %}
-    {% block scripts %}{% endblock %}
-  </body>
+  {% load static %}
+  <!-- Minimal favicon fix -->
+  <link rel="icon" type="image/png" href="{% static 'favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'favicon-16x16.png' %}">
+</head>
+<body>
+  {% block content %}{% endblock %}
+</body>
 </html>
 

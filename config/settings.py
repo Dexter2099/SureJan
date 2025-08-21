@@ -115,6 +115,10 @@ STORAGES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Temporary guard to avoid 500s from missing manifest entries while iterating.
+# REMOVE once favicon/static references are correct and collectstatic is clean.
+WHITENOISE_MANIFEST_STRICT = False
+
 # Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
 USE_S3_MEDIA = os.environ.get("DJANGO_USE_S3_MEDIA", "").lower() in ("1", "true", "yes")
 if USE_S3_MEDIA:
