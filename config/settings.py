@@ -107,15 +107,17 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Django 4.2+ STORAGES API
+# TEMPORARY: use non-manifest to avoid 500s while we fix favicon paths
 STORAGES = {
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
     # default (MEDIA) set below; remains filesystem unless S3 is enabled
 }
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Temporary: avoid 500s if a file is missing in the manifest during deploys
+# WhiteNoise temporary guard: prevents 500s if a file is missing from manifest
+# REMOVE once logs are clean and favicon/static references are correct
 WHITENOISE_MANIFEST_STRICT = False
 
 # Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
