@@ -1,0 +1,31 @@
+app = "surejan"
+primary_region = "syd"
+
+[env]
+  PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    timeout = "5s"
+    method = "GET"
+    path = "/"
+
+[processes]
+  app = "gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 90"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+[build]
+  dockerfile = "Dockerfile"

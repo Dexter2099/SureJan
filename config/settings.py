@@ -142,3 +142,5 @@ CONTENT_SECURITY_POLICY = {
 }
 
 # No ratelimit system-check silences needed
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
+CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
