@@ -1,7 +1,5 @@
 # ---------- Base ----------
 FROM python:3.12-slim
-
-# Build arg to bust cache for collectstatic
 ARG BUILD_REV=dev
 ENV BUILD_REV=${BUILD_REV}
 
