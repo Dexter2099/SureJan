@@ -115,8 +115,7 @@ STORAGES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# WhiteNoise temporary guard: prevents 500s if a file is missing from manifest
-# REMOVE once logs are clean and favicon/static references are correct
+# Temporary: avoid 500s if a file is missing in the manifest during deploys
 WHITENOISE_MANIFEST_STRICT = False
 
 # Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
