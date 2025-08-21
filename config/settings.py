@@ -115,27 +115,21 @@ STORAGES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Temporary guard to avoid 500s from missing manifest entries while iterating.
-# REMOVE once favicon/static references are correct and collectstatic is clean.
+# WhiteNoise temporary guard: prevents 500s if a file is missing from manifest
+# REMOVE once logs are clean and favicon/static references are correct
 WHITENOISE_MANIFEST_STRICT = False
 
 # Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
 USE_S3_MEDIA = os.environ.get("DJANGO_USE_S3_MEDIA", "").lower() in ("1", "true", "yes")
 if USE_S3_MEDIA:
-    # Only add 'storages' if actually enabled (avoids import errors when package isn't installed yet)
     INSTALLED_APPS.append("storages")
-
     AWS_STORAGE_BUCKET_NAME = os.environ["BUCKET_NAME"]
     AWS_S3_ENDPOINT_URL = os.environ.get("AWS_ENDPOINT_URL_S3")  # e.g. https://fly.storage.tigris.dev
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_ADDRESSING_STYLE = "virtual"
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    # For public buckets on Tigris:
     AWS_DEFAULT_ACL = "public-read"
-
-    STORAGES["default"] = {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-    }
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}
 else:
     STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
 
@@ -169,7 +163,6 @@ _extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
 if _extra_csrf:
     CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_csrf.split(",") if o.strip()]
 
-# Respect Fly proxy for secure detection
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
