@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  {% load static %}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SureJan</title>
@@ -8,8 +9,6 @@
   <!-- HTMX -->
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 
-  {% load static %}
-  <!-- ✅ PNG-only favicon reference -->
   <link rel="icon" type="image/png" href="{% static 'site/favicon-16x16.png' %}">
   <link rel="apple-touch-icon" href="{% static 'site/favicon-16x16.png' %}">
 </head>
