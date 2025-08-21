@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>SureJan</h1>
-  {% include "core/partials/tab_bar.html" %}
+  {% include "partials/sort_tabs.html" with active_sort=sort sort_tabs=sort_tabs %}
   <div id="feed-list">
     {% include "core/partials/post_list.html" with posts=posts %}
   </div>

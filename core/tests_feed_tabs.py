@@ -36,7 +36,7 @@ class FeedTabOrderTests(TestCase):
         self.new.refresh_from_db()
 
     def _first_post(self, tab):
-        resp = self.client.get(reverse("home") + f"?t={tab}")
+        resp = self.client.get(reverse("home") + f"?sort={tab}")
         return resp.context["posts"][0]
 
     def test_best_order(self):
@@ -85,7 +85,7 @@ class CommunityFeedTabOrderTests(TestCase):
         self.new.refresh_from_db()
 
     def _first_post(self, tab):
-        url = reverse("community", args=[self.community.slug]) + f"?t={tab}"
+        url = reverse("community", args=[self.community.slug]) + f"?sort={tab}"
         resp = self.client.get(url)
         return resp.context["posts"][0]
 

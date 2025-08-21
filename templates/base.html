@@ -15,17 +15,10 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="/" class="brand" aria-label="SureJan home">
-        <img
-          src="{% static 'img/SureJanLogo.png' %}"
-          alt="SureJan"
-          class="brand-logo"
-          width="200"
-          height="100"
-          decoding="async"
-        />
-        <span class="brand-text">SureJan</span>
-      </a>
+      <div class="site-brand">
+        <a href="/"><img src="{% static 'img/SureJanLogo.png' %}" alt="SureJan logo" class="site-logo"></a>
+        <span class="site-title">SureJan</span>
+      </div>
       <nav class="header-nav">
         <div class="user-info">
           {% if request.user.is_authenticated %}
@@ -35,15 +28,6 @@
             <a href="{% url 'admin:login' %}">login</a>
           {% endif %}
         </div>
-        <nav class="tab-bar">
-          <a href="#" class="active" aria-current="page">Best</a>
-          <a href="#">Hot</a>
-          <a href="#">New</a>
-          <a href="#">Rising</a>
-          <a href="#">Controversial</a>
-          <a href="#">Top</a>
-          <a href="#">Wiki</a>
-        </nav>
         <nav class="subreddit-bar">
           <a href="/r/news/">News</a>
           <a href="/r/brisbane/">Brisbane</a>
