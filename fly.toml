@@ -1,3 +1,5 @@
+# fly.toml
+
 app = "surejan"
 primary_region = "syd"
 
@@ -20,7 +22,7 @@ primary_region = "syd"
     interval = "30s"
     timeout = "5s"
     method = "GET"
-    path = "/"
+    path = "/healthz"
 
 [processes]
   app = "gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 90"
@@ -28,4 +30,4 @@ primary_region = "syd"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 256
+  memory_mb = 512
