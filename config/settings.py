@@ -1,8 +1,7 @@
+# config/settings.py
 import os
 from pathlib import Path
-from datetime import timedelta
-
-import dj_database_url  # make sure this is in requirements.txt
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -18,21 +17,18 @@ USE_I18N = True
 USE_TZ = True
 
 INSTALLED_APPS = [
-    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Your app(s)
     "core",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise must be just after SecurityMiddleware
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -64,14 +60,30 @@ WSGI_APPLICATION = "config.wsgi.application"
 # -----------------------------------------------------------------------------
 # Database
 # -----------------------------------------------------------------------------
-# Uses DATABASE_URL if present (e.g., from Fly/Postgres/Neon); falls back to SQLite for local dev.
-DATABASES = {
-    "default": dj_database_url.config(
-        env="DATABASE_URL",
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
-}
+db_url = os.environ.get("DATABASE_URL", "").strip()
+
+# Support Fly Managed Postgres (PG* vars) if DATABASE_URL isn’t provided
+pg_host = os.environ.get("PGHOST")
+pg_port = os.environ.get("PGPORT", "5432")
+pg_user = os.environ.get("PGUSER")
+pg_pass = os.environ.get("PGPASSWORD")
+pg_db   = os.environ.get("PGDATABASE")
+
+if not db_url and all([pg_host, pg_user, pg_pass, pg_db]):
+    db_url = f"postgres://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+
+if db_url:
+    DATABASES = {
+        "default": dj_database_url.parse(db_url, conn_max_age=600, ssl_require=False)
+    }
+else:
+    # Fallback to SQLite so the app boots even if DB is missing
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # -----------------------------------------------------------------------------
 # Static / Media
@@ -80,11 +92,10 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise: serve compressed, cached static files
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
+    }
 }
 
 MEDIA_URL = "/media/"
@@ -93,35 +104,31 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -----------------------------------------------------------------------------
-# Security / Proxy / Hosts (Render + Fly)
+# Hosts / CSRF (Render + Fly)
 # -----------------------------------------------------------------------------
-# What the app is called on Fly; helps build hostnames below.
 FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
+    "localhost", "127.0.0.1",
     "surejan.onrender.com",
     "surejan.fly.dev",
     f"{FLY_APP_NAME}.fly.dev",
-    ".fly.dev",  # wildcard for preview hosts if you ever add them
+    ".fly.dev",
 ]
 
-# Trust both Render and Fly for CSRF (https only)
 CSRF_TRUSTED_ORIGINS = [
     "https://surejan.onrender.com",
     "https://surejan.fly.dev",
     f"https://{FLY_APP_NAME}.fly.dev",
 ]
 
-# When behind a proxy/edge (Fly), respect X-Forwarded-Proto for secure cookies/redirects
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 # -----------------------------------------------------------------------------
-# Logging (kept simple; adjust as needed)
+# Logging
 # -----------------------------------------------------------------------------
 LOGGING = {
     "version": 1,
@@ -131,7 +138,7 @@ LOGGING = {
 }
 
 # -----------------------------------------------------------------------------
-# Admin login redirects (optional, keep if you were using these)
+# Auth redirects
 # -----------------------------------------------------------------------------
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
