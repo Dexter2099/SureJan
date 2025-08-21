@@ -14,13 +14,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")  # override in Rende
 DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
 
 # Hosts / CSRF for Fly
-APP_NAME = os.getenv("FLY_APP_NAME", "")
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".fly.dev"]
-if APP_NAME:
-    ALLOWED_HOSTS.append(f"{APP_NAME}.fly.dev")
-# allow extra hosts from env
-ALLOWED_HOSTS += [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
-CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"] + [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+CSRF_TRUSTED_ORIGINS = ["https://*.fly.dev"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
