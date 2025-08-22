@@ -7,6 +7,10 @@ primary_region = "syd"
 
 [env]
   PORT = "8000"
+  FLY_APP_NAME = "surejan"
+
+[deploy]
+  release_command = "python manage.py migrate --noinput"
 
 [http_service]
   internal_port = 8000
@@ -23,16 +27,8 @@ primary_region = "syd"
     method = "GET"
     path = "/healthz"
 
-# VM sizing (bump memory to 1024 if you see OOM or heavy traffic)
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 512
-  
-[deploy]
-  release_command = "python manage.py migrate --noinput"
-
-[env]
-  PORT = "8000"
-  FLY_APP_NAME = "surejan"   # optional, helps settings build hostnames
 
