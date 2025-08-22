@@ -13,15 +13,14 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body>
-    <header class="site-header" style="display:flex; align-items:center; gap:12px; padding:8px 12px; border-bottom:1px solid #ccc;">
-      <!-- ✅ Logo on the left -->
-      <a href="/" class="site-logo">
-        <img src="{% static 'SureJanLogo.png' %}" alt="SureJan Logo" style="height:40px; width:auto;">
-      </a>
-
-      <!-- Site name (clickable) -->
-      <div class="site-brand" style="font-weight:bold; font-size:24px;">
-        <a href="/" style="text-decoration:none; color:inherit;">SureJan</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="site-brand">
+          <a href="/">
+            <img src="{% static 'SureJanLogo.png' %}" alt="SureJan Logo" class="site-logo">
+          </a>
+          <a href="/" class="site-title">SureJan</a>
+        </div>
       </div>
     </header>
 
