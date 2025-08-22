@@ -25,9 +25,19 @@ RUN pip install --upgrade pip wheel && \
 # Copy the project
 COPY . .
 
-# Collect static at build-time (WhiteNoise serves them at runtime)
-# If DEBUG ever on locally, this still succeeds; in CI it will just build the manifest.
-RUN python manage.py collectstatic --noinput || true
+# After installing deps and copying source
+RUN python manage.py collectstatic --noinput --clear
+
+# Fail the build if static pipeline would break
+RUN python - <<'PY'
+import os
+from django.conf import settings
+from django import setup
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+setup()
+from django.templatetags.static import static
+assert static("favicon.ico"), "favicon.ico not found in collected static"
+PY
 
 # Optional: run as a non-root user for safety
 RUN useradd -ms /bin/bash appuser && chown -R appuser:appuser /app
