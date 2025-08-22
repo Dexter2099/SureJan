@@ -25,10 +25,10 @@ RUN pip install --upgrade pip wheel && \
 # Copy the project
 COPY . .
 
-# After installing deps and copying source
+# Collect static at build-time (fail fast if broken)
 RUN DJANGO_COLLECTSTATIC=1 python manage.py collectstatic --noinput --clear
 
-# Fail the build if static pipeline would break
+# Optional static pipeline check (example: ensure favicon exists)
 RUN python - <<'PY'
 import os
 from django.conf import settings
@@ -48,9 +48,6 @@ USER appuser
 EXPOSE 8000
 
 # Keep Gunicorn modest for a 512 MB machine
-# - 2 workers keeps memory usage in check
-# - 90s timeout handles slow startups without hanging
-# - log to stdout/stderr so `flyctl logs` shows issues
 CMD ["gunicorn", "config.wsgi:application", \
      "--bind", "0.0.0.0:8000", \
      "--workers", "2", \
