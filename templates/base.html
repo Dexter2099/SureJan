@@ -6,14 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}SureJan{% endblock %}</title>
 
-    <!-- Styles (only files that actually exist in static/) -->
+    <!-- Styles -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
     {% block head_extra %}{% endblock %}
+
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body>
-    {% block content %}{% endblock %}
+    <header class="site-header" style="display:flex; align-items:center; gap:12px; padding:8px 12px; border-bottom:1px solid #ccc;">
+      <!-- ✅ Logo on the left -->
+      <a href="/" class="site-logo">
+        <img src="{% static 'SureJanLogo.png' %}" alt="SureJan Logo" style="height:40px; width:auto;">
+      </a>
+
+      <!-- Site name (clickable) -->
+      <div class="site-brand" style="font-weight:bold; font-size:24px;">
+        <a href="/" style="text-decoration:none; color:inherit;">SureJan</a>
+      </div>
+    </header>
+
+    <main class="container" style="max-width:980px; margin:16px auto;">
+      {% block content %}{% endblock %}
+    </main>
+
     {% block scripts %}{% endblock %}
   </body>
 </html>
