@@ -6,11 +6,13 @@ import dj_database_url  # make sure this is in requirements.txt
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+IS_COLLECTSTATIC = os.getenv("DJANGO_COLLECTSTATIC") == "1"
+DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
+
 # -----------------------------------------------------------------------------
 # Core
 # -----------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
-DEBUG = os.environ.get("DEBUG", "0").lower() in ("1", "true", "yes")
 
 LANGUAGE_CODE = "en-au"
 TIME_ZONE = "Australia/Brisbane"
@@ -62,19 +64,19 @@ TEMPLATES = [
 # -----------------------------------------------------------------------------
 # Database (Postgres via DATABASE_URL; safe local fallback only in DEBUG)
 # -----------------------------------------------------------------------------
-db_url = os.environ.get("DATABASE_URL", "").strip()
+db_url = os.getenv("DATABASE_URL", "").strip()
 
 # Optional PG* var support (if you ever set PGHOST/PGUSER/etc.)
 if not db_url:
-    pg_host = os.environ.get("PGHOST")
-    pg_port = os.environ.get("PGPORT", "5432")
-    pg_user = os.environ.get("PGUSER")
-    pg_pass = os.environ.get("PGPASSWORD")
-    pg_db   = os.environ.get("PGDATABASE")
+    pg_host = os.getenv("PGHOST")
+    pg_port = os.getenv("PGPORT", "5432")
+    pg_user = os.getenv("PGUSER")
+    pg_pass = os.getenv("PGPASSWORD")
+    pg_db   = os.getenv("PGDATABASE")
     if all([pg_host, pg_user, pg_pass, pg_db]):
         db_url = f"postgres://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
 
-if not DEBUG and not db_url:
+if not DEBUG and not IS_COLLECTSTATIC and not db_url:
     raise RuntimeError("DATABASE_URL must be set in production")
 
 if db_url:
@@ -96,7 +98,8 @@ else:
 
 # Optional connection options
 DATABASES["default"].setdefault("OPTIONS", {})
-DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 30)
+if DATABASES["default"]["ENGINE"] != "django.db.backends.sqlite3":
+    DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 30)
 
 # -----------------------------------------------------------------------------
 # Static / Media
