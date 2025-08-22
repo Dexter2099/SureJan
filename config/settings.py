@@ -31,8 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise just after SecurityMiddleware
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static from image
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -103,22 +102,19 @@ DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 30)
 # Static / Media
 # -----------------------------------------------------------------------------
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]  # keep if you have app-level assets
 
-# Django 4.2+ STORAGES API
-# TEMPORARY: use non-manifest to avoid 500s while we fix favicon paths
+# WhiteNoise with hashed filenames; fail at build if missing
 STORAGES = {
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
-    # default (MEDIA) set below; remains filesystem unless S3 is enabled
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    }
 }
 
+# Media (unchanged)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
-# WhiteNoise temporary guard: prevents 500s if a file is missing from manifest
-# REMOVE once logs are clean and favicon/static references are correct
-WHITENOISE_MANIFEST_STRICT = False
 
 # Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
 USE_S3_MEDIA = os.environ.get("DJANGO_USE_S3_MEDIA", "").lower() in ("1", "true", "yes")
