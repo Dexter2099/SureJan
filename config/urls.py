@@ -1,11 +1,15 @@
 # config/urls.py
 from django.conf import settings
-from django.conf.urls.static import static
+from django.conf.urls.static import static as serve_static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include
+from django.views.generic.base import RedirectView
+from django.templatetags.static import static
 
 urlpatterns = [
+    path("favicon.ico", RedirectView.as_view(url=static("favicon.ico"), permanent=True)),
+
     # Admin
     path("admin/", admin.site.urls),
 
@@ -18,5 +22,5 @@ urlpatterns = [
 
 # Serve user-uploaded media & collected static only in development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += serve_static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += serve_static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
