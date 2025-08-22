@@ -28,3 +28,11 @@ primary_region = "syd"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 512
+  
+[deploy]
+  release_command = "python manage.py migrate --noinput"
+
+[env]
+  PORT = "8000"
+  FLY_APP_NAME = "surejan"   # optional, helps settings build hostnames
+
