@@ -1,19 +1,19 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
-<head>
-  {% load static %}
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SureJan</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}SureJan{% endblock %}</title>
 
-  <!-- ✅ Add your stylesheet(s) -->
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <!-- add more as needed, e.g. -->
-  <!-- <link rel="stylesheet" href="{% static 'css/other.css' %}"> -->
+    <!-- Styles (only files that actually exist in static/) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
-  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-</head>
-<body>
-  {% block content %}{% endblock %}
-</body>
+    {% block head_extra %}{% endblock %}
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  </head>
+  <body>
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+  </body>
 </html>
