@@ -8,7 +8,7 @@ from django.views.generic.base import RedirectView
 from django.templatetags.static import static
 
 urlpatterns = [
-    path("favicon.ico", RedirectView.as_view(url=static("favicon.ico"), permanent=True)),
+    path("favicon.ico", RedirectView.as_view(url=static("favicon.ico"), permanent=False)),
 
     # Admin
     path("admin/", admin.site.urls),

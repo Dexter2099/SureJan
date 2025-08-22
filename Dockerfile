@@ -26,7 +26,7 @@ RUN pip install --upgrade pip wheel && \
 COPY . .
 
 # After installing deps and copying source
-RUN python manage.py collectstatic --noinput --clear
+RUN DJANGO_COLLECTSTATIC=1 python manage.py collectstatic --noinput --clear
 
 # Fail the build if static pipeline would break
 RUN python - <<'PY'
@@ -48,14 +48,14 @@ USER appuser
 EXPOSE 8000
 
 # Keep Gunicorn modest for a 512 MB machine
-# - 2 workers + 2 threads gives decent concurrency without OOM
-# - timeouts avoid hung startups blocking health checks
+# - 2 workers keeps memory usage in check
+# - 90s timeout handles slow startups without hanging
 # - log to stdout/stderr so `flyctl logs` shows issues
 CMD ["gunicorn", "config.wsgi:application", \
      "--bind", "0.0.0.0:8000", \
      "--workers", "2", \
      "--threads", "2", \
-     "--timeout", "60", \
+     "--timeout", "90", \
      "--graceful-timeout", "30", \
      "--max-requests", "1000", \
      "--max-requests-jitter", "100", \
