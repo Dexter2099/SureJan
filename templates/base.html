@@ -1,17 +1,23 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
-  {% load static %}
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
   <title>SureJan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- HTMX -->
-  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-
-  <link rel="icon" href="{% static 'favicon.ico' %}">
+  <!-- Canonical favicons -->
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'favicon-16x16.png' %}" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'SureJanLogo.png' %}">
 </head>
 <body>
+  <nav>
+    <a href="/">SureJan</a>
+    {% if request.user.is_staff %}
+      <a href="{% url 'community_create' %}">Create community</a>
+    {% endif %}
+  </nav>
   {% block content %}{% endblock %}
 </body>
 </html>
