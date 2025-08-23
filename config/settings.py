@@ -147,9 +147,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # -----------------------------------------------------------------------------
 # Hosts / CSRF
 # -----------------------------------------------------------------------------
-ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
+_raw = os.getenv("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = [h.strip() for h in _raw.split(",") if h.strip()]
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["surejan.fly.dev"]  # safe default
 
-# Keep CSRF tight even if ALLOWED_HOSTS is broad
+# keep CSRF tight even if ALLOWED_HOSTS includes '*'
 CSRF_TRUSTED_ORIGINS = [
     "https://surejan.fly.dev",
     "https://www.surejan.com",
