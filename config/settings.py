@@ -147,6 +147,11 @@ STORAGES = {
     }
 }
 
+if os.getenv("DJANGO_TESTS") in ("1", "true", "True"):
+    STORAGES["staticfiles"] = {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+    }
+
 # Temporary guard to avoid 500s from missing manifest entries while iterating.
 # REMOVE once favicon/static references are correct and collectstatic is clean.
 WHITENOISE_MANIFEST_STRICT = False

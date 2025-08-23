@@ -1,0 +1,463 @@
+/* ---------------------------------------------------------------------
+   Base styles for SureJan - mimicking 2008-era old.reddit.com vibes
+   ------------------------------------------------------------------ */
+
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/static/fonts/VCR-OSD-Mono.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables ------------------------------------------------------ */
+:root {
+  --bg: #f6f7f8;
+  --panel: #ffffff;
+  --border: #dddddd;
+  --text: #111111;
+  --muted: #777777;
+  --link: #3366cc;
+  --link-visited: #551a8b;
+  --accent: #ff8b60; /* upvote */
+  --accent-down: #5f99cf; /* downvote */
+  --brand-font: 'VCR OSD Mono', monospace;
+}
+
+/* Typography and body ------------------------------------------------ */
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* Link colours ------------------------------------------------------- */
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--link-visited);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Header ------------------------------------------------------------- */
+.site-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+}
+
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-logo {
+  height: 108px;
+  width: auto;
+  display: block;
+}
+
+.site-title, h1, .page-title {
+  font-family: var(--brand-font);
+  letter-spacing: 0.25px;
+}
+
+.site-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+.header-nav {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.user-info a {
+  color: var(--link);
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--panel);
+}
+
+.tab-bar a {
+  padding: 2px 4px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 11px;
+}
+
+.tab-bar a:visited {
+  color: var(--muted);
+}
+
+.tab-bar a:hover {
+  text-decoration: underline;
+}
+
+.tab-bar a.active {
+  font-weight: bold;
+  color: var(--text);
+  border-bottom: 2px solid var(--link);
+}
+
+.tab-bar a.active:visited {
+  color: var(--text);
+}
+
+.tab-bar a.active:hover {
+  text-decoration: none;
+}
+
+/* Subreddit bar ------------------------------------------------------ */
+.subreddit-bar {
+  background: #f2f2f2;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.subreddit-bar a {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 4px 6px;
+  color: var(--link);
+}
+
+/* Sort tabs ---------------------------------------------------------- */
+.sort-tabs ul {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sort-tabs li {
+  display: inline;
+}
+
+.sort-tabs a {
+  text-decoration: none;
+  color: #1a1a1a;
+}
+
+.sort-tabs a.active {
+  font-weight: bold;
+  border-bottom: 2px solid #2b6cb0;
+  padding-bottom: 3px;
+}
+
+/* Layout ------------------------------------------------------------- */
+.layout {
+  max-width: 960px;
+  margin: 16px auto;
+  display: flex;
+  gap: 16px;
+}
+
+.main {
+  flex: 1;
+  max-width: 640px;
+}
+
+.sidebar {
+  flex: 0 0 300px;
+}
+
+/* Thing (post) card -------------------------------------------------- */
+.post-row {
+  display: flex;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.vote-col {
+  width: 40px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.vote-col button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 0;
+  font-size: 16px;
+}
+
+.vote-col span {
+  display: block;
+  margin: 4px 0;
+  font-weight: bold;
+}
+
+.vote {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.vote button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vote .score {
+  font-weight: bold;
+  font-size: 11px;
+  text-align: center;
+}
+
+.vote .up:hover,
+.vote .up:active,
+.vote .up[aria-pressed="true"] {
+  color: var(--accent);
+}
+
+.vote .down:hover,
+.vote .down:active,
+.vote .down[aria-pressed="true"] {
+  color: var(--accent-down);
+}
+
+.post-body {
+  flex: 1;
+}
+
+.post-body h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.post-body .domain {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.post-body .meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.post-body .meta a {
+  color: var(--link);
+}
+
+.post-body .actions {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.post-body .actions a {
+  color: var(--link);
+  margin-right: 4px;
+  position: relative;
+}
+
+.post-body .actions a + a:before {
+  content: "\2022";
+  color: #aaa;
+  position: absolute;
+  left: -6px;
+}
+
+/* Sidebar ------------------------------------------------------------ */
+
+.sidebar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 8px;
+  font-size: 11px;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.sidebar li {
+  margin: 4px 0;
+}
+
+.sidebar a {
+  color: var(--link);
+}
+
+/* Comments ----------------------------------------------------------- */
+.comment {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 8px;
+  margin: 8px 0;
+  font-size: 11px;
+}
+
+.comment .meta {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+/* Forms -------------------------------------------------------------- */
+input[type="text"],
+input[type="password"],
+textarea {
+  border: 1px solid #ccc;
+  padding: 4px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--link);
+  outline: none;
+}
+
+/* Misc --------------------------------------------------------------- */
+.button {
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  background: #eee;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.button:hover {
+  background: var(--border);
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  margin: 8px 0;
+}
+
+/* Responsive --------------------------------------------------------- */
+@media (max-width: 768px) {
+  .site-logo { height: 24px; }
+  .site-title { display: none; }
+  .header-inner { padding: 6px 10px; }
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: 1 1 auto;
+    width: auto;
+  }
+
+  .tab-bar {
+    overflow-x: auto;
+  }
+
+  .subreddit-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Post images: responsive + bounded */
+.post-image {
+  display: block;
+  max-width: 100%;
+  height: auto;         /* preserve aspect ratio */
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+/* Tighter in feed cards so they don’t eat the page */
+.feed .post-image {
+  width: 100%;
+  max-height: 360px;    /* tweak: 300–480px depending on taste */
+  object-fit: cover;    /* crops gracefully to the box */
+}
+
+/* Roomier on the post detail page */
+.post .post-image {
+  width: 100%;
+  max-height: 640px;    /* show more of the image on detail */
+  object-fit: contain;  /* avoid cropping on detail view */
+}
+
+@media (max-width: 768px) {
+  .feed .post-image { max-height: 240px; }
+  .post .post-image { max-height: 480px; }
+}
+
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
