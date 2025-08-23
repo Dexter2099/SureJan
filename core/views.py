@@ -1,6 +1,9 @@
 """Core application views."""
 
+from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django_ratelimit.decorators import ratelimit as dratelimit, is_ratelimited
@@ -10,10 +13,10 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.db.models import F
+from django import forms
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post
-from .ratelimit import ratelimit
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 
@@ -21,6 +24,32 @@ from .pagination import PAGE_SIZE
 def healthz(_request):
     """Simple health check endpoint."""
     return HttpResponse("ok", content_type="text/plain")
+
+
+class SignupForm(forms.ModelForm):
+    """Minimal signup form with username and password."""
+
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = get_user_model()
+        fields = ["username", "password"]
+
+
+def signup(request):
+    """Create a new user account and log them in."""
+
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            login(request, user)
+            return redirect("home")
+    else:
+        form = SignupForm()
+    return render(request, "registration/signup.html", {"form": form})
 
 
 # Mapping of feed tabs to their ordering in the database.  Each ordering
@@ -122,19 +151,25 @@ def community(request, slug):
 
 
 @login_required
-@ratelimit(action="post", limit=3)
+@require_http_methods(["GET", "POST"])
+@dratelimit(key="user", rate="30/m", method=["POST"], block=False)
 def submit_post(request, slug):
     """Submit a new post to a community."""
 
     community = get_object_or_404(Community, slug=slug)
 
     if request.method == "POST":
+        if getattr(request, "limited", False):
+            resp = HttpResponse("Too many requests", status=429)
+            resp.headers["X-RateLimit-Triggered"] = "1"
+            return resp
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.community = community
             post.author = request.user
             post.save()
+            messages.success(request, "Post submitted")
             return redirect("community", slug=community.slug)
     else:
         form = PostForm()
@@ -154,27 +189,23 @@ def post_detail(request, slug, post_id, post_slug):
 
 
 @login_required
-@require_http_methods(["GET", "POST"])
-@ratelimit(action="comment", limit=10)
+@require_POST
+@dratelimit(key="user", rate="30/m", method=["POST"], block=False)
 def comment_reply(request, post_id):
-    """Reply to a post or comment or render the reply form."""
+    """Create a new comment on a post or comment."""
+
+    if getattr(request, "limited", False):
+        if request.headers.get("HX-Request") == "true":
+            html = render_to_string(
+                "core/partials/ratelimit.html", {"action": "comment"}, request=request
+            )
+            resp = HttpResponse(html, status=429)
+        else:
+            resp = HttpResponse("Too many requests", status=429)
+        resp.headers["X-RateLimit-Triggered"] = "1"
+        return resp
 
     post = get_object_or_404(Post, pk=post_id)
-
-    if request.method == "GET":
-        if request.headers.get("HX-Request") != "true":
-            return HttpResponseBadRequest("Invalid request")
-        parent_id = request.GET.get("parent_id")
-        if not parent_id:
-            return HttpResponseBadRequest("Missing parent_id")
-        parent = get_object_or_404(Comment, pk=parent_id, post=post)
-        form = CommentForm()
-        html = render_to_string(
-            "core/partials/reply_form.html",
-            {"form": form, "parent": parent, "post": post},
-            request=request,
-        )
-        return HttpResponse(html)
 
     form = CommentForm(request.POST)
     if not form.is_valid():
@@ -214,11 +245,38 @@ def comment_reply(request, post_id):
 
 
 @login_required
+@require_http_methods(["GET"])
+def comment_reply_form(request, post_id):
+    """Render the comment reply form via HTMX."""
+
+    if request.headers.get("HX-Request") != "true":
+        return HttpResponseBadRequest("Invalid request")
+
+    post = get_object_or_404(Post, pk=post_id)
+    parent_id = request.GET.get("parent_id")
+    if not parent_id:
+        return HttpResponseBadRequest("Missing parent_id")
+    parent = get_object_or_404(Comment, pk=parent_id, post=post)
+    form = CommentForm()
+    html = render_to_string(
+        "core/partials/reply_form.html",
+        {"form": form, "parent": parent, "post": post},
+        request=request,
+    )
+    return HttpResponse(html)
+
+
+@login_required
 @require_POST
 @csrf_protect
-@ratelimit(action="vote", limit=20)
+@dratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_post(request, pk):
     """Handle voting on a post."""
+
+    if getattr(request, "limited", False):
+        resp = HttpResponse("Too many requests", status=429)
+        resp.headers["X-RateLimit-Triggered"] = "1"
+        return resp
 
     try:
         value = int(request.GET.get("v"))
@@ -237,9 +295,14 @@ def vote_post(request, pk):
 @login_required
 @require_POST
 @csrf_protect
-@ratelimit(action="vote", limit=20)
+@dratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_comment(request, pk):
     """Handle voting on a comment."""
+
+    if getattr(request, "limited", False):
+        resp = HttpResponse("Too many requests", status=429)
+        resp.headers["X-RateLimit-Triggered"] = "1"
+        return resp
 
     try:
         value = int(request.GET.get("v"))

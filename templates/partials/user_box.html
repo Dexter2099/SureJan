@@ -1,8 +1,13 @@
 {% load points %}
 <div class="user-box">
   {% if request.user.is_authenticated %}
-    {{ request.user.username }} | Points: {{ request.user|get_points }} | <a href="{% url 'admin:logout' %}">logout</a>
+    <a href="{% url 'user_overview' request.user.username %}">{{ request.user.username }}</a>
+    | Points: {{ request.user|get_points }} |
+    <a href="{% url 'user_overview' request.user.username %}">Profile</a> |
+    <a href="{% url 'user_submitted' request.user.username %}">Submitted</a> |
+    <a href="{% url 'user_comments' request.user.username %}">Comments</a> |
+    <a href="{% url 'logout' %}">logout</a>
   {% else %}
-    <a href="{% url 'admin:login' %}">login</a> | <a href="#">register</a>
+    <a href="{% url 'login' %}">login</a> | <a href="{% url 'signup' %}">register</a>
   {% endif %}
 </div>

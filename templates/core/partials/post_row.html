@@ -1,9 +1,9 @@
 {% load url_domain %}
 <div class="post-row">
   <div class="vote-col">
-    <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML">▲</button>
+    <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
     <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
-    <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML">▼</button>
+    <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
   </div>
   <div class="post-body">
     <h2>

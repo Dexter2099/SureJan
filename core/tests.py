@@ -65,14 +65,14 @@ class SubmitPostTests(TestCase):
 
     def test_rate_limit(self):
         url = reverse("submit_post", args=[self.community.slug])
-        for i in range(3):
+        for i in range(30):
             self.client.post(
                 url,
                 {"post_type": "text", "title": f"H{i}", "body": "", "url": ""},
             )
         resp = self.client.post(
             url,
-            {"post_type": "text", "title": "H3", "body": "", "url": ""},
+            {"post_type": "text", "title": "H30", "body": "", "url": ""},
         )
         self.assertEqual(resp.status_code, 429)
 
@@ -145,7 +145,7 @@ class VotePostTests(TestCase):
 
     def test_rate_limit(self):
         url = reverse("vote_post", args=[self.post.pk])
-        for _ in range(20):
+        for _ in range(120):
             resp = self.client.post(url + "?v=1")
             self.assertEqual(resp.status_code, 200)
         resp = self.client.post(url + "?v=1")
