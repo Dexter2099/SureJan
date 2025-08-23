@@ -4,7 +4,7 @@
 <article class="post">
   <h1>{{ post.title }}</h1>
   {% if post.image %}
-    <img src="{{ post.image.url }}" alt="" class="post-image">
+    <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
   {% endif %}
   {% if post.body %}
     <p>{{ post.body }}</p>
