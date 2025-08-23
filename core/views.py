@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
-from django_ratelimit.decorators import ratelimit as dratelimit, is_ratelimited
+from django_ratelimit.decorators import ratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -26,14 +26,9 @@ def healthz(_request):
     return HttpResponse("ok", content_type="text/plain")
 
 
-class SignupForm(forms.ModelForm):
-    """Minimal signup form with username and password."""
-
+class SignupForm(forms.Form):
+    username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
-
-    class Meta:
-        model = get_user_model()
-        fields = ["username", "password"]
 
 
 def signup(request):
@@ -42,11 +37,16 @@ def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data["password"])
-            user.save()
-            login(request, user)
-            return redirect("home")
+            U = get_user_model()
+            username = form.cleaned_data["username"]
+            if U.objects.filter(username=username).exists():
+                form.add_error("username", "That username is taken.")
+            else:
+                user = U.objects.create_user(
+                    username=username, password=form.cleaned_data["password"]
+                )
+                login(request, user)
+                return redirect("home")
     else:
         form = SignupForm()
     return render(request, "registration/signup.html", {"form": form})
@@ -152,7 +152,7 @@ def community(request, slug):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-@dratelimit(key="user", rate="30/m", method=["POST"], block=False)
+@ratelimit(key="user", rate="30/m", method=["POST"], block=False)
 def submit_post(request, slug):
     """Submit a new post to a community."""
 
@@ -190,7 +190,7 @@ def post_detail(request, slug, post_id, post_slug):
 
 @login_required
 @require_POST
-@dratelimit(key="user", rate="30/m", method=["POST"], block=False)
+@ratelimit(key="user", rate="30/m", method=["POST"], block=False)
 def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
 
@@ -269,7 +269,7 @@ def comment_reply_form(request, post_id):
 @login_required
 @require_POST
 @csrf_protect
-@dratelimit(key="user", rate="120/m", method=["POST"], block=False)
+@ratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_post(request, pk):
     """Handle voting on a post."""
 
@@ -295,7 +295,7 @@ def vote_post(request, pk):
 @login_required
 @require_POST
 @csrf_protect
-@dratelimit(key="user", rate="120/m", method=["POST"], block=False)
+@ratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_comment(request, pk):
     """Handle voting on a comment."""
 
@@ -401,7 +401,7 @@ def user_submitted(request, username):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-@dratelimit(key="user", rate="5/m", method=["POST"], block=False)
+@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
 def create_community(request):
     if not request.user.is_staff:
         from django.core.exceptions import PermissionDenied

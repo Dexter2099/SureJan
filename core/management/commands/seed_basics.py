@@ -1,32 +1,17 @@
-from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-
+from django.contrib.auth import get_user_model
 from core.models import Community
 
-COMMUNITIES = [
-    ("news", "News"),
-    ("brisbane", "Brisbane"),
-]
-
-
 class Command(BaseCommand):
-    help = "Seed basic communities"
+    help = "Seed initial communities"
 
-    def handle(self, *args, **options):
-        User = get_user_model()
-        user = User.objects.first()
-        if not user:
-            user = User.objects.create_user("admin")
-        for slug, name in COMMUNITIES:
-            community, created = Community.objects.get_or_create(
+    def handle(self, *args, **kwargs):
+        seeds = [("news", "News"), ("brisbane", "Brisbane")]
+        U = get_user_model()
+        user, _ = U.objects.get_or_create(username="admin")
+        for slug, title in seeds:
+            obj, created = Community.objects.get_or_create(
                 slug=slug,
-                defaults={
-                    "name": name,
-                    "title": name,
-                    "created_by": user,
-                },
+                defaults={"name": title, "title": title, "created_by": user},
             )
-            if created:
-                self.stdout.write(f"CREATED {slug}")
-            else:
-                self.stdout.write(f"EXISTS {slug}")
+            self.stdout.write(f"{'CREATED' if created else 'EXISTS '} r/{slug}")
