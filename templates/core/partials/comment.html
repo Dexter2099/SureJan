@@ -13,10 +13,16 @@
         <button hx-get="{% url 'comment_reply_form' comment.post.pk %}?parent_id={{ comment.pk }}"
                 hx-target="#comment-{{ comment.pk }}"
                 hx-swap="afterend">reply</button>
-        {% if request.user.is_staff or request.user == comment.author %}
-        · <button hx-post="{% url 'comment_delete' comment.pk %}"
-                  hx-target="#comment-{{ comment.pk }}"
-                  hx-swap="outerHTML">delete</button>
+        {% if request.user.id == comment.author_id or request.user.is_staff %}
+        · <form method="post"
+                action="{% url 'comment_delete' comment.pk %}"
+                style="display:inline"
+                hx-post="{% url 'comment_delete' comment.pk %}"
+                hx-target="#comment-{{ comment.pk }}"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="linklike" aria-label="Delete comment">delete</button>
+          </form>
         {% endif %}
     </small>
 </div>
