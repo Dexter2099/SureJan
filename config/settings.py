@@ -19,6 +19,9 @@ TIME_ZONE = "Australia/Brisbane"
 USE_I18N = True
 USE_TZ = True
 
+# Keep DB connections open briefly to reduce churn
+CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", "60"))
+
 INSTALLED_APPS = [
     # Django
     "django.contrib.admin",
@@ -83,7 +86,7 @@ if db_url:
     DATABASES = {
         "default": dj_database_url.parse(
             db_url,
-            conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", "600")),
+            conn_max_age=CONN_MAX_AGE,
             ssl_require=False,  # Fly Postgres on private network; sslmode=disable is fine
         )
     }

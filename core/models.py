@@ -13,10 +13,16 @@ class Community(models.Model):
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
     wiki_html = models.TextField(blank=True, null=True)
+    is_system = models.BooleanField(default=False, db_index=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="communities"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name="uniq_community_name"),
+        ]
 
     def __str__(self) -> str:
         return f"c/{self.slug}"
@@ -43,6 +49,7 @@ class Post(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["community", "-created_at", "-id"]),
+            models.Index(fields=["community", "-created_at"], name="post_comm_created_idx"),
             models.Index(fields=["-hot_rank", "-created_at"]),
             models.Index(fields=["-score", "-created_at"]),
             models.Index(fields=["-controversy", "-created_at"]),
@@ -76,7 +83,10 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        indexes = [models.Index(fields=["post", "path"])]
+        indexes = [
+            models.Index(fields=["post", "path"]),
+            models.Index(fields=["post", "-created_at"], name="comment_post_created_idx"),
+        ]
 
     @property
     def depth(self):
@@ -93,7 +103,12 @@ class Vote(models.Model):
     value = models.SmallIntegerField()
 
     class Meta:
-        unique_together = ("user", "target_type", "target_id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "target_type", "target_id"],
+                name="uniq_vote_target_user",
+            )
+        ]
 
 
 class UserProfile(models.Model):
