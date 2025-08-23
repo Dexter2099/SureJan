@@ -24,6 +24,7 @@ urlpatterns = [
     # Comments & voting
     path("comment/<int:post_id>/reply/", core_views.comment_reply, name="comment_reply"),
     path("comment/<int:post_id>/reply-form/", core_views.comment_reply_form, name="comment_reply_form"),
+    path("comment/<int:pk>/delete/", core_views.comment_delete, name="comment_delete"),
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
     path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
 
