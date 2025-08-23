@@ -13,5 +13,10 @@
         <button hx-get="{% url 'comment_reply_form' comment.post.pk %}?parent_id={{ comment.pk }}"
                 hx-target="#comment-{{ comment.pk }}"
                 hx-swap="afterend">reply</button>
+        {% if request.user.is_staff or request.user == comment.author %}
+        · <button hx-post="{% url 'comment_delete' comment.pk %}"
+                  hx-target="#comment-{{ comment.pk }}"
+                  hx-swap="outerHTML">delete</button>
+        {% endif %}
     </small>
 </div>

@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_protect
 from django_ratelimit.decorators import ratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.db.models import F
@@ -264,6 +264,33 @@ def comment_reply_form(request, post_id):
         request=request,
     )
     return HttpResponse(html)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def comment_delete(request, pk):
+    """Delete a comment if the requester is the author or staff."""
+
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.user != comment.author and not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+
+    post = comment.post
+    # number of comments to remove including any descendants
+    count = Comment.objects.filter(post=post, path__startswith=comment.path).count()
+    comment.delete()
+    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") - count)
+
+    if request.headers.get("HX-Request") == "true":
+        return HttpResponse("")
+
+    return redirect(
+        "post_detail",
+        slug=post.community.slug,
+        post_id=post.pk,
+        post_slug=slugify(post.title),
+    )
 
 
 @login_required
