@@ -453,3 +453,11 @@ hr {
   .feed .post-image { max-height: 240px; }
   .post .post-image { max-height: 480px; }
 }
+
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
