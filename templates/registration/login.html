@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Log in</h1>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button>Log in</button></form>
+<form method="post" action="{% url 'login' %}" hx-boost="false" hx-swap="none">
+  {% csrf_token %}{{ form.as_p }}<button>Log in</button>
+</form>
+<p><a href="{% url 'password_reset' %}" hx-boost="false">Forgot your password?</a></p>
 <p>No account? <a href="{% url 'signup' %}">Sign up</a></p>
 {% endblock %}

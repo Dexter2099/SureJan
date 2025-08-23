@@ -9,6 +9,6 @@
       <button type="submit" class="linklike">logout</button>
     </form>
   {% else %}
-    <a href="{% url 'login' %}">login</a> | <a href="{% url 'signup' %}">register</a>
+    <a href="{% url 'login' %}" hx-boost="false">login</a> | <a href="{% url 'signup' %}" hx-boost="false">register</a>
   {% endif %}
 </div>
