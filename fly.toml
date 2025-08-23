@@ -21,11 +21,11 @@ primary_region = "syd"
   processes = ["app"]
 
   [[http_service.checks]]
-    grace_period = "10s"
-    interval = "30s"
-    timeout = "5s"
-    method = "GET"
-    path = "/healthz"
+    method   = "get"
+    path     = "/healthz"
+    interval = "10s"
+    timeout  = "2s"
+    headers  = ["Host: surejan.fly.dev"]
 
 [[vm]]
   cpu_kind = "shared"
