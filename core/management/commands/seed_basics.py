@@ -12,6 +12,14 @@ class Command(BaseCommand):
         for slug, title in seeds:
             obj, created = Community.objects.get_or_create(
                 slug=slug,
-                defaults={"name": title, "title": title, "created_by": user},
+                defaults={
+                    "name": title,
+                    "title": title,
+                    "is_system": True,
+                    "created_by": user,
+                },
             )
-            self.stdout.write(f"{'CREATED' if created else 'EXISTS '} r/{slug}")
+            if not created and not obj.is_system:
+                obj.is_system = True
+                obj.save(update_fields=["is_system"])
+            self.stdout.write(f"{'CREATED' if created else 'EXISTS '} r/{slug} (system)")
