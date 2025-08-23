@@ -1,7 +1,7 @@
 asgiref==3.9.1
 django-storages>=1.14,<2
 boto3>=1.34,<2
-
+django-storages[boto3]
 dj-database-url==3.0.1
 Django==5.2.5
 django-csp==4.0
