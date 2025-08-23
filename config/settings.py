@@ -145,32 +145,15 @@ else:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -----------------------------------------------------------------------------
-# Hosts / CSRF (Fly + Render) with env overrides
+# Hosts / CSRF
 # -----------------------------------------------------------------------------
-FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
+ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
 
-DEFAULT_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "surejan.onrender.com",
-    "surejan.fly.dev",
-    f"{FLY_APP_NAME}.fly.dev",
-    ".fly.dev",
-]
-_env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
-if _env_hosts:
-    ALLOWED_HOSTS = ["*"] if _env_hosts == "*" else [h.strip() for h in _env_hosts.split(",") if h.strip()]
-else:
-    ALLOWED_HOSTS = DEFAULT_HOSTS
-
+# Keep CSRF tight even if ALLOWED_HOSTS is broad
 CSRF_TRUSTED_ORIGINS = [
-    "https://surejan.onrender.com",
     "https://surejan.fly.dev",
-    f"https://{FLY_APP_NAME}.fly.dev",
+    "https://www.surejan.com",
 ]
-_extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
-if _extra_csrf:
-    CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_csrf.split(",") if o.strip()]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
@@ -198,4 +181,3 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    ALLOWED_HOSTS = ["surejan.fly.dev", "www.surejan.com"]
