@@ -1,52 +1,83 @@
 # config/settings.py — GMFU (Good, Minimal, Fast, Understandable)
-import os
 from pathlib import Path
+import os
+import dj_database_url
+from csp.constants import SELF, UNSAFE_INLINE  # django-csp v4
 
-import dj_database_url  # make sure this is in requirements.txt
-
+# -----------------------------------------------------------------------------
+# Base
+# -----------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-IS_COLLECTSTATIC = os.getenv("DJANGO_COLLECTSTATIC") == "1"
-DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
+# -----------------------------------------------------------------------------
+# Security / Debug
+# -----------------------------------------------------------------------------
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
 
 # -----------------------------------------------------------------------------
-# Core
+# Hosts / CSRF (Fly + optional Render) with env overrides
 # -----------------------------------------------------------------------------
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
+FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
 
-LANGUAGE_CODE = "en-au"
-TIME_ZONE = "Australia/Brisbane"
-USE_I18N = True
-USE_TZ = True
+DEFAULT_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "surejan.onrender.com",
+    "surejan.fly.dev",
+    f"{FLY_APP_NAME}.fly.dev",
+    ".fly.dev",
+]
 
-# Keep DB connections open briefly to reduce churn
-CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", "60"))
+_env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
+if _env_hosts:
+    ALLOWED_HOSTS = ["*"] if _env_hosts == "*" else [h.strip() for h in _env_hosts.split(",") if h.strip()]
+else:
+    ALLOWED_HOSTS = DEFAULT_HOSTS
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://surejan.onrender.com",
+    "https://surejan.fly.dev",
+    f"https://{FLY_APP_NAME}.fly.dev",
+]
+_extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
+if _extra_csrf:
+    CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_csrf.split(",") if o.strip()]
+
+# Respect Fly proxy for secure detection
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# -----------------------------------------------------------------------------
+# Apps / Middleware
+# -----------------------------------------------------------------------------
 INSTALLED_APPS = [
-    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Your app(s)
+    "django_htmx",
+    "csp",   # django-csp
     "core",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static from image
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "csp.middleware.CSPMiddleware",  # django-csp v4
 ]
 
 ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
 
 TEMPLATES = [
     {
@@ -55,7 +86,6 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
@@ -64,67 +94,55 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = "config.wsgi.application"
+
 # -----------------------------------------------------------------------------
-# Database (Postgres via DATABASE_URL; safe local fallback only in DEBUG)
+# Database (DATABASE_URL with SQLite fallback; keep-alive)
 # -----------------------------------------------------------------------------
-db_url = os.getenv("DATABASE_URL", "").strip()
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "sqlite:///db.sqlite3"),
+        conn_max_age=60,
+        ssl_require=False,
+    )
+}
 
-# Optional PG* var support (if you ever set PGHOST/PGUSER/etc.)
-if not db_url:
-    pg_host = os.getenv("PGHOST")
-    pg_port = os.getenv("PGPORT", "5432")
-    pg_user = os.getenv("PGUSER")
-    pg_pass = os.getenv("PGPASSWORD")
-    pg_db   = os.getenv("PGDATABASE")
-    if all([pg_host, pg_user, pg_pass, pg_db]):
-        db_url = f"postgres://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-
-if not DEBUG and not IS_COLLECTSTATIC and not db_url:
-    raise RuntimeError("DATABASE_URL must be set in production")
-
-if db_url:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            db_url,
-            conn_max_age=CONN_MAX_AGE,
-            ssl_require=False,  # Fly Postgres on private network; sslmode=disable is fine
-        )
+# -----------------------------------------------------------------------------
+# Password validation
+# -----------------------------------------------------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 10},
     }
-else:
-    # Local dev fallback
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+]
 
-# Optional connection options
-DATABASES["default"].setdefault("OPTIONS", {})
-if DATABASES["default"]["ENGINE"] != "django.db.backends.sqlite3":
-    DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 30)
+# -----------------------------------------------------------------------------
+# I18N
+# -----------------------------------------------------------------------------
+LANGUAGE_CODE = "en-au"
+TIME_ZONE = "Australia/Brisbane"
+USE_I18N = True
+USE_TZ = True
 
 # -----------------------------------------------------------------------------
 # Static / Media
 # -----------------------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]  # keep if you have app-level assets
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# WhiteNoise with hashed filenames; fail at build if missing
+# WhiteNoise with hashed filenames
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
 
-if DEBUG:
-    STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.StaticFilesStorage"
+# Temporary guard to avoid 500s from missing manifest entries while iterating.
+# REMOVE once favicon/static references are correct and collectstatic is clean.
+WHITENOISE_MANIFEST_STRICT = False
 
-if DEBUG:
-    STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
-# Media (unchanged)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -142,45 +160,20 @@ if USE_S3_MEDIA:
 else:
     STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
 
+# -----------------------------------------------------------------------------
+# Misc
+# -----------------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# -----------------------------------------------------------------------------
-# Hosts / CSRF
-# -----------------------------------------------------------------------------
-_raw = os.getenv("DJANGO_ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = [h.strip() for h in _raw.split(",") if h.strip()]
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["surejan.fly.dev"]  # safe default
+# Public auth redirects
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
-# keep CSRF tight even if ALLOWED_HOSTS includes '*'
-CSRF_TRUSTED_ORIGINS = [
-    "https://surejan.fly.dev",
-    "https://www.surejan.com",
-]
-
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-
-# -----------------------------------------------------------------------------
-# Logging
-# -----------------------------------------------------------------------------
+# Logging (simple console)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
-
-# -----------------------------------------------------------------------------
-# Auth redirects
-# -----------------------------------------------------------------------------
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
