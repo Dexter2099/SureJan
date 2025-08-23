@@ -21,9 +21,17 @@
         <a href="/r/news/">NEWS</a>
         <a href="/r/brisbane/">BRISBANE</a>
       </nav>
+      {% include "partials/user_box.html" %}
     </header>
 
     <main class="container" style="max-width:980px; margin:16px auto;">
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
 
