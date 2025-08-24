@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models import F
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
+from django.contrib.auth.hashers import make_password, check_password
 
 from .ranking import recompute_post_ranks
 
@@ -109,6 +110,15 @@ class Vote(models.Model):
                 name="uniq_vote_target_user",
             )
         ]
+
+
+class RecoveryCode(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="recovery_codes"
+    )
+    code_hash = models.CharField(max_length=128)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class UserProfile(models.Model):

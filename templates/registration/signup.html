@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Sign up</h1>
-<form method="post">{% csrf_token %}{{ form.as_p }}<button>Create account</button></form>
+<div class="notice">Password reset will be enabled soon. For now, keep your password safe.</div>
+<form method="post" hx-boost="false" hx-swap="none">
+  {% csrf_token %}
+  {{ form.username.errors }}
+  <p>{{ form.username.label_tag }} {{ form.username }}</p>
+  {{ form.password.errors }}
+  <p>{{ form.password.label_tag }} {{ form.password }}</p>
+  {% if captcha_question %}
+    {{ form.captcha.errors }}
+    <p>Prove you’re human: {{ captcha_question }}<br>
+    <input type="number" name="captcha" required></p>
+  {% endif %}
+  <button>Create account</button>
+</form>
 <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
 {% endblock %}

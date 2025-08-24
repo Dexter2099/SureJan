@@ -11,6 +11,7 @@ from core import views as core
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("healthz", lambda request: HttpResponse("ok"), name="healthz"),
+    path("accounts/login/", core.RateLimitedLoginView.as_view(), name="login"),
     path(
         "accounts/logout/",
         LogoutView.as_view(next_page="/"),
