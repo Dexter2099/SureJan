@@ -48,6 +48,15 @@
       {% endif %}
       {% block content %}{% endblock %}
     </main>
+    <footer class="site-footer">
+      <div class="container" style="max-width:980px; margin:16px auto; text-align:center;">
+        <a href="{% url 'terms' %}">Terms</a>
+        &middot;
+        <a href="{% url 'privacy' %}">Privacy</a>
+        &middot;
+        <a href="{% url 'rules' %}">Rules</a>
+      </div>
+    </footer>
 
       {% block scripts %}{% endblock %}
       {% include "core/_htmx_csrf.html" %}

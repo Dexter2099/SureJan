@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Sign up</h1>
-<div class="notice">Password reset will be enabled soon. For now, keep your password safe.</div>
+<div class="notice">No email resets during beta—save your password and recovery codes.</div>
 <form method="post" hx-boost="false" hx-swap="none">
   {% csrf_token %}
   {{ form.username.errors }}
