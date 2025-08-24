@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Log in</h1>
-<div class="notice">No email resets during beta—save your password and recovery codes.</div>
+<div class="notice">No email resets—use recovery codes.</div>
 <form method="post" action="{% url 'login' %}" hx-boost="false" hx-swap="none">
   {% csrf_token %}
   {{ form.as_p }}
@@ -12,4 +12,5 @@
   <button>Log in</button>
 </form>
 <p>No account? <a href="{% url 'signup' %}">Sign up</a></p>
+<p><a href="{% url 'terms' %}">Terms</a> &middot; <a href="{% url 'privacy' %}">Privacy</a> &middot; <a href="{% url 'rules' %}">Rules</a></p>
 {% endblock %}
