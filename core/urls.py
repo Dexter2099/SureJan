@@ -49,4 +49,6 @@ urlpatterns = [
     path("u/<str:username>/", core_views.user_overview, name="user_overview"),
     path("u/<str:username>/comments/", core_views.user_comments, name="user_comments"),
     path("u/<str:username>/submitted/", core_views.user_submitted, name="user_submitted"),
+    path("u/<str:username>/ban/", core_views.ban_user, name="ban_user"),
+    path("u/<str:username>/unban/", core_views.unban_user, name="unban_user"),
 ]

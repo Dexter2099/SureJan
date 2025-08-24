@@ -391,6 +391,8 @@ def comment_reply(request, post_id):
 def comment_reply_form(request, post_id):
     """Render the comment reply form via HTMX."""
 
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     if request.headers.get("HX-Request") != "true":
         return HttpResponseBadRequest("Invalid request")
 
@@ -608,6 +610,36 @@ def user_submitted(request, username):
         "tab": "submitted",
     }
     return render(request, "core/user_submitted.html", context)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def ban_user(request, username):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    user = _get_profile_user(username)
+    if user == request.user:
+        return HttpResponseForbidden("Cannot modify yourself")
+    user.profile.is_banned = True
+    user.profile.save(update_fields=["is_banned"])
+    return redirect("user_overview", username=username)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def unban_user(request, username):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    user = _get_profile_user(username)
+    user.profile.is_banned = False
+    user.profile.save(update_fields=["is_banned"])
+    return redirect("user_overview", username=username)
 
 
 @login_required
