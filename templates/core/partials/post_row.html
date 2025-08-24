@@ -26,6 +26,7 @@
       · <a href="{% url 'report' 'post' post.pk %}">[report]</a>
       {% endif %}
       {% if user.is_staff %}
+      <!-- staff moderation controls -->
       · <form action="{% url 'post_delete' post.pk %}" method="post" style="display:inline">
         {% csrf_token %}<button type="submit" style="background:none;border:none;padding:0;color:inherit">[remove]</button>
       </form>
