@@ -323,6 +323,8 @@ def submit_post(request, slug):
             post.save()
             messages.success(request, "Post submitted")
             return redirect("community", slug=community.slug)
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = PostForm()
 
