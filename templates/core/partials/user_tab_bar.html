@@ -5,5 +5,18 @@
   <a href="{% url 'user_comments' profile_user.username %}" class="{% if current == 'comments' %}active{% endif %}">Comments</a>
   <a href="{% url 'user_submitted' profile_user.username %}" class="{% if current == 'submitted' %}active{% endif %}">Submitted</a>
 </nav>
+{% if request.user.is_staff and request.user != profile_user %}
+  {% if profile_user.profile.is_banned %}
+    <form method="post" action="{% url 'unban_user' profile_user.username %}">
+      {% csrf_token %}
+      <button type="submit">Unban user</button>
+    </form>
+  {% else %}
+    <form method="post" action="{% url 'ban_user' profile_user.username %}">
+      {% csrf_token %}
+      <button type="submit">Ban user</button>
+    </form>
+  {% endif %}
+{% endif %}
 {% endwith %}
 
