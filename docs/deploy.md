@@ -1,5 +1,9 @@
 # Deployment
 
+## Environment
+
+Set `SENTRY_DSN` via Fly secrets or environment variables before deploying.
+
 ```bash
 git add -A
 git commit -m "alpha: public signup + header auth + submit CTA + seeds"
