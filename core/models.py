@@ -41,14 +41,11 @@ def _resize_img(file, max_px=1600):
     return ContentFile(buf.getvalue(), name=f"{name}.jpg")
 
 
-def _make_thumb(file, height=400):
+def _make_thumb(file, max_px=400):
     file.seek(0)
     img = Image.open(file)
     img = img.convert("RGB")
-    w, h = img.size
-    if h > height:
-        ratio = height / float(h)
-        img = img.resize((int(w * ratio), height), Image.LANCZOS)
+    img.thumbnail((max_px, max_px), Image.LANCZOS)
     buf = BytesIO()
     img.save(buf, format="JPEG", quality=80, optimize=True)
     name, _ = os.path.splitext(getattr(file, "name", "thumb"))

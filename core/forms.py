@@ -12,7 +12,10 @@ class PostForm(forms.ModelForm):
     def clean_image(self):
         image = self.cleaned_data.get("image")
         if image:
-            validate_image_file(image)
+            try:
+                validate_image_file(image)
+            except forms.ValidationError as e:
+                raise e
         return image
 
     def clean(self):
