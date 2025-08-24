@@ -2,8 +2,10 @@
 {% block content %}
   <h1>SureJan</h1>
   {% include "partials/sort_tabs.html" with active_sort=sort sort_tabs=sort_tabs %}
-  <div id="feed-list">
-    {% include "core/partials/post_list.html" with posts=posts %}
+  <div class="feed">
+    <div id="feed-list">
+      {% include "core/partials/post_list.html" with posts=posts %}
+    </div>
   </div>
   {% if next_page %}
     {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}
