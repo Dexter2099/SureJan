@@ -2,7 +2,10 @@
 
 ## Environment
 
-Set `SENTRY_DSN` via Fly secrets or environment variables before deploying.
+Set `SENTRY_DSN` via Fly secrets or environment variables before deploying. The
+Django admin lives at `/secret-admin/`; restrict it by setting an
+`ADMIN_IP_ALLOWLIST` environment variable with a comma-separated list of
+allowed IPs.
 
 ```bash
 git add -A
@@ -20,3 +23,4 @@ flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collect
 * `/accounts/signup/` → create user, header shows username.
 * `/r/news/` → "Submit" visible (logged-in), post appears in feed.
 * Vote/comment work; anonymous users get redirected to login for writes.
+* `/secret-admin/` → admin login loads (only from allowlisted IPs if set).
