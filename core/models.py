@@ -6,6 +6,8 @@ from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
 from django import forms
 from django.core.files.base import ContentFile
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 from PIL import Image
 from io import BytesIO
@@ -186,6 +188,7 @@ class UserProfile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
     )
     points_cached = models.IntegerField(default=0, db_index=True)
+    is_banned = models.BooleanField(default=False)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
@@ -198,6 +201,22 @@ def get_points(user):
     if hasattr(user, "points_cached"):
         return user.points_cached
     return getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0
+
+
+class Report(models.Model):
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reports"
+    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    target = GenericForeignKey("content_type", "object_id")
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
 
 
 # -- Vote side effects ------------------------------------------------------
