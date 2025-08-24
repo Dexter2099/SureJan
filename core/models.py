@@ -25,7 +25,7 @@ def validate_image_file(f):
     try:
         Image.open(f).verify()
     except Exception:
-        raise forms.ValidationError("Upload must be a valid image.")
+        raise forms.ValidationError("Upload must be an image.")
     finally:
         f.seek(0)
 
