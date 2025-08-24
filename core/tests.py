@@ -2,14 +2,17 @@
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from io import BytesIO
+from PIL import Image
 
 from .models import Comment, Community, Post
 
 
 class SubmitPostTests(TestCase):
-    """Ensure users can submit text and link posts."""
+    """Ensure users can submit text, link and image posts."""
 
     def setUp(self):
         cache.clear()
@@ -53,6 +56,27 @@ class SubmitPostTests(TestCase):
         self.assertEqual(post.post_type, "link")
         self.assertEqual(post.url, "https://example.com")
         self.assertEqual(post.body, "")
+
+    def test_submit_image_post(self):
+        url = reverse("submit_post", args=[self.community.slug])
+        img = Image.new("RGB", (1, 1), color="white")
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        resp = self.client.post(
+            url,
+            {
+                "post_type": "image",
+                "title": "Pic",
+                "body": "",
+                "url": "",
+                "image": SimpleUploadedFile("pic.png", buf.read(), content_type="image/png"),
+            },
+        )
+        self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
+        post = Post.objects.get()
+        self.assertEqual(post.post_type, "image")
+        self.assertTrue(post.image)
 
     def test_requires_login(self):
         self.client.logout()
