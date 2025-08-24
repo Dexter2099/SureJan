@@ -461,3 +461,41 @@ hr {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Post page wrapper + 2-column thing */
+.post-page { max-width: 740px; margin: 12px auto 48px; }
+.post-thing { display: grid; grid-template-columns: 40px 1fr; gap: 10px; background:#fff; border:1px solid #ddd; padding:10px; }
+
+/* Vote rail like old reddit */
+.vote { display:flex; flex-direction:column; align-items:center; gap:2px; width:40px; color:#888; }
+.vote .up, .vote .down { background:none; border:0; cursor:pointer; }
+.vote .score { font-weight:bold; font-size:11px; }
+.vote .up[aria-pressed="true"] { color:#ff8b60; } /* up */
+.vote .down[aria-pressed="true"] { color:#5f99cf; } /* down */
+
+/* Title + meta + actions */
+.post-head h1 { font: normal 16px/1.2 Verdana, Arial, sans-serif; margin:0 0 4px; }
+.post-head h1 a { color:#3366cc; }
+.post-head h1 a:visited { color:#551a8b; }
+.post-meta { color:#777; font-size:11px; margin-bottom:6px; }
+.post-actions { font-size:11px; color:#777; margin-top:6px; }
+.post-actions a { color:#3366cc; margin-right:8px; position:relative; }
+.post-actions a + a:before { content:"•"; color:#aaa; position:absolute; left:-6px; }
+
+/* Image */
+.post-content .post-image { border:1px solid #e6e6e6; box-shadow:0 1px 0 #eee; }
+
+/* Comment tree */
+.comment { background:#fff; border:1px solid #ddd; padding:8px; margin:8px 0; font-size:11px; }
+.comment .meta { color:#777; margin-bottom:4px; }
+.comment .children { border-left:1px solid #e6e6e6; margin-left:10px; padding-left:10px; }
+
+/* Tabs (top of post) */
+.sort-tabs { font-size:11px; text-transform:uppercase; letter-spacing:.02em; }
+.sort-tabs a { color:#777; }
+.sort-tabs a.active { color:#111; border-bottom:2px solid #3366cc; }
+
+@media (max-width: 768px) {
+  .post-page { margin:8px auto 32px; }
+  .post-thing { grid-template-columns: 32px 1fr; }
+}
