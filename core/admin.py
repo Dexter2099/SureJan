@@ -100,3 +100,4 @@ admin.site.register(get_user_model(), UserAdmin)
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
     list_display = ("id", "reporter", "content_type", "object_id", "created_at")
+    list_filter = ("content_type", "reporter")

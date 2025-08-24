@@ -35,7 +35,7 @@
         <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
         <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
         {% if user.is_authenticated %}
-        <a href="{% url 'report' 'post' post.pk %}">[report]</a>
+        <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
         {% endif %}
         {% if user.is_staff %}
         <form action="{% url 'post_delete' post.pk %}" method="post" style="display:inline">
