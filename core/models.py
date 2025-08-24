@@ -34,7 +34,10 @@ class Post(models.Model):
         Community, on_delete=models.CASCADE, related_name="posts"
     )
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    post_type = models.CharField(max_length=10, choices=[("text", "text"), ("link", "link")])
+    post_type = models.CharField(
+        max_length=10,
+        choices=[("text", "text"), ("link", "link"), ("image", "image")],
+    )
     title = models.CharField(max_length=300)
     body = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)

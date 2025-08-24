@@ -16,6 +16,7 @@ class PostForm(forms.ModelForm):
         title = (cleaned_data.get("title") or "").strip()
         body = (cleaned_data.get("body") or "").strip()
         url = (cleaned_data.get("url") or "").strip()
+        image = cleaned_data.get("image")
 
         cleaned_data["title"] = title
         cleaned_data["body"] = body
@@ -29,9 +30,20 @@ class PostForm(forms.ModelForm):
                 self.add_error("url", "URL is required for link posts.")
             if body:
                 self.add_error("body", "Body must be empty for link posts.")
+            if image:
+                self.add_error("image", "Image must be empty for link posts.")
         elif post_type == "text":
             if url:
                 self.add_error("url", "URL must be empty for text posts.")
+            if image:
+                self.add_error("image", "Image must be empty for text posts.")
+        elif post_type == "image":
+            if not image:
+                self.add_error("image", "Image is required for image posts.")
+            if url:
+                self.add_error("url", "URL must be empty for image posts.")
+            if body:
+                self.add_error("body", "Body must be empty for image posts.")
 
         return cleaned_data
 

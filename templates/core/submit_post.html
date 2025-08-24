@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Submit to {{ community.title|default:community.slug }}</h1>
-
+<!-- submit-stacked v1 -->
 <div class="submit-box">
   <form method="post" action="{% url 'submit_post' community.slug %}" enctype="multipart/form-data" class="submit-form" hx-boost="false" hx-swap="none">
     {% csrf_token %}
@@ -12,44 +12,36 @@
     <div class="form-row">
       <label for="{{ form.title.id_for_label }}">Title</label>
       {{ form.title }}
-      <div class="help">Be descriptive but concise.</div>
       {{ form.title.errors }}
     </div>
     {% endif %}
 
     <div class="form-row">
-      <label>Post type</label>
-      <div class="radio-list">
-        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="text"  {% if form.post_type.value == 'text' or not form.post_type.value %}checked{% endif %}> text</label>
-        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="link"  {% if form.post_type.value == 'link' %}checked{% endif %}> link</label>
-        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="image" {% if form.post_type.value == 'image' %}checked{% endif %}> image</label>
-      </div>
+      <label for="{{ form.post_type.id_for_label }}">Post type</label>
+      {{ form.post_type }}
       {{ form.post_type.errors }}
     </div>
 
     {% if form.body %}
     <div class="form-row type-block" id="type-text">
-      <label for="{{ form.body.id_for_label }}">Text</label>
+      {{ form.body.label_tag }}
       {{ form.body }}
-      <div class="help">Optional body for text posts.</div>
       {{ form.body.errors }}
     </div>
     {% endif %}
 
     {% if form.url %}
     <div class="form-row type-block" id="type-link">
-      <label for="{{ form.url.id_for_label }}">URL</label>
+      {{ form.url.label_tag }}
       {{ form.url }}
-      <div class="help">Link posts must include a valid URL.</div>
       {{ form.url.errors }}
     </div>
     {% endif %}
 
     {% if form.image %}
     <div class="form-row type-block" id="type-image">
-      <label for="{{ form.image.id_for_label }}">Image</label>
+      {{ form.image.label_tag }}
       {{ form.image }}
-      <div class="help">JPEG/PNG/WebP, up to your configured limit.</div>
       {{ form.image.errors }}
     </div>
     {% endif %}
@@ -62,20 +54,11 @@
 </div>
 
 <script>
-(function() {
-  const els = {
-    radios: document.querySelectorAll('input[name="{{ form.post_type.name|default:"post_type" }}"]'),
-    text: document.getElementById('type-text'),
-    link: document.getElementById('type-link'),
-    image: document.getElementById('type-image')
-  };
-  function show(type) {
-    ['text','link','image'].forEach(t => els[t] && (els[t].style.display = (t===type ? '' : 'none')));
-  }
-  const checked = document.querySelector('input[name="{{ form.post_type.name|default:"post_type" }}"]:checked');
-  show(checked ? checked.value : 'text');
-  els.radios.forEach(r => r.addEventListener('change', e => show(e.target.value)));
-})();
+  (function() {
+    const sel = document.getElementById("{{ form.post_type.id_for_label }}") || document.querySelector('select[name="{{ form.post_type.name }}"]');
+    const blocks = {text: "#type-text", link: "#type-link", image: "#type-image"};
+    function show(v){ for (const k in blocks){ const el = document.querySelector(blocks[k]); if (el) el.style.display = (k===v ? "" : "none"); } }
+    if (sel){ show(sel.value || "text"); sel.addEventListener("change", e => show(e.target.value)); }
+  })();
 </script>
 {% endblock %}
-
