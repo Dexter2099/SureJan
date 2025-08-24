@@ -1,33 +1,81 @@
 {% extends "base.html" %}
+
 {% block content %}
-<header><a href="/">SureJan</a></header>
-<div class="page">
-    <h1>Submit to {{ community.title }}</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="text" name="title" value="{{ form.title.value|default_if_none:'' }}" placeholder="Title">
-        {% if form.title.errors %}<div>{{ form.title.errors }}</div>{% endif %}
-        {% with pt=form.post_type.value|default:'text' %}
-        <select name="post_type" id="post_type">
-            <option value="text" {% if pt == 'text' %}selected{% endif %}>text</option>
-            <option value="link" {% if pt == 'link' %}selected{% endif %}>link</option>
-        </select>
-        {% if form.post_type.errors %}<div>{{ form.post_type.errors }}</div>{% endif %}
-        <textarea name="body" id="field-body"{% if pt != 'text' %} style="display:none"{% endif %}>{{ form.body.value|default_if_none:'' }}</textarea>
-        {% if form.body.errors %}<div>{{ form.body.errors }}</div>{% endif %}
-        <input type="url" name="url" id="field-url" value="{{ form.url.value|default_if_none:'' }}"{% if pt != 'link' %} style="display:none"{% endif %}>
-        {% if form.url.errors %}<div>{{ form.url.errors }}</div>{% endif %}
-        {% endwith %}
-        <input type="file" name="image" id="field-image">
-        {% if form.image.errors %}<div>{{ form.image.errors }}</div>{% endif %}
-        <button type="submit">Submit</button>
-    </form>
+<h1>Submit to {{ community.title|default:community.slug }}</h1>
+
+<div class="submit-box">
+  <form method="post" action="{% url 'submit_post' community.slug %}" enctype="multipart/form-data" class="submit-form" hx-boost="false" hx-swap="none">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {% if form.title %}
+    <div class="form-row">
+      <label for="{{ form.title.id_for_label }}">Title</label>
+      {{ form.title }}
+      <div class="help">Be descriptive but concise.</div>
+      {{ form.title.errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-row">
+      <label>Post type</label>
+      <div class="radio-list">
+        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="text"  {% if form.post_type.value == 'text' or not form.post_type.value %}checked{% endif %}> text</label>
+        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="link"  {% if form.post_type.value == 'link' %}checked{% endif %}> link</label>
+        <label><input type="radio" name="{{ form.post_type.name|default:'post_type' }}" value="image" {% if form.post_type.value == 'image' %}checked{% endif %}> image</label>
+      </div>
+      {{ form.post_type.errors }}
+    </div>
+
+    {% if form.body %}
+    <div class="form-row type-block" id="type-text">
+      <label for="{{ form.body.id_for_label }}">Text</label>
+      {{ form.body }}
+      <div class="help">Optional body for text posts.</div>
+      {{ form.body.errors }}
+    </div>
+    {% endif %}
+
+    {% if form.url %}
+    <div class="form-row type-block" id="type-link">
+      <label for="{{ form.url.id_for_label }}">URL</label>
+      {{ form.url }}
+      <div class="help">Link posts must include a valid URL.</div>
+      {{ form.url.errors }}
+    </div>
+    {% endif %}
+
+    {% if form.image %}
+    <div class="form-row type-block" id="type-image">
+      <label for="{{ form.image.id_for_label }}">Image</label>
+      {{ form.image }}
+      <div class="help">JPEG/PNG/WebP, up to your configured limit.</div>
+      {{ form.image.errors }}
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+      <button class="button">Submit</button>
+      <a href="{% url 'community' community.slug %}">cancel</a>
+    </div>
+  </form>
 </div>
+
 <script>
-const sel=document.getElementById('post_type');
-const bodyField=document.getElementById('field-body');
-const urlField=document.getElementById('field-url');
-function update(){const v=sel.value;bodyField.style.display=v==='text'?'':'none';urlField.style.display=v==='link'?'':'none';}
-sel.addEventListener('change',update);update();
+(function() {
+  const els = {
+    radios: document.querySelectorAll('input[name="{{ form.post_type.name|default:"post_type" }}"]'),
+    text: document.getElementById('type-text'),
+    link: document.getElementById('type-link'),
+    image: document.getElementById('type-image')
+  };
+  function show(type) {
+    ['text','link','image'].forEach(t => els[t] && (els[t].style.display = (t===type ? '' : 'none')));
+  }
+  const checked = document.querySelector('input[name="{{ form.post_type.name|default:"post_type" }}"]:checked');
+  show(checked ? checked.value : 'text');
+  els.radios.forEach(r => r.addEventListener('change', e => show(e.target.value)));
+})();
 </script>
 {% endblock %}
+
