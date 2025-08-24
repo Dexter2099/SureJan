@@ -13,6 +13,7 @@ from django.contrib.auth.views import LoginView
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.admin.views.decorators import staff_member_required
 from django_ratelimit.decorators import ratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
@@ -23,6 +24,8 @@ from django.db.models import F
 from django import forms
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
+from django.db import connections
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
@@ -36,7 +39,13 @@ def _is_banned(user):
 
 
 def healthz(_request):
-    """Simple health check endpoint."""
+    """Health check verifying database and cache connectivity."""
+    try:
+        connections["default"].cursor()
+        cache.set("healthz", "ok", 1)
+        cache.get("healthz")
+    except Exception:
+        return HttpResponse("unhealthy", status=500, content_type="text/plain")
     return HttpResponse("ok", content_type="text/plain")
 
 
@@ -314,6 +323,8 @@ def submit_post(request, slug):
             post.save()
             messages.success(request, "Post submitted")
             return redirect("community", slug=community.slug)
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
         form = PostForm()
 
@@ -383,6 +394,8 @@ def comment_reply(request, post_id):
 def comment_reply_form(request, post_id):
     """Render the comment reply form via HTMX."""
 
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     if request.headers.get("HX-Request") != "true":
         return HttpResponseBadRequest("Invalid request")
 
@@ -400,12 +413,10 @@ def comment_reply_form(request, post_id):
     return HttpResponse(html)
 
 
-@login_required
 @require_POST
 @csrf_protect
 def post_delete(request, pk):
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
+    """Delete a post; only staff members may perform this action."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
     post = get_object_or_404(Post, pk=pk)
@@ -502,15 +513,29 @@ def vote_comment(request, pk):
 @login_required
 @require_http_methods(["GET", "POST"])
 @csrf_protect
-def report(request, target_type, pk):
+def report(request):
+    """Allow users to report posts or comments."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-    if target_type == "post":
-        target = get_object_or_404(Post, pk=pk)
-    elif target_type == "comment":
-        target = get_object_or_404(Comment, pk=pk)
+
+    if request.method == "POST":
+        target_type = request.POST.get("target_type")
+        object_id = request.POST.get("object_id")
     else:
+        target_type = request.GET.get("target_type")
+        object_id = request.GET.get("object_id")
+
+    if target_type not in {"post", "comment"}:
         return HttpResponseBadRequest("Invalid target")
+
+    try:
+        object_id = int(object_id)
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid object id")
+
+    model = Post if target_type == "post" else Comment
+    target = get_object_or_404(model, pk=object_id)
+
     if request.method == "POST":
         reason = request.POST.get("reason", "")
         Report.objects.create(
@@ -520,7 +545,19 @@ def report(request, target_type, pk):
             reason=reason,
         )
         return render(request, "core/report_form.html", {"thanks": True})
-    return render(request, "core/report_form.html", {"target": target})
+
+    return render(
+        request,
+        "core/report_form.html",
+        {"target": target, "target_type": target_type, "object_id": object_id},
+    )
+
+
+@staff_member_required
+def report_list(request):
+    """Simple listing view for recent reports."""
+    reports = Report.objects.select_related("reporter", "content_type").order_by("-created_at")
+    return render(request, "core/report_list.html", {"reports": reports})
 
 
 def community_wiki(request, slug):
@@ -602,6 +639,36 @@ def user_submitted(request, username):
         "tab": "submitted",
     }
     return render(request, "core/user_submitted.html", context)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def ban_user(request, username):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    user = _get_profile_user(username)
+    if user == request.user:
+        return HttpResponseForbidden("Cannot modify yourself")
+    user.profile.is_banned = True
+    user.profile.save(update_fields=["is_banned"])
+    return redirect("user_overview", username=username)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def unban_user(request, username):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    user = _get_profile_user(username)
+    user.profile.is_banned = False
+    user.profile.save(update_fields=["is_banned"])
+    return redirect("user_overview", username=username)
 
 
 @login_required

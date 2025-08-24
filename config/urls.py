@@ -3,7 +3,6 @@ from django.conf import settings
 from django.conf.urls.static import static as serve_static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
-from django.http import HttpResponse
 from django.urls import path, include
 from django.views.generic import TemplateView
 
@@ -11,7 +10,7 @@ from core import views as core
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
-    path("healthz", lambda request: HttpResponse("ok"), name="healthz"),
+    path("healthz", core.healthz, name="healthz"),
     path("accounts/login/", core.RateLimitedLoginView.as_view(), name="login"),
     path(
         "accounts/logout/",

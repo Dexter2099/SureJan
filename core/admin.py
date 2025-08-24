@@ -85,6 +85,8 @@ class VoteAdmin(admin.ModelAdmin):
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
+    fields = ("points_cached", "is_banned")
+    readonly_fields = ("points_cached",)
 
 
 class UserAdmin(BaseUserAdmin):
@@ -98,3 +100,4 @@ admin.site.register(get_user_model(), UserAdmin)
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
     list_display = ("id", "reporter", "content_type", "object_id", "created_at")
+    list_filter = ("content_type", "reporter")

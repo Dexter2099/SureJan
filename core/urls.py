@@ -41,11 +41,15 @@ urlpatterns = [
     path("comment/<int:pk>/delete/", core_views.comment_delete, name="comment_delete"),
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
     path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
+    # Post moderation
     path("post/<int:pk>/delete/", core_views.post_delete, name="post_delete"),
-    path("report/<str:target_type>/<int:pk>/", core_views.report, name="report"),
+    path("report/", core_views.report, name="report"),
+    path("reports/", core_views.report_list, name="report_list"),
 
     # User pages
     path("u/<str:username>/", core_views.user_overview, name="user_overview"),
     path("u/<str:username>/comments/", core_views.user_comments, name="user_comments"),
     path("u/<str:username>/submitted/", core_views.user_submitted, name="user_submitted"),
+    path("u/<str:username>/ban/", core_views.ban_user, name="ban_user"),
+    path("u/<str:username>/unban/", core_views.unban_user, name="unban_user"),
 ]

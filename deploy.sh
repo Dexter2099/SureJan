@@ -93,7 +93,7 @@ primary_region = "syd"
     interval = "30s"
     timeout = "5s"
     method = "GET"
-    path = "/"
+    path = "/healthz"
 
 [[vm]]
   cpu_kind = "shared"
@@ -111,7 +111,8 @@ else
       if(!have_build){print "\n[build]"; print "  dockerfile = \"Dockerfile\""}
       else if(!have_df){print "  dockerfile = \"Dockerfile\""}
     }' fly.toml | \
-  awk '{sub(/internal_port *= *[0-9]+/,"internal_port = 8000")}1' > .fly.toml.tmp
+  awk '{sub(/internal_port *= *[0-9]+/,"internal_port = 8000")}1' | \
+  awk '{sub(/path *= *"[^"]*"/,"path = \"/healthz\"")}1' > .fly.toml.tmp
   mv .fly.toml.tmp fly.toml
 fi
 

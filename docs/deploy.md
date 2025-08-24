@@ -2,10 +2,11 @@
 
 ## Environment
 
-Set `SENTRY_DSN` via Fly secrets or environment variables before deploying. The
-Django admin lives at `/secret-admin/`; restrict it by setting an
+Set `SENTRY_DSN` via Fly secrets or environment variables before deploying.
+The Django admin lives at `/secret-admin/`; restrict it by setting an
 `ADMIN_IP_ALLOWLIST` environment variable with a comma-separated list of
-allowed IPs.
+allowed IPs. The app exposes `/healthz` which checks database and cache
+connectivity; point your uptime monitor at this path.
 
 ```bash
 git add -A

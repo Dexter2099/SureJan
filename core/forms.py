@@ -2,6 +2,7 @@ from django import forms
 from django.utils.text import slugify
 
 from .models import Comment, Post, Community, validate_image_file
+from .utils.link_safety import check_url_safety
 
 
 class PostForm(forms.ModelForm):
@@ -12,7 +13,10 @@ class PostForm(forms.ModelForm):
     def clean_image(self):
         image = self.cleaned_data.get("image")
         if image:
-            validate_image_file(image)
+            try:
+                validate_image_file(image)
+            except forms.ValidationError as e:
+                raise e
         return image
 
     def clean(self):
@@ -34,6 +38,9 @@ class PostForm(forms.ModelForm):
         if post_type == "link":
             if not url:
                 self.add_error("url", "URL is required for link posts.")
+            else:
+                if not check_url_safety(url):
+                    self.add_error("url", "URL flagged as unsafe.")
             if body:
                 self.add_error("body", "Body must be empty for link posts.")
             if image:
