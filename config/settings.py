@@ -65,11 +65,18 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    CSP_DEFAULT_SRC = ("'self'",)
+    CSP_SCRIPT_SRC = ("'self'",)  # htmx is local
+    CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+    CSP_IMG_SRC = ("'self'", "https:", "data:")
+    CSP_CONNECT_SRC = ("'self'",)
+    CSP_FRAME_ANCESTORS = ("'self'",)
+    CSP_UPGRADE_INSECURE_REQUESTS = True
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
             "script-src": ("'self'",),  # htmx is local
-            "style-src": ("'self'", "'unsafe-inline'"),  # inline styles allowed for now
+            "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": ("'self'", "https:", "data:"),
             "connect-src": ("'self'",),
             "frame-ancestors": ("'self'",),
