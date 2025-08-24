@@ -52,7 +52,7 @@ class CommentReplyTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
     def test_rate_limit(self):
-        for i in range(30):
+        for i in range(3):
             self.client.post(self.url, {"body": f"c{i}"}, HTTP_HX_REQUEST="true")
-        resp = self.client.post(self.url, {"body": "c30"}, HTTP_HX_REQUEST="true")
+        resp = self.client.post(self.url, {"body": "c3"}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 429)
