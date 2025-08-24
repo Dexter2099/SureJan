@@ -2,7 +2,6 @@
 from pathlib import Path
 import os
 import dj_database_url
-from csp.constants import SELF, UNSAFE_INLINE  # django-csp v4
 
 # -----------------------------------------------------------------------------
 # Base
@@ -55,6 +54,17 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    CONTENT_SECURITY_POLICY = {
+        "DIRECTIVES": {
+            "default-src": ("'self'",),
+            "script-src": ("'self'",),  # htmx is local
+            "style-src": ("'self'", "'unsafe-inline'"),  # inline styles allowed for now
+            "img-src": ("'self'", "https:", "data:"),
+            "connect-src": ("'self'",),
+            "frame-ancestors": ("'self'",),
+            "upgrade-insecure-requests": True,
+        }
+    }
 
 # -----------------------------------------------------------------------------
 # Apps / Middleware
