@@ -14,17 +14,29 @@
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   </head>
   <body>
-    <header class="site-header" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-bottom:1px solid #ccc;">
-      <a href="/">
-        <img src="{% static 'SureJanLogo.png' %}" alt="SureJan Logo" class="site-logo">
-      </a>
-      <a href="{% url 'mission' %}" class="brand-mission" hx-boost="false">Our Mission</a>
-      <nav class="subreddit-links" style="display:flex; gap:12px;">
-        <a href="/r/news/">NEWS</a>
-        <a href="/r/brisbane/">BRISBANE</a>
-      </nav>
-      {% include "partials/user_box.html" %}
+    <header class="site-header">
+      <div class="header-inner header-3col">
+
+        <!-- Left: Logo + Our Mission -->
+        <div class="hdr-left">
+          <a href="{% url 'home' %}" class="site-brand"><img src="{% static 'SureJanLogo.png' %}" alt="SureJan" class="site-logo"></a>
+          <a href="{% url 'mission' %}" class="brand-mission" hx-boost="false">Our Mission</a>
+        </div>
+
+        <!-- Center: NEWS / BRISBANE -->
+        <nav class="hdr-center" aria-label="Communities">
+          <a href="{% url 'community' 'news' %}">NEWS</a>
+          <a href="{% url 'community' 'brisbane' %}">BRISBANE</a>
+        </nav>
+
+        <!-- Right: Login/Register or username menu -->
+        <div class="hdr-right">
+          {% include "partials/user_box.html" %}
+        </div>
+
+      </div>
     </header>
+    {% comment %} old subreddit bar removed in favor of hdr-center {% endcomment %}
 
     <main class="container" style="max-width:980px; margin:16px auto;">
       {% if messages %}
