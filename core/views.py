@@ -440,7 +440,7 @@ def vote_post(request, pk):
         return resp
 
     try:
-        value = int(request.GET.get("v"))
+        value = int(request.GET.get("v") or request.POST.get("v"))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
 
@@ -466,7 +466,7 @@ def vote_comment(request, pk):
         return resp
 
     try:
-        value = int(request.GET.get("v"))
+        value = int(request.GET.get("v") or request.POST.get("v"))
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
 

@@ -36,6 +36,7 @@
       {% block content %}{% endblock %}
     </main>
 
-    {% block scripts %}{% endblock %}
-  </body>
-</html>
+      {% block scripts %}{% endblock %}
+      {% include "core/_htmx_csrf.html" %}
+    </body>
+  </html>
