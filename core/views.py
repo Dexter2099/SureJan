@@ -33,6 +33,10 @@ def healthz(_request):
     return HttpResponse("ok", content_type="text/plain")
 
 
+def mission(request):
+    return render(request, "core/mission.html")
+
+
 class SignupForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
