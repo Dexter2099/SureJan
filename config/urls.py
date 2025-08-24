@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 from core import views as core
 
 urlpatterns = [
-    path("_sj-admin-8h9ks3/", admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     path("healthz", lambda request: HttpResponse("ok"), name="healthz"),
     path("accounts/login/", core.RateLimitedLoginView.as_view(), name="login"),
     path(

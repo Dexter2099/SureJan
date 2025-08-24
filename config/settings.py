@@ -85,6 +85,16 @@ if not DEBUG:
     }
 
 # -----------------------------------------------------------------------------
+# Admin
+# -----------------------------------------------------------------------------
+ADMIN_URL = os.environ.get("DJANGO_ADMIN_URL", "secret-admin/").strip("/") + "/"
+ADMIN_IP_ALLOWLIST = {
+    ip.strip()
+    for ip in os.environ.get("ADMIN_IP_ALLOWLIST", "").split(",")
+    if ip.strip()
+}
+
+# -----------------------------------------------------------------------------
 # Apps / Middleware
 # -----------------------------------------------------------------------------
 INSTALLED_APPS = [
@@ -101,6 +111,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.AdminIPAllowlistMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
