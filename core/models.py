@@ -4,8 +4,53 @@ from django.db.models import F
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
+from django import forms
+from django.core.files.base import ContentFile
+
+from PIL import Image
+from io import BytesIO
+import os
 
 from .ranking import recompute_post_ranks
+
+
+MAX_BYTES = 5 * 1024 * 1024
+
+
+def validate_image_file(f):
+    if f.size > MAX_BYTES:
+        raise forms.ValidationError("Image too large (max 5MB).")
+    try:
+        Image.open(f).verify()
+    except Exception:
+        raise forms.ValidationError("Upload must be a valid image.")
+    finally:
+        f.seek(0)
+
+
+def _resize_img(file, max_px=1600):
+    file.seek(0)
+    img = Image.open(file)
+    img = img.convert("RGB")
+    img.thumbnail((max_px, max_px), Image.LANCZOS)
+    buf = BytesIO()
+    img.save(buf, format="JPEG", quality=85, optimize=True)
+    name, _ = os.path.splitext(getattr(file, "name", "image"))
+    return ContentFile(buf.getvalue(), name=f"{name}.jpg")
+
+
+def _make_thumb(file, height=400):
+    file.seek(0)
+    img = Image.open(file)
+    img = img.convert("RGB")
+    w, h = img.size
+    if h > height:
+        ratio = height / float(h)
+        img = img.resize((int(w * ratio), height), Image.LANCZOS)
+    buf = BytesIO()
+    img.save(buf, format="JPEG", quality=80, optimize=True)
+    name, _ = os.path.splitext(getattr(file, "name", "thumb"))
+    return ContentFile(buf.getvalue(), name=f"{name}_thumb.jpg")
 
 
 class Community(models.Model):
@@ -41,7 +86,12 @@ class Post(models.Model):
     title = models.CharField(max_length=300)
     body = models.TextField(blank=True, null=True)
     url = models.URLField(blank=True, null=True)
-    image = models.ImageField(upload_to="posts/", blank=True, null=True)
+    image = models.ImageField(
+        upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
+    )
+    image_thumb = models.ImageField(
+        upload_to="posts/thumbs/", blank=True, null=True
+    )
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)
@@ -61,6 +111,13 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         recompute = kwargs.pop("recompute_hot", True)
+
+        if self.image:
+            resized = _resize_img(self.image)
+            thumb = _make_thumb(resized)
+            self.image.save(resized.name, resized, save=False)
+            self.image_thumb.save(thumb.name, thumb, save=False)
+
         super().save(*args, **kwargs)
         if recompute and not kwargs.get("update_fields"):
             self.recompute_hot()
