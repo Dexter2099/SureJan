@@ -23,6 +23,8 @@ from django.db.models import F
 from django import forms
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
+from django.db import connections
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
@@ -36,7 +38,13 @@ def _is_banned(user):
 
 
 def healthz(_request):
-    """Simple health check endpoint."""
+    """Health check verifying database and cache connectivity."""
+    try:
+        connections["default"].cursor()
+        cache.set("healthz", "ok", 1)
+        cache.get("healthz")
+    except Exception:
+        return HttpResponse("unhealthy", status=500, content_type="text/plain")
     return HttpResponse("ok", content_type="text/plain")
 
 

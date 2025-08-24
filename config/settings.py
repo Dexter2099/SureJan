@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
 DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
 
-if not DEBUG and (dsn := os.getenv("SENTRY_DSN")):
+if dsn := os.getenv("SENTRY_DSN"):
     sentry_sdk.init(
         dsn=dsn,
         integrations=[DjangoIntegration()],
