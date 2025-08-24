@@ -6,6 +6,19 @@ urlpatterns = [
     # Home / front page
     path("", core_views.home, name="home"),
 
+    # Recovery codes
+    path("accounts/recovery-codes/", core_views.recovery_codes, name="recovery_codes"),
+    path(
+        "accounts/recovery-codes/download/",
+        core_views.download_recovery_codes,
+        name="download_recovery_codes",
+    ),
+    path(
+        "accounts/security/recovery-codes/regenerate/",
+        core_views.regenerate_recovery_codes,
+        name="recovery_codes_regenerate",
+    ),
+
     # Create a community
     path("c/new/", core_views.create_community, name="community_create"),
 

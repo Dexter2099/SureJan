@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Log in</h1>
+<div class="notice">Password reset will be enabled soon. For now, keep your password safe.</div>
 <form method="post" action="{% url 'login' %}" hx-boost="false" hx-swap="none">
-  {% csrf_token %}{{ form.as_p }}<button>Log in</button>
+  {% csrf_token %}
+  {{ form.as_p }}
+  {% if captcha_question %}
+    <p>Prove you’re human: {{ captcha_question }}<br>
+    <input type="number" name="captcha" required></p>
+  {% endif %}
+  <button>Log in</button>
 </form>
-<p><a href="{% url 'password_reset' %}" hx-boost="false">Forgot your password?</a></p>
 <p>No account? <a href="{% url 'signup' %}">Sign up</a></p>
 {% endblock %}

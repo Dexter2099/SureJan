@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Recovery Codes</h1>
+<p>Save these codes somewhere safe. They will only be shown once.</p>
+<ul>
+  {% for code in codes %}
+    <li>{{ code }}</li>
+  {% endfor %}
+</ul>
+<p><a href="{% url 'download_recovery_codes' %}">Download</a></p>
+<form method="post" action="{% url 'recovery_codes_regenerate' %}">
+  {% csrf_token %}
+  <button type="submit">Regenerate Codes</button>
+</form>
+{% endblock %}
