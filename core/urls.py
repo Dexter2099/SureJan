@@ -5,6 +5,7 @@ from . import views as core_views
 urlpatterns = [
     # Home / front page
     path("", core_views.home, name="home"),
+    path("mission/", core_views.mission, name="mission"),
 
     # Recovery codes
     path("accounts/recovery-codes/", core_views.recovery_codes, name="recovery_codes"),
