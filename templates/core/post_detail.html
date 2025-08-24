@@ -1,21 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
-<article class="post">
-  <h1>{{ post.title }}</h1>
-  {% if post.image %}
-    <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-  {% endif %}
-  {% if post.body %}
-    <p>{{ post.body }}</p>
-  {% endif %}
-  {% if post.url %}
-    <p><a href="{{ post.url }}">{{ post.url }}</a></p>
-  {% endif %}
-</article>
+<div class="post-page">
+  <article class="post-thing">
+    <div class="vote">
+      <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
+      <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
+      <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+    </div>
+    <div class="post-body">
+      <header class="post-head">
+        <h1>
+          {% if post.url %}<a href="{{ post.url }}" rel="noopener nofollow">{{ post.title }}</a>{% else %}{{ post.title }}{% endif %}
+        </h1>
+        <div class="post-meta">
+          submitted {{ post.created_at|timesince }} ago by
+          <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
+          to <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
+        </div>
+      </header>
+      <div class="post-content">
+        {% if post.image %}
+          <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        {% endif %}
+        {% if post.body %}
+          <p>{{ post.body }}</p>
+        {% endif %}
+        {% if post.url %}
+          <p><a href="{{ post.url }}">{{ post.url }}</a></p>
+        {% endif %}
+      </div>
+      <nav class="post-actions">
+        <a href="#comments">{{ post.comment_count }} comments</a>
+        <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
+        <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
+      </nav>
+    </div>
+  </article>
+</div>
+
 <div id="comments">
   {% for comment in comments %}
-    {% include "core/partials/comment.html" %}
+    {% if not comment.parent_id %}
+      {% include "core/partials/comment.html" %}
+    {% endif %}
   {% empty %}
     <p>No comments yet.</p>
   {% endfor %}

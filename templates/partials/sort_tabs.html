@@ -1,18 +1,17 @@
 {% comment %} Reusable sort nav for home/community {% endcomment %}
 <nav id="sort-tabs" class="sort-tabs">
-  <ul>
-    {% for key,label in sort_tabs %}
-      {% if community_slug %}
-        {% if key == 'wiki' %}
-          <li><a href="{% url 'community_wiki' community_slug %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a></li>
-        {% else %}
-          <li><a href="{% url 'community' community_slug %}?sort={{ key }}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a></li>
-        {% endif %}
+  {% for key,label in sort_tabs %}
+    {% if community_slug %}
+      {% if key == 'wiki' %}
+        <a href="{% url 'community_wiki' community_slug %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
       {% else %}
-        {% if key != 'wiki' %}
-          <li><a href="/?sort={{ key }}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a></li>
-        {% endif %}
+        <a href="{% url 'community' community_slug %}?sort={{ key }}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
       {% endif %}
-    {% endfor %}
-  </ul>
+    {% else %}
+      {% if key != 'wiki' %}
+        <a href="/?sort={{ key }}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
 </nav>
+
