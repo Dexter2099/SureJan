@@ -13,6 +13,7 @@ from django.contrib.auth.views import LoginView
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.admin.views.decorators import staff_member_required
 from django_ratelimit.decorators import ratelimit, is_ratelimited
 from django.template.loader import render_to_string
 
@@ -510,15 +511,29 @@ def vote_comment(request, pk):
 @login_required
 @require_http_methods(["GET", "POST"])
 @csrf_protect
-def report(request, target_type, pk):
+def report(request):
+    """Allow users to report posts or comments."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-    if target_type == "post":
-        target = get_object_or_404(Post, pk=pk)
-    elif target_type == "comment":
-        target = get_object_or_404(Comment, pk=pk)
+
+    if request.method == "POST":
+        target_type = request.POST.get("target_type")
+        object_id = request.POST.get("object_id")
     else:
+        target_type = request.GET.get("target_type")
+        object_id = request.GET.get("object_id")
+
+    if target_type not in {"post", "comment"}:
         return HttpResponseBadRequest("Invalid target")
+
+    try:
+        object_id = int(object_id)
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid object id")
+
+    model = Post if target_type == "post" else Comment
+    target = get_object_or_404(model, pk=object_id)
+
     if request.method == "POST":
         reason = request.POST.get("reason", "")
         Report.objects.create(
@@ -528,7 +543,19 @@ def report(request, target_type, pk):
             reason=reason,
         )
         return render(request, "core/report_form.html", {"thanks": True})
-    return render(request, "core/report_form.html", {"target": target})
+
+    return render(
+        request,
+        "core/report_form.html",
+        {"target": target, "target_type": target_type, "object_id": object_id},
+    )
+
+
+@staff_member_required
+def report_list(request):
+    """Simple listing view for recent reports."""
+    reports = Report.objects.select_related("reporter", "content_type").order_by("-created_at")
+    return render(request, "core/report_list.html", {"reports": reports})
 
 
 def community_wiki(request, slug):

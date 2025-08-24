@@ -43,7 +43,8 @@ urlpatterns = [
     path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
     # Post moderation
     path("post/<int:pk>/delete/", core_views.post_delete, name="post_delete"),
-    path("report/<str:target_type>/<int:pk>/", core_views.report, name="report"),
+    path("report/", core_views.report, name="report"),
+    path("reports/", core_views.report_list, name="report_list"),
 
     # User pages
     path("u/<str:username>/", core_views.user_overview, name="user_overview"),

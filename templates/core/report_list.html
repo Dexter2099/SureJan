@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Reports</h1>
+<ul>
+  {% for r in reports %}
+  <li>{{ r.created_at }} - {{ r.reporter }} reported {{ r.content_type }} {{ r.object_id }}: {{ r.reason }}</li>
+  {% empty %}
+  <li>No reports.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
