@@ -20,14 +20,13 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.db.models import F
-from django.utils import timezone
-from datetime import timedelta
 from django import forms
 
 from django.contrib.contenttypes.models import ContentType
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, RecoveryCode, get_points, Report
+from .models import Comment, Community, Post, RecoveryCode, Report
+from .ratelimit import ratelimit as age_ratelimit
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 
@@ -167,12 +166,6 @@ def _store_codes(user, codes):
     RecoveryCode.objects.bulk_create(
         [RecoveryCode(user=user, code_hash=make_password(c)) for c in codes]
     )
-
-
-def is_new_user(user):
-    return (timezone.now() - user.date_joined) < timedelta(hours=24) or get_points(user) == 0
-
-
 @login_required
 def recovery_codes(request):
     codes = request.session.get("new_recovery_codes")
@@ -304,25 +297,15 @@ def community(request, slug):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@age_ratelimit(action="submit_post", limit=(3, 10), window=60)
 def submit_post(request, slug):
     """Submit a new post to a community."""
 
     community = get_object_or_404(Community, slug=slug)
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-    rate = "3/m" if is_new_user(request.user) else "10/m"
-    limited = is_ratelimited(
-        request,
-        key="user",
-        rate=rate,
-        method=["POST"],
-        increment=True,
-        group="submit_post",
-    )
 
     if request.method == "POST":
-        if limited:
-            return render(request, "429.html", status=429)
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
@@ -350,15 +333,11 @@ def post_detail(request, slug, post_id, post_slug):
 
 @login_required
 @require_POST
+@age_ratelimit(action="comment_reply", limit=(3, 10), window=60)
 def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-    rate = "3/m" if is_new_user(request.user) else "10/m"
-    if is_ratelimited(
-        request, key="user", rate=rate, increment=True, group="comment_reply"
-    ):
-        return render(request, "429.html", status=429)
 
     post = get_object_or_404(Post, pk=post_id)
 

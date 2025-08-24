@@ -38,3 +38,12 @@
 
 **Admin-only note for MVP setup:** seed two communities (News, Brisbane) via a management command or admin page.
 
+## Rate Limits
+
+Post and comment creation are rate limited based on account age:
+
+* New users (signed up within 24 hours or with zero points) may create up to 3 posts or comments per minute.
+* Established users may create up to 10 posts or comments per minute.
+
+Exceeding these limits returns an HTTP 429 response that tells you how long to wait before trying again.
+
