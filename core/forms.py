@@ -1,13 +1,19 @@
 from django import forms
 from django.utils.text import slugify
 
-from .models import Comment, Post, Community
+from .models import Comment, Post, Community, validate_image_file
 
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["post_type", "title", "body", "url", "image"]
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if image:
+            validate_image_file(image)
+        return image
 
     def clean(self):
         cleaned_data = super().clean()
