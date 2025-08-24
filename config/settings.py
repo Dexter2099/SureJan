@@ -59,6 +59,8 @@ CSRF_COOKIE_SECURE = not DEBUG
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
+    # Exempt Fly’s HTTP health probe hitting internal :8000
+    SECURE_REDIRECT_EXEMPT = [r"^healthz$"]
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
