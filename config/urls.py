@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.http import HttpResponse
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 from core import views as core
 
@@ -19,6 +20,9 @@ urlpatterns = [
     ),
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/signup/", core.signup, name="signup"),
+    path("terms/", TemplateView.as_view(template_name="legal/terms.html"), name="terms"),
+    path("privacy/", TemplateView.as_view(template_name="legal/privacy.html"), name="privacy"),
+    path("rules/", TemplateView.as_view(template_name="legal/rules.html"), name="rules"),
     path("", include("core.urls")),
 ]
 
