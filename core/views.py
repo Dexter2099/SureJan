@@ -170,7 +170,7 @@ def _store_codes(user, codes):
 
 
 def is_new_user(user):
-    return (timezone.now() - user.date_joined) < timedelta(hours=24) or get_points(user) <= 0
+    return (timezone.now() - user.date_joined) < timedelta(hours=24) or get_points(user) == 0
 
 
 @login_required
