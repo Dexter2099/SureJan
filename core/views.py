@@ -408,12 +408,10 @@ def comment_reply_form(request, post_id):
     return HttpResponse(html)
 
 
-@login_required
 @require_POST
 @csrf_protect
 def post_delete(request, pk):
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
+    """Delete a post; only staff members may perform this action."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
     post = get_object_or_404(Post, pk=pk)
