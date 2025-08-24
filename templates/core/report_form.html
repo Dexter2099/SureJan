@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Report</h1>
+{% if thanks %}
+<p>Thanks for your report.</p>
+{% else %}
+<form method="post">
+  {% csrf_token %}
+  <label for="id_reason">Reason:</label>
+  <textarea id="id_reason" name="reason" required></textarea>
+  <button type="submit">Submit</button>
+</form>
+{% endif %}
+{% endblock %}

@@ -24,10 +24,16 @@ from django.utils import timezone
 from datetime import timedelta
 from django import forms
 
+from django.contrib.contenttypes.models import ContentType
+
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, RecoveryCode, get_points
+from .models import Comment, Community, Post, RecoveryCode, get_points, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
+
+
+def _is_banned(user):
+    return getattr(getattr(user, "profile", None), "is_banned", False)
 
 
 def healthz(_request):
@@ -190,6 +196,8 @@ def download_recovery_codes(request):
 @login_required
 @require_POST
 def regenerate_recovery_codes(request):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     codes = _gen_codes()
     _store_codes(request.user, codes)
     request.session["new_recovery_codes"] = codes
@@ -300,6 +308,8 @@ def submit_post(request, slug):
     """Submit a new post to a community."""
 
     community = get_object_or_404(Community, slug=slug)
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     rate = "3/m" if is_new_user(request.user) else "10/m"
     limited = is_ratelimited(
         request,
@@ -342,6 +352,8 @@ def post_detail(request, slug, post_id, post_slug):
 @require_POST
 def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     rate = "3/m" if is_new_user(request.user) else "10/m"
     if is_ratelimited(
         request, key="user", rate=rate, increment=True, group="comment_reply"
@@ -412,8 +424,24 @@ def comment_reply_form(request, post_id):
 @login_required
 @require_POST
 @csrf_protect
+def post_delete(request, pk):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    post = get_object_or_404(Post, pk=pk)
+    slug = post.community.slug
+    post.delete()
+    return redirect("community", slug=slug)
+
+
+@login_required
+@require_POST
+@csrf_protect
 def comment_delete(request, pk):
     """Delete a comment if the requester is the author or staff."""
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
 
     comment = get_object_or_404(Comment, pk=pk)
     if request.user != comment.author and not request.user.is_staff:
@@ -447,6 +475,8 @@ def vote_post(request, pk):
         resp = HttpResponse("Too many requests", status=429)
         resp.headers["X-RateLimit-Triggered"] = "1"
         return resp
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
 
     try:
         value = int(request.GET.get("v") or request.POST.get("v"))
@@ -473,6 +503,8 @@ def vote_comment(request, pk):
         resp = HttpResponse("Too many requests", status=429)
         resp.headers["X-RateLimit-Triggered"] = "1"
         return resp
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
 
     try:
         value = int(request.GET.get("v") or request.POST.get("v"))
@@ -486,6 +518,30 @@ def vote_comment(request, pk):
 
     score = Comment.objects.get(pk=pk).score
     return HttpResponse(f"<span id='comment-score-{pk}'>{score}</span>")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+@csrf_protect
+def report(request, target_type, pk):
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if target_type == "post":
+        target = get_object_or_404(Post, pk=pk)
+    elif target_type == "comment":
+        target = get_object_or_404(Comment, pk=pk)
+    else:
+        return HttpResponseBadRequest("Invalid target")
+    if request.method == "POST":
+        reason = request.POST.get("reason", "")
+        Report.objects.create(
+            reporter=request.user,
+            content_type=ContentType.objects.get_for_model(target),
+            object_id=target.pk,
+            reason=reason,
+        )
+        return render(request, "core/report_form.html", {"thanks": True})
+    return render(request, "core/report_form.html", {"target": target})
 
 
 def community_wiki(request, slug):
@@ -576,6 +632,8 @@ def create_community(request):
     if not request.user.is_staff:
         from django.core.exceptions import PermissionDenied
         raise PermissionDenied
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
     if request.method == "POST":
         if is_ratelimited(request, group="community-create", key="user", rate="5/m", method=["POST"], increment=True):
             return HttpResponse(status=429)

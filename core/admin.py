@@ -1,6 +1,8 @@
 from django.contrib import admin, messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Community, Post, Comment, Vote, UserProfile
+from .models import Community, Post, Comment, Vote, UserProfile, Report
 
 
 @admin.register(Community)
@@ -80,6 +82,19 @@ class VoteAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "target_type", "target_id", "value")
 
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "points_cached")
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = [UserProfileInline]
+
+
+admin.site.unregister(get_user_model())
+admin.site.register(get_user_model(), UserAdmin)
+
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ("id", "reporter", "content_type", "object_id", "created_at")
