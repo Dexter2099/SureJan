@@ -12,6 +12,8 @@ from django.contrib.contenttypes.models import ContentType
 from PIL import Image
 from io import BytesIO
 import os
+from datetime import timedelta
+from django.utils import timezone
 
 from .ranking import recompute_post_ranks
 
@@ -107,6 +109,15 @@ class Post(models.Model):
     controversy = models.FloatField(default=0, db_index=True)
     best_rank = models.FloatField(default=0, db_index=True)
     comment_count = models.IntegerField(default=0)
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -139,6 +150,36 @@ class Post(models.Model):
             target_type="post", target_id=self.pk, value=-1
         ).count()
         return recompute_post_ranks(self, up, down)
+
+    def can_author_delete(self, user, minutes=15):
+        """Author may delete within N minutes of creation; staff always allowed."""
+        if user.is_staff:
+            return True
+        if user != self.author or self.is_deleted:
+            return False
+        return (timezone.now() - self.created_at) <= timedelta(minutes=minutes)
+
+    def soft_delete(self, by_user):
+        """Mark deleted and scrub sensitive fields; keep thread intact."""
+        from django.utils import timezone
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.deleted_by = by_user
+        # Scrub content fields if your model has them
+        if hasattr(self, "body"):
+            self.body = ""
+        if hasattr(self, "url"):
+            self.url = ""
+        if hasattr(self, "link"):
+            self.link = ""
+        # Remove images if present to avoid stale URLs
+        if hasattr(self, "image") and self.image:
+            self.image.delete(save=False)
+            self.image = None
+        if hasattr(self, "image_thumb") and self.image_thumb:
+            self.image_thumb.delete(save=False)
+            self.image_thumb = None
+        self.save()
 
 
 class Comment(models.Model):
