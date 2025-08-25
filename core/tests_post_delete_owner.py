@@ -71,6 +71,18 @@ class PostDeleteOwnerTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Post.objects.filter(pk=post.pk).exists())
 
+    def test_banned_user_cannot_delete(self):
+        self.user.profile.is_banned = True
+        self.user.profile.save(update_fields=["is_banned"])
+        post = Post.objects.create(
+            community=self.community, author=self.user, post_type="text", title="Nope"
+        )
+        url = reverse("post_delete_owner", args=[post.pk])
+        self.client.login(username="alice", password="pwd")
+        resp = self.client.post(url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 403)
+        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+
     def test_rate_limit(self):
         self.client.login(username="alice", password="pwd")
         posts = [

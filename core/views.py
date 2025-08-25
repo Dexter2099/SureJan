@@ -448,8 +448,8 @@ def comment_reply_form(request, post_id):
 @ratelimit(key="user", rate="10/m", block=False)
 def post_delete_owner(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    # Block banned users here if you have is_banned checks
-    # if hasattr(request.user, "profile") and request.user.profile.is_banned: return HttpResponseForbidden()
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
 
     allowed = post.can_author_delete(request.user, minutes=15)
     if not allowed:
@@ -459,6 +459,7 @@ def post_delete_owner(request, pk):
 
     has_comments = Comment.objects.filter(post=post).exists()
     if has_comments:
+        post_slug = slugify(post.title)
         post.soft_delete(request.user)
         # HTMX: swap the row to a deleted stub in feeds
         if request.headers.get("HX-Request") == "true":
@@ -468,13 +469,14 @@ def post_delete_owner(request, pk):
             "post_detail",
             slug=post.community.slug,
             post_id=post.id,
-            post_slug=slugify(post.title),
+            post_slug=post_slug,
         )
     else:
+        community_slug = post.community.slug
         post.delete()
         if request.headers.get("HX-Request") == "true":
             return HttpResponse("")  # hx-swap="outerHTML" removes the row
-        return redirect("community", slug=post.community.slug)
+        return redirect("community", slug=community_slug)
 
 
 @require_POST
