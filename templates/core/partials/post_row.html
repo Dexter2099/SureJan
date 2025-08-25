@@ -20,11 +20,9 @@
       </h2>
       {% if post.image_thumb or post.image %}
         {% if post.image_thumb %}
-          <img src="{{ post.image_thumb.url }}" alt="" class="post-image"
-               loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <img src="{{ post.image_thumb.url }}" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         {% else %}
-          <img src="{{ post.image.url }}" alt="" class="post-image"
-               loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <img src="{{ post.image.url }}" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         {% endif %}
       {% endif %}
     {% endif %}
