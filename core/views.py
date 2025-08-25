@@ -458,6 +458,43 @@ def post_delete(request, pk):
 @login_required
 @require_POST
 @csrf_protect
+def post_delete_owner(request, pk):
+    """Allow authors (within a time window) or staff to delete their posts."""
+    post = get_object_or_404(Post, pk=pk)
+
+    if not (request.user.is_staff or post.can_author_delete(request.user, 15)):
+        return HttpResponseForbidden("Forbidden")
+
+    slug = post.community.slug
+
+    if post.comment_count > 0:
+        post.is_deleted = True
+        post.title = ""
+        post.body = ""
+        post.url = None
+        if post.image:
+            post.image.delete(save=False)
+        if post.image_thumb:
+            post.image_thumb.delete(save=False)
+        post.image = None
+        post.image_thumb = None
+        post.save()
+        if request.headers.get("HX-Request") == "true":
+            html = render_to_string(
+                "core/partials/post_row.html", {"post": post}, request=request
+            )
+            return HttpResponse(html)
+        return redirect("community", slug=slug)
+
+    post.delete()
+    if request.headers.get("HX-Request") == "true":
+        return HttpResponse("")
+    return redirect("community", slug=slug)
+
+
+@login_required
+@require_POST
+@csrf_protect
 def comment_delete(request, pk):
     """Delete a comment if the requester is the author or staff."""
     if _is_banned(request.user):

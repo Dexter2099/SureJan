@@ -8,6 +8,8 @@ from django import forms
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+from datetime import timedelta
 
 from PIL import Image
 from io import BytesIO
@@ -107,6 +109,7 @@ class Post(models.Model):
     controversy = models.FloatField(default=0, db_index=True)
     best_rank = models.FloatField(default=0, db_index=True)
     comment_count = models.IntegerField(default=0)
+    is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -139,6 +142,13 @@ class Post(models.Model):
             target_type="post", target_id=self.pk, value=-1
         ).count()
         return recompute_post_ranks(self, up, down)
+
+    def can_author_delete(self, user, minutes):
+        """Return True if the user is the author and within the delete window."""
+        if user != self.author:
+            return False
+        window = self.created_at + timedelta(minutes=minutes)
+        return timezone.now() <= window
 
 
 class Comment(models.Model):
