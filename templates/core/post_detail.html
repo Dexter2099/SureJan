@@ -36,7 +36,9 @@
         {% endif %}
       </div>
       <nav class="post-actions">
-        <a href="#comments">{{ post.comment_count }} comments</a>
+        <a href="#comments">
+          {{ post.comment_count }} comment{{ post.comment_count|pluralize }}
+        </a>
         <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
         <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
         {% if request.user.is_authenticated and not post.is_deleted %}
