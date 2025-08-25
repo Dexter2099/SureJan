@@ -3,6 +3,7 @@
 import random
 import secrets
 import string
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -14,11 +15,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.views.decorators import staff_member_required
-from django_ratelimit.decorators import ratelimit, is_ratelimited
+from django_ratelimit.decorators import ratelimit
 from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import F
 from django import forms
@@ -26,16 +28,33 @@ from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db import connections
+from django_ratelimit.core import is_ratelimited
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
-from .ratelimit import ratelimit as age_ratelimit
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 
 
 def _is_banned(user):
     return getattr(getattr(user, "profile", None), "is_banned", False)
+
+
+def is_new_user(u):
+    if not u.is_authenticated:
+        return True
+    return (timezone.now() - u.date_joined) < timedelta(hours=24)
+
+
+def limit_or_429(request, group, rate):
+    return is_ratelimited(
+        request,
+        group=group,
+        key="user",
+        rate=rate,
+        method=["POST"],
+        increment=True,
+    )
 
 
 def healthz(_request):
@@ -306,7 +325,6 @@ def community(request, slug):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-@age_ratelimit(action="submit_post", limit=(3, 10), window=60)
 def submit_post(request, slug):
     """Submit a new post to a community."""
 
@@ -315,6 +333,12 @@ def submit_post(request, slug):
         return HttpResponseForbidden("Account banned")
 
     if request.method == "POST":
+        if is_new_user(request.user):
+            if limit_or_429(request, "submit_new_user", "3/m"):
+                return render(request, "429.html", status=429)
+        else:
+            if limit_or_429(request, "submit_established", "10/m"):
+                return render(request, "429.html", status=429)
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
@@ -344,11 +368,17 @@ def post_detail(request, slug, post_id, post_slug):
 
 @login_required
 @require_POST
-@age_ratelimit(action="comment_reply", limit=(3, 10), window=60)
 def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
+
+    if is_new_user(request.user):
+        if limit_or_429(request, "comment_new_user", "3/m"):
+            return render(request, "429.html", status=429)
+    else:
+        if limit_or_429(request, "comment_established", "10/m"):
+            return render(request, "429.html", status=429)
 
     post = get_object_or_404(Post, pk=post_id)
 

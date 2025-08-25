@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import Comment, Community, Post
 
@@ -55,4 +58,17 @@ class CommentReplyTests(TestCase):
         for i in range(3):
             self.client.post(self.url, {"body": f"c{i}"}, HTTP_HX_REQUEST="true")
         resp = self.client.post(self.url, {"body": "c3"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 429)
+
+    def test_rate_limit_established_user(self):
+        self.user.date_joined = timezone.now() - timedelta(days=2)
+        self.user.save()
+        for i in range(10):
+            resp = self.client.post(
+                self.url,
+                {"body": f"e{i}"},
+                HTTP_HX_REQUEST="true",
+            )
+            self.assertNotEqual(resp.status_code, 429)
+        resp = self.client.post(self.url, {"body": "e10"}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 429)
