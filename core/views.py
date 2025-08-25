@@ -443,6 +443,40 @@ def comment_reply_form(request, post_id):
     return HttpResponse(html)
 
 
+@login_required
+@require_POST
+@ratelimit(key="user", rate="10/m", block=False)
+def post_delete_owner(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    # Block banned users here if you have is_banned checks
+    # if hasattr(request.user, "profile") and request.user.profile.is_banned: return HttpResponseForbidden()
+
+    allowed = post.can_author_delete(request.user, minutes=15)
+    if not allowed:
+        return HttpResponseForbidden("Delete window expired or not author.")
+    if getattr(request, "limited", False):
+        return HttpResponse("Too many requests", status=429)
+
+    has_comments = Comment.objects.filter(post=post).exists()
+    if has_comments:
+        post.soft_delete(request.user)
+        # HTMX: swap the row to a deleted stub in feeds
+        if request.headers.get("HX-Request") == "true":
+            html = render_to_string("core/partials/post_deleted_stub.html", {"post": post})
+            return HttpResponse(html)
+        return redirect(
+            "post_detail",
+            slug=post.community.slug,
+            post_id=post.id,
+            post_slug=slugify(post.title),
+        )
+    else:
+        post.delete()
+        if request.headers.get("HX-Request") == "true":
+            return HttpResponse("")  # hx-swap="outerHTML" removes the row
+        return redirect("community", slug=post.community.slug)
+
+
 @require_POST
 @csrf_protect
 def post_delete(request, pk):

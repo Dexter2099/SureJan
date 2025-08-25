@@ -8,6 +8,8 @@ from django import forms
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from datetime import timedelta
+from django.utils import timezone
 
 from PIL import Image
 from io import BytesIO
@@ -139,6 +141,29 @@ class Post(models.Model):
             target_type="post", target_id=self.pk, value=-1
         ).count()
         return recompute_post_ranks(self, up, down)
+
+    def can_author_delete(self, user, minutes=15):
+        """Return whether a user may delete this post."""
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if user.is_staff:
+            return True
+        if user != self.author:
+            return False
+        return timezone.now() - self.created_at <= timedelta(minutes=minutes)
+
+    def soft_delete(self, user):
+        """Soft delete the post, keeping a tombstone record."""
+        self.title = "[deleted]"
+        self.body = ""
+        self.url = ""
+        if self.image:
+            self.image.delete(save=False)
+            self.image = None
+        if self.image_thumb:
+            self.image_thumb.delete(save=False)
+            self.image_thumb = None
+        self.save(update_fields=["title", "body", "url", "image", "image_thumb"])
 
 
 class Comment(models.Model):
