@@ -55,6 +55,8 @@ if _extra_csrf:
 # Respect Fly proxy for secure detection
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG
 
 if not DEBUG:
