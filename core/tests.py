@@ -1,10 +1,13 @@
 """Tests for post submission and voting endpoints."""
 
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from io import BytesIO
 from PIL import Image
 
@@ -97,6 +100,22 @@ class SubmitPostTests(TestCase):
         resp = self.client.post(
             url,
             {"post_type": "text", "title": "H3", "body": "", "url": ""},
+        )
+        self.assertEqual(resp.status_code, 429)
+
+    def test_rate_limit_established_user(self):
+        self.user.date_joined = timezone.now() - timedelta(days=2)
+        self.user.save()
+        url = reverse("submit_post", args=[self.community.slug])
+        for i in range(10):
+            resp = self.client.post(
+                url,
+                {"post_type": "text", "title": f"E{i}", "body": "", "url": ""},
+            )
+            self.assertNotEqual(resp.status_code, 429)
+        resp = self.client.post(
+            url,
+            {"post_type": "text", "title": "E10", "body": "", "url": ""},
         )
         self.assertEqual(resp.status_code, 429)
 
