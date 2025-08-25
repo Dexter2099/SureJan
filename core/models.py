@@ -30,26 +30,36 @@ def validate_image_file(f):
         f.seek(0)
 
 
+def _to_rgb(img):  # avoid RGBA in JPEG
+    return img.convert("RGB") if img.mode not in ("L", "RGB") else img
+
+
+def _reencode_jpeg(img: Image.Image, quality=85):
+    buf = BytesIO()
+    img = _to_rgb(img)
+    # no 'exif' param => EXIF stripped
+    img.save(buf, format="JPEG", quality=quality, optimize=True)
+    return ContentFile(buf.getvalue())
+
+
 def _resize_img(file, max_px=1600):
     file.seek(0)
     img = Image.open(file)
-    img = img.convert("RGB")
     img.thumbnail((max_px, max_px), Image.LANCZOS)
-    buf = BytesIO()
-    img.save(buf, format="JPEG", quality=85, optimize=True)
+    new_file = _reencode_jpeg(img, quality=85)
     name, _ = os.path.splitext(getattr(file, "name", "image"))
-    return ContentFile(buf.getvalue(), name=f"{name}.jpg")
+    new_file.name = f"{name}.jpg"
+    return new_file
 
 
 def _make_thumb(file, max_px=400):
     file.seek(0)
     img = Image.open(file)
-    img = img.convert("RGB")
     img.thumbnail((max_px, max_px), Image.LANCZOS)
-    buf = BytesIO()
-    img.save(buf, format="JPEG", quality=80, optimize=True)
+    new_file = _reencode_jpeg(img, quality=80)
     name, _ = os.path.splitext(getattr(file, "name", "thumb"))
-    return ContentFile(buf.getvalue(), name=f"{name}_thumb.jpg")
+    new_file.name = f"{name}_thumb.jpg"
+    return new_file
 
 
 class Community(models.Model):
