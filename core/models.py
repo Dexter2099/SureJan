@@ -14,8 +14,6 @@ from django.utils import timezone
 from PIL import Image
 from io import BytesIO
 import os
-from datetime import timedelta
-from django.utils import timezone
 
 from .ranking import recompute_post_ranks
 
@@ -154,30 +152,6 @@ class Post(models.Model):
         return recompute_post_ranks(self, up, down)
 
     def can_author_delete(self, user, minutes=15):
-codex/add-post-only-owner-delete-view
-        """Return whether a user may delete this post."""
-        if not getattr(user, "is_authenticated", False):
-            return False
-        if user.is_staff:
-            return True
-        if user != self.author:
-            return False
-        return timezone.now() - self.created_at <= timedelta(minutes=minutes)
-
-    def soft_delete(self, user):
-        """Soft delete the post, keeping a tombstone record."""
-        self.title = "[deleted]"
-        self.body = ""
-        self.url = ""
-        if self.image:
-            self.image.delete(save=False)
-            self.image = None
-        if self.image_thumb:
-            self.image_thumb.delete(save=False)
-            self.image_thumb = None
-        self.save(update_fields=["title", "body", "url", "image", "image_thumb"])
-
-        """Author may delete within N minutes of creation; staff always allowed."""
         if user.is_staff:
             return True
         if user != self.author or self.is_deleted:
@@ -185,19 +159,17 @@ codex/add-post-only-owner-delete-view
         return (timezone.now() - self.created_at) <= timedelta(minutes=minutes)
 
     def soft_delete(self, by_user):
-        """Mark deleted and scrub sensitive fields; keep thread intact."""
-        from django.utils import timezone
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.deleted_by = by_user
-        # Scrub content fields if your model has them
+        if hasattr(self, "title"):
+            self.title = "[deleted]"
         if hasattr(self, "body"):
             self.body = ""
-        if hasattr(self, "url"):
-            self.url = ""
         if hasattr(self, "link"):
             self.link = ""
-        # Remove images if present to avoid stale URLs
+        if hasattr(self, "url"):
+            self.url = ""
         if hasattr(self, "image") and self.image:
             self.image.delete(save=False)
             self.image = None
@@ -205,7 +177,6 @@ codex/add-post-only-owner-delete-view
             self.image_thumb.delete(save=False)
             self.image_thumb = None
         self.save()
-main
 
 
 class Comment(models.Model):
