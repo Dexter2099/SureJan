@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load timeutils %}
 
 {% block content %}
 <div class="post-page">
@@ -39,7 +40,7 @@
         <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
         <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
         {% if request.user.is_authenticated and not post.is_deleted %}
-          {% if request.user.is_staff or post.can_author_delete(request.user, 15) %}
+          {% if request.user.is_staff or (request.user.id == post.author_id and post.created_at|within_minutes:15) %}
             <form method="post"
                   action="{% url 'post_delete_owner' post.pk %}"
                   hx-post="{% url 'post_delete_owner' post.pk %}"
