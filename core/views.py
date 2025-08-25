@@ -494,6 +494,23 @@ def post_delete(request, pk):
 @login_required
 @require_POST
 @csrf_protect
+def post_delete_owner(request, pk):
+    """Delete a post if the requester is the author or staff."""
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+
+    post = get_object_or_404(Post, pk=pk)
+    if request.user != post.author and not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+
+    slug = post.community.slug
+    post.delete()
+    return redirect("community", slug=slug)
+
+
+@login_required
+@require_POST
+@csrf_protect
 def comment_delete(request, pk):
     """Delete a comment if the requester is the author or staff."""
     if _is_banned(request.user):

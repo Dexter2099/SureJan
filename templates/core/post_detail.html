@@ -20,20 +20,36 @@
         </div>
       </header>
       <div class="post-content">
-        {% if post.image %}
-          <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-        {% endif %}
-        {% if post.body %}
-          <p>{{ post.body }}</p>
-        {% endif %}
-        {% if post.url %}
-          <p><a href="{{ post.url }}">{{ post.url }}</a></p>
+        {% if post.is_deleted %}
+          <p><em>[deleted by author]</em></p>
+        {% else %}
+          {% if post.image %}
+            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          {% endif %}
+          {% if post.body %}
+            <p>{{ post.body }}</p>
+          {% endif %}
+          {% if post.url %}
+            <p><a href="{{ post.url }}">{{ post.url }}</a></p>
+          {% endif %}
         {% endif %}
       </div>
       <nav class="post-actions">
         <a href="#comments">{{ post.comment_count }} comments</a>
         <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
         <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
+        {% if request.user.is_authenticated and not post.is_deleted %}
+          {% if request.user.is_staff or post.can_author_delete(request.user, 15) %}
+            <form method="post"
+                  action="{% url 'post_delete_owner' post.pk %}"
+                  hx-post="{% url 'post_delete_owner' post.pk %}"
+                  hx-swap="none"
+                  hx-confirm="Delete this post? (If it has comments, only the content will be deleted)">
+              {% csrf_token %}
+              <button type="submit" class="linklike">delete</button>
+            </form>
+          {% endif %}
+        {% endif %}
         {% if user.is_authenticated %}
         <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
         {% endif %}
