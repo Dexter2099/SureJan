@@ -14,8 +14,14 @@
       <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
     {% endif %}
     </h2>
-    {% if post.image or post.image_thumb %}
-      <img src="{{ post.image_thumb.url|default:post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+    {% if post.image_thumb or post.image %}
+      {% if post.image_thumb %}
+        <img src="{{ post.image_thumb.url }}" alt="" class="post-image"
+             loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      {% else %}
+        <img src="{{ post.image.url }}" alt="" class="post-image"
+             loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      {% endif %}
     {% endif %}
     <p class="meta">
       <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}/</a>
