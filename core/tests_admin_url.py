@@ -22,3 +22,24 @@ class AdminURLTests(TestCase):
     def test_admin_allowed_for_allowlisted_ip(self):
         resp = self.client.get("/secret-admin/", REMOTE_ADDR="1.1.1.1", secure=True)
         self.assertEqual(resp.status_code, 302)
+
+    @override_settings(ADMIN_IP_ALLOWLIST={"1.1.1.1"})
+    def test_admin_uses_cf_connecting_ip(self):
+        resp = self.client.get(
+            "/secret-admin/",
+            REMOTE_ADDR="2.2.2.2",
+            HTTP_X_FORWARDED_FOR="3.3.3.3",
+            HTTP_CF_CONNECTING_IP="1.1.1.1",
+            secure=True,
+        )
+        self.assertEqual(resp.status_code, 302)
+
+    @override_settings(ADMIN_IP_ALLOWLIST={"1.1.1.1"})
+    def test_admin_blocks_when_cf_connecting_ip_not_allowlisted(self):
+        resp = self.client.get(
+            "/secret-admin/",
+            REMOTE_ADDR="1.1.1.1",
+            HTTP_CF_CONNECTING_IP="2.2.2.2",
+            secure=True,
+        )
+        self.assertEqual(resp.status_code, 403)
