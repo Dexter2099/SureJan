@@ -1,4 +1,5 @@
 {% load url_domain %}
+{% load timeutils %}
 <div class="post-row" id="post-{{ post.pk }}">
   <div class="vote-col">
     <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
@@ -36,7 +37,7 @@
       · <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
       {% endif %}
       {% if request.user.is_authenticated and not post.is_deleted %}
-        {% if request.user.is_staff or post.can_author_delete(request.user, 15) %}
+        {% if request.user.is_staff or (request.user.id == post.author_id and post.created_at|within_minutes:15) %}
         · <form method="post"
               action="{% url 'post_delete_owner' post.pk %}"
               style="display:inline"
