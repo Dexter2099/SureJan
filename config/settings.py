@@ -4,6 +4,7 @@ import os
 import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from django.core.exceptions import ImproperlyConfigured
 
 # -----------------------------------------------------------------------------
 # Base
@@ -13,8 +14,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------------------------------------------------------
 # Security / Debug
 # -----------------------------------------------------------------------------
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
-DEBUG = os.environ.get("DEBUG", "0") in ("1", "true", "True")
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") in ("1", "true", "True")
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not DEBUG:
+    if not SECRET_KEY or SECRET_KEY == "dev-secret-key":
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production")
+else:
+    SECRET_KEY = SECRET_KEY or "dev-secret-key"
 
 if dsn := os.getenv("SENTRY_DSN"):
     sentry_sdk.init(
