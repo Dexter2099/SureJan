@@ -22,7 +22,7 @@ SureJan is an independent, Brisbane-built community forum inspired by the old Re
 
 * **Backend**: Django 5, Python 3.12+
 * **Frontend**: HTMX for partial page updates, Django templates for rendering
-* **Database**: Postgres (Neon or Fly Postgres), SQLite fallback for development
+* **Database**: Postgres, SQLite fallback for development
 * **Deployment**: Fly.io with Docker-based builds
 * **Static Files**: WhiteNoise for static file serving, optional S3-compatible storage for media (Tigris, AWS S3)
 * **Security**: django-csp, CSRF protection, secure session and cookie handling
