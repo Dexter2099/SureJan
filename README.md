@@ -1,4 +1,3 @@
-Here’s a tightened **README.md draft** for the public SureJan repo that includes the **tech stack** explicitly, keeps it repo-appropriate, and notes that it is live at `surejan.app`:
 
 ---
 
@@ -47,6 +46,7 @@ Visit `http://127.0.0.1:8000` to access the dev server.
 ## Status
 
 SureJan is an early-stage MVP. Contributions, bug reports, and feedback are welcome.
+This project was developed and MVP shipped in three weeks with the use of AI coding agents.
 
 ---
 
