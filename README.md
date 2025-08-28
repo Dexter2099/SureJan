@@ -1,49 +1,54 @@
+
+---
+
 # SureJan
 
-## Critical User Stories
+SureJan is an independent, Brisbane-built community forum inspired by the old Reddit layout. It is designed to provide a fast and simple way for locals to post, comment, and vote without interference from algorithms, astroturfing, or excessive big-tech influence.
 
-1. **Browse the front page & communities (old-reddit layout)**
-   - As a visitor, I can browse the Home feed or a Community feed and switch tabs: best, hot, new, rising, controversial, top.
-   - **Acceptance criteria**
-     - Subreddit bar across the top lists at least News and Brisbane.
-     - Each feed shows post title, score, community, author, age, comment count; pagination (25 per page).
-     - Sort tabs re-query the feed correctly; selected tab is highlighted.
-     - Not logged in users can read everything but cannot vote/post/comment.
-2. **Sign up / log in and see my username + points**
-   - As a user, I can create an account, log in/out, and see my username top-right with points (karma-like).
-   - **Acceptance criteria**
-     - Sign-up: unique username + password.
-     - Log in/out rounds trip correctly; username displays top-right.
-     - Points displayed (sum of post/comment scores authored by the user; negative points have no consequence yet).
-3. **Create posts and discuss (threaded comments)**
-   - As a logged-in user, I can create link or text posts in a community and comment in a threaded view on the post page.
-   - **Acceptance criteria**
-     - "Submit" supports URL or text; community must be selectable/valid.
-     - Post page shows OP, body (basic Markdown), and a nested comment tree.
-     - Compose comment box + reply to a specific comment; timestamps show "x minutes ago".
-     - Basic formatting: links, code, bold/italic (no images needed for MVP).
-4. **Vote on posts & comments (instant feedback)**
-   - As a logged-in user, I can upvote/downvote posts and comments and see the score update immediately.
-   - **Acceptance criteria**
-     - One vote per user per item; clicking the same arrow again removes my vote.
-     - Scores update without full page reload (HTMX/Ajax).
-     - My own points update on next page load (or after a short refresh).
-     - Simple rate-limit: max N votes/minute (to prevent spam).
-5. **Profiles & history**
-   - As a user, I can click my username to view my profile: posts, comments, and points.
-   - **Acceptance criteria**
-     - Profile has tabs: Overview, Posts, Comments.
-     - Each list paginated; items link back to the original thread/community.
-     - Anyone can view anyone’s profile (public by default).
+**Live site:** [https://surejan.app](https://surejan.app)
 
-**Admin-only note for MVP setup:** seed two communities (News, Brisbane) via a management command or admin page.
+## Features (MVP)
 
-## Rate Limits
+* **Community Feeds**: Old-Reddit style feeds with sorting options (Best, Hot, New, Rising, Controversial, Top). Pagination set to 25 posts per page.
+* **Seed Communities**: Two initial communities, `news` and `brisbane`, seeded via a management command.
+* **User Accounts**: Username and password based authentication (email optional). Accounts display total “points” (sum of post and comment votes).
+* **Posts**: Supports text or link submissions. Posts can be assigned to communities and rendered with basic Markdown formatting.
+* **Comments**: Threaded comment trees with reply support, relative timestamps, and Markdown.
+* **Voting**: Upvote and downvote support for posts and comments. Voting updates dynamically with HTMX requests. Rate limits apply to reduce spam.
+* **Profiles**: Public user profiles with tabs for Overview, Posts, and Comments. Pagination provided for long histories.
+* **Authentication & Security**: Secure session cookies, CSRF protection, CAPTCHA during signup, recovery codes for account resets, and basic rate limiting.
 
-Post and comment creation are rate limited based on account age:
+## Tech Stack
 
-* New users (signed up within 24 hours or with zero points) may create up to 3 posts or comments per minute.
-* Established users may create up to 10 posts or comments per minute.
+* **Backend**: Django 5, Python 3.12+
+* **Frontend**: HTMX for partial page updates, Django templates for rendering
+* **Database**: Postgres (Neon or Fly Postgres), SQLite fallback for development
+* **Deployment**: Fly.io with Docker-based builds
+* **Static Files**: WhiteNoise for static file serving, optional S3-compatible storage for media (Tigris, AWS S3)
+* **Security**: django-csp, CSRF protection, secure session and cookie handling
+* **Testing**: Django test framework with HTMX request coverage
 
-Exceeding these limits returns an HTTP 429 response that tells you how long to wait before trying again.
+## Development Setup
+
+```bash
+git clone https://github.com/Dexter2099/SureJan.git
+cd SureJan
+python -m venv .venv
+source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_basics
+python manage.py runserver
+```
+
+Visit `http://127.0.0.1:8000` to access the dev server.
+
+## Status
+
+SureJan is an early-stage MVP. Contributions, bug reports, and feedback are welcome.
+This project was developed and MVP shipped in three weeks with the use of AI coding agents.
+
+---
+
+
 
