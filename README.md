@@ -5,7 +5,7 @@
 
 SureJan is an independent, Brisbane-built community forum inspired by the old Reddit layout. It is designed to provide a fast and simple way for locals to post, comment, and vote without interference from algorithms, astroturfing, or excessive big-tech influence.
 
-**Live site:** [https://surejan.app](https://surejan.app)
+**Live site:** back under development as of 31/08/2025
 
 ## Features (MVP)
 
