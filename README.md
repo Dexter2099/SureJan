@@ -52,3 +52,5 @@ This project was developed and MVP shipped in three weeks with the use of AI cod
 
 
 
+<img width="673" height="718" alt="Surejan Public beta" src="https://github.com/user-attachments/assets/6086515d-cfd1-44b7-8591-b21057b975ff" />
+
