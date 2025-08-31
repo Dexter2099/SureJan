@@ -1,11 +1,9 @@
 from datetime import timedelta
 
 from django.conf import settings
-codex/cache-compute_post_signals-results
 from django.core.cache import cache
 
 from django.utils import timezone
-main
 
 from ..models import CommunityBaseline, Post, Vote
 
@@ -112,7 +110,6 @@ def compute_post_signals(post_id):
         },
         "severity": severity,
     }
-codex/cache-compute_post_signals-results
     cache.set(cache_key, data, 30)
     return data
 
@@ -164,4 +161,3 @@ def compute_user_post_summary(user_id, days: int = 90):
         "rating": rating,
         "severities": severities,
     }
-main
