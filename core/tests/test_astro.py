@@ -5,7 +5,6 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.text import slugify
 from freezegun import freeze_time
 
 from ..models import Community, EngagementEvent, Post, CommunityBaseline
@@ -186,7 +185,7 @@ class AstroFeatureFlagViewTests(TestCase):
         chips_url = reverse("post_signals_chips", args=[self.post.pk])
         detail_url = reverse(
             "post_detail",
-            args=[self.community.slug, self.post.pk, slugify(self.post.title)],
+            args=[self.community.slug, self.post.pk, self.post.slug],
         )
         self.assertContains(self.client.get(detail_url), chips_url)
         self.assertContains(self.client.get(reverse("home")), chips_url)

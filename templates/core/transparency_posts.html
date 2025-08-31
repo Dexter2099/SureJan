@@ -17,7 +17,7 @@
     <tbody>
       {% for row in page_obj %}
       <tr>
-        <td><a href="{% url 'post_detail' row.post.community.slug row.post.pk row.post.title|slugify %}">{{ row.post.title }}</a></td>
+        <td><a href="{% url 'post_detail' row.post.community.slug row.post.pk row.post.slug %}">{{ row.post.title }}</a></td>
         <td>{{ row.author_age }}</td>
         <td>{{ row.rate5 }} / {{ row.base5 }}</td>
         <td>{{ row.rate15 }} / {{ row.base15 }}</td>

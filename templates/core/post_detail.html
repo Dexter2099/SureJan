@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% load permissions static %}
+{% url 'post_detail' post.community.slug post.pk post.slug as post_url %}
+
+{% block head_extra %}
+<link rel="canonical" href="{{ post_url }}">
+{% endblock %}
 
 {% block content %}
 <div class="post-page">
@@ -88,7 +93,7 @@
   {% endfor %}
 </div>
 <div>
-  {% include "core/partials/comment_form.html" %}
+  {% include "core/partials/comment_form.html" with post=post parent=post comment=None %}
 </div>
 {% endblock %}
 

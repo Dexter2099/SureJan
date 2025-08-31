@@ -39,7 +39,7 @@ urlpatterns = [
 
     # Post detail (nested under community, with id + slug)
     path(
-        "r/<slug:slug>/comments/<int:post_id>/<slug:post_slug>/",
+        "r/<slug:community>/comments/<int:pk>/<slug:slug>/",
         core_views.post_detail,
         name="post_detail",
     ),
