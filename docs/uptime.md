@@ -1,6 +1,6 @@
 # Uptime monitoring
 
-The `/healthz` endpoint performs basic checks for the database and cache.
+The `/healthz` endpoint returns a lightweight `ok` response.
 Configure an external service such as UptimeRobot to poll it and alert if
 it fails.
 

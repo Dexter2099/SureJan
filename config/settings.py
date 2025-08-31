@@ -59,6 +59,17 @@ _extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
 if _extra_csrf:
     CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_csrf.split(",") if o.strip()]
 
+# --- Dev proxy defaults (only in DEBUG) ---
+if DEBUG:
+    _dev_allowed = {"localhost", "127.0.0.1", "surejan.internal", "surejan.fly.dev"}
+    ALLOWED_HOSTS = list(sorted(set(ALLOWED_HOSTS) | _dev_allowed))
+    # allow HTTP localhost origins for forms while using the proxy
+    _dev_csrf = {
+        "http://localhost:8080", "http://127.0.0.1:8080",
+        "http://localhost:8888", "http://127.0.0.1:8888",
+    }
+    CSRF_TRUSTED_ORIGINS = list(sorted(set(CSRF_TRUSTED_ORIGINS + list(_dev_csrf))))
+
 # Respect Fly proxy for secure detection
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
