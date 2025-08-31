@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page container">
+  <h1>Flagged posts (last 24 h)</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Post</th>
+        <th>Author age (days)</th>
+        <th>5m votes / baseline</th>
+        <th>15m votes / baseline</th>
+        <th>Early-new %</th>
+        <th>Discuss ratio</th>
+        <th>Severity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in page_obj %}
+      <tr>
+        <td><a href="{% url 'post_detail' row.post.community.slug row.post.pk row.post.title|slugify %}">{{ row.post.title }}</a></td>
+        <td>{{ row.author_age }}</td>
+        <td>{{ row.rate5 }} / {{ row.base5 }}</td>
+        <td>{{ row.rate15 }} / {{ row.base15 }}</td>
+        <td>{{ row.early_new_share_pct|floatformat:1 }}%</td>
+        <td>{{ row.discuss_ratio|floatformat:1 }}</td>
+        <td>{{ row.severity|floatformat:1 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">No flagged posts in the last 24 h.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">&laquo; Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if sort %}&sort={{ sort }}{% endif %}">Next &raquo;</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
