@@ -134,10 +134,43 @@ document.addEventListener('DOMContentLoaded',()=>{
   const urlField=document.getElementById('id_url');
   const postTypeField=document.getElementById('id_post_type');
   let domainHint;
-  function updateDomain(){if(!urlField||!domainHint)return;const v=urlField.value.trim();let h='';if(v){try{h=new URL(v).hostname;}catch(e){}}domainHint.textContent=h?`(${h})`:'';}
-  if(urlField){domainHint=document.createElement('div');domainHint.id='link-domain';urlField.insertAdjacentElement('afterend',domainHint);urlField.addEventListener('input',updateDomain);updateDomain();}
+  function updateDomain(){
+    if(!urlField||!domainHint)return;
+    const v=urlField.value.trim();
+    let h='';
+    if(v){
+      try{h=new URL(v).hostname;}catch(e){}
+    }
+    domainHint.value=h;
+    domainHint.hidden=!h;
+  }
+  if(urlField){
+    domainHint=document.createElement('input');
+    domainHint.id='link-domain';
+    domainHint.readOnly=true;
+    domainHint.tabIndex=-1;
+    domainHint.hidden=true;
+    urlField.insertAdjacentElement('afterend',domainHint);
+    urlField.addEventListener('input',updateDomain);
+    updateDomain();
+  }
 
-  if(bodyField&&urlField){bodyField.addEventListener('paste',e=>{const t=e.clipboardData.getData('text/plain').trim();if(/^https?:\/\/\S+$/.test(t)&&!urlField.value.trim()){setTimeout(()=>{if(confirm('Move this to Content URL?')){urlField.value=t;urlField.dispatchEvent(new Event('input',{bubbles:true}));}},0);}});}
+  if(bodyField&&urlField){
+    bodyField.addEventListener('paste',e=>{
+      const t=e.clipboardData.getData('text/plain').trim();
+      if(/^https?:\/\/\S+$/.test(t)&&!urlField.value.trim()){
+        e.preventDefault();
+        const start=bodyField.selectionStart,end=bodyField.selectionEnd;
+        if(confirm('Move this to Content URL?')){
+          urlField.value=t;
+          urlField.dispatchEvent(new Event('input',{bubbles:true}));
+        }else{
+          bodyField.setRangeText(t,start,end,'end');
+          bodyField.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+      }
+    });
+  }
 
   const form=document.querySelector('.post-form');
   if(form){form.addEventListener('submit',()=>{if(postTypeField){const urlVal=urlField&&urlField.value.trim();postTypeField.value=urlVal?'link':'text';}});}
