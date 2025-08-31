@@ -46,7 +46,11 @@ from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
+codex/add-user-post-summary-and-ratings
+from .services.astro import compute_user_post_summary
+
 from .services.astro import compute_post_signals
+main
 
 
 def _is_banned(user):
@@ -1045,10 +1049,13 @@ def user_overview(request, username):
     activity.sort(key=lambda a: a["created_at"], reverse=True)
     activity = activity[:20]
 
+    summary = compute_user_post_summary(profile_user.id)
+
     context = {
         "profile_user": profile_user,
         "activity": activity,
         "tab": "overview",
+        "user_summary": summary,
     }
     return render(request, "core/user_overview.html", context)
 
