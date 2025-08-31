@@ -25,7 +25,7 @@ class LinkSafetyTests(TestCase):
         mock_post.return_value.status_code = 200
         resp = self.client.post(
             self.url,
-            {"title": "Link", "body": "", "url": "https://example.com"},
+            {"title": "Link", "body": "", "content_url": "https://example.com"},
         )
         self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         self.assertEqual(Post.objects.count(), 1)
@@ -39,8 +39,8 @@ class LinkSafetyTests(TestCase):
         mock_post.return_value.status_code = 200
         resp = self.client.post(
             self.url,
-            {"title": "Bad", "body": "", "url": "http://malware.test"},
+            {"title": "Bad", "body": "", "content_url": "http://malware.test"},
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertFormError(resp.context["form"], "url", "URL flagged as unsafe.")
+        self.assertFormError(resp.context["form"], "content_url", "URL flagged as unsafe.")
         self.assertEqual(Post.objects.count(), 0)

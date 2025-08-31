@@ -5,11 +5,13 @@ from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from datetime import timedelta
 from django.utils import timezone
+from urllib.parse import urlparse
 
 from PIL import Image
 from io import BytesIO
@@ -95,8 +97,11 @@ class Post(models.Model):
         choices=[("text", "text"), ("link", "link"), ("image", "image")],
     )
     title = models.CharField(max_length=300)
-    body = models.TextField(blank=True, null=True)
-    url = models.URLField(blank=True, null=True)
+    heading = models.CharField(max_length=500, blank=True)
+    body = models.TextField(blank=True)
+    content_url = models.URLField(blank=True)
+    embed_html = models.TextField(blank=True)
+    link_domain = models.CharField(max_length=120, blank=True)
     image = models.ImageField(
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
     )
@@ -129,8 +134,16 @@ class Post(models.Model):
             models.Index(fields=["-controversy", "-created_at"]),
         ]
 
+    def clean(self):
+        super().clean()
+        if not self.is_deleted and not self.body and not self.content_url:
+            raise ValidationError("Either body or content_url is required.")
+
     def save(self, *args, **kwargs):
         recompute = kwargs.pop("recompute_hot", True)
+
+        if self.content_url:
+            self.link_domain = urlparse(self.content_url).netloc
 
         if self.image:
             resized = _resize_img(self.image)
@@ -164,12 +177,18 @@ class Post(models.Model):
         self.deleted_by = by_user
         if hasattr(self, "title"):
             self.title = "[deleted]"
+        if hasattr(self, "heading"):
+            self.heading = ""
         if hasattr(self, "body"):
             self.body = ""
         if hasattr(self, "link"):
             self.link = ""
-        if hasattr(self, "url"):
-            self.url = ""
+        if hasattr(self, "content_url"):
+            self.content_url = ""
+        if hasattr(self, "embed_html"):
+            self.embed_html = ""
+        if hasattr(self, "link_domain"):
+            self.link_domain = ""
         if hasattr(self, "image") and self.image:
             self.image.delete(save=False)
             self.image = None

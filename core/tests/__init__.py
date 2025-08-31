@@ -33,7 +33,7 @@ class SubmitPostTests(TestCase):
         post = Post.objects.get()
         self.assertEqual(post.post_type, "text")
         self.assertEqual(post.body, "Body")
-        self.assertEqual(post.url, "")
+        self.assertEqual(post.content_url, "")
 
     def test_submit_link_post(self):
         url = reverse("submit_post", args=[self.community.slug])
@@ -42,13 +42,13 @@ class SubmitPostTests(TestCase):
             {
                 "title": "Link",
                 "body": "",
-                "url": "https://example.com",
+                "content_url": "https://example.com",
             },
         )
         self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         post = Post.objects.get()
         self.assertEqual(post.post_type, "link")
-        self.assertEqual(post.url, "https://example.com")
+        self.assertEqual(post.content_url, "https://example.com")
         self.assertEqual(post.body, "")
 
     def test_submit_image_post(self):
@@ -62,7 +62,7 @@ class SubmitPostTests(TestCase):
             {
                 "title": "Pic",
                 "body": "caption",
-                "url": "",
+                "content_url": "",
                 "image": SimpleUploadedFile("pic.png", buf.read(), content_type="image/png"),
             },
         )
