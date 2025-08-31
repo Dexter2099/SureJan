@@ -36,7 +36,7 @@
         {% endif %}
       </div>
       <nav class="post-actions">
-        <a href="#comments">
+        <a href="#comments" id="comment-count">
           {{ post.comment_count }} comment{{ post.comment_count|pluralize }}
         </a>
         <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>

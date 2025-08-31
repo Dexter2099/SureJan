@@ -536,6 +536,96 @@ def comment_reply(request, post_id):
 
 @login_required
 @require_http_methods(["GET"])
+def comment_new(request):
+    """Return a comment form for replying via HTMX."""
+
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if request.headers.get("HX-Request") != "true":
+        return HttpResponseBadRequest("Invalid request")
+
+    post_id = request.GET.get("post")
+    parent_id = request.GET.get("parent")
+    if not post_id:
+        return HttpResponseBadRequest("Missing post")
+    post = get_object_or_404(Post, pk=post_id)
+    parent = None
+    if parent_id:
+        parent = get_object_or_404(Comment, pk=parent_id, post=post)
+    form = CommentForm()
+    html = render_to_string(
+        "core/partials/comment_form.html",
+        {"form": form, "post": post, "parent": parent},
+        request=request,
+    )
+    return HttpResponse(html)
+
+
+@login_required
+@require_POST
+def comment_create(request):
+    """Create a new comment via HTMX."""
+
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+
+    if is_new_user(request.user):
+        if limit_or_429(request, "comment_new_user", "3/m"):
+            return render(request, "429.html", status=429)
+    else:
+        if limit_or_429(request, "comment_established", "10/m"):
+            return render(request, "429.html", status=429)
+
+    post_id = request.POST.get("post")
+    if not post_id:
+        return HttpResponseBadRequest("Missing post")
+    post = get_object_or_404(Post, pk=post_id)
+
+    form = CommentForm(request.POST)
+    if not form.is_valid():
+        return HttpResponseBadRequest("Invalid comment")
+
+    parent_id = request.POST.get("parent")
+    parent = None
+    if parent_id:
+        parent = get_object_or_404(Comment, pk=parent_id, post=post)
+        child_seq = parent.children.count() + 1
+        path = f"{parent.path}/{child_seq:04d}"
+    else:
+        root_seq = post.comments.filter(parent__isnull=True).count() + 1
+        path = f"{root_seq:04d}"
+
+    comment = Comment.objects.create(
+        post=post,
+        author=request.user,
+        parent=parent,
+        body=form.cleaned_data["body"],
+        path=path,
+    )
+    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
+    post.refresh_from_db(fields=["comment_count"])
+
+    if request.headers.get("HX-Request") == "true":
+        item_html = render_to_string(
+            "core/partials/comment_item.html", {"comment": comment}, request=request
+        )
+        plural = "s" if post.comment_count != 1 else ""
+        count_html = (
+            f'<a href="#comments" id="comment-count" hx-swap-oob="outerHTML">'
+            f"{post.comment_count} comment{plural}</a>"
+        )
+        return HttpResponse(item_html + count_html)
+
+    return redirect(
+        "post_detail",
+        slug=post.community.slug,
+        post_id=post.pk,
+        post_slug=slugify(post.title),
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
 def comment_reply_form(request, post_id):
     """Render the comment reply form via HTMX."""
 
