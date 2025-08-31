@@ -23,7 +23,7 @@
               aria-label="Downvote" class="down" aria-pressed="false">▼</button>
     </span>
     <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
-            hx-target="#comment-{{ comment.pk }}" hx-swap="afterend">Reply</button>
+            hx-target="#comment-{{ comment.pk }} > .children" hx-swap="beforeend">Reply</button>
     {% if comment|can_edit_comment:request.user %}
       <button hx-get="{% url 'comment_edit' comment.pk %}"
               hx-target="#comment-body-{{ comment.pk }}"
@@ -47,16 +47,16 @@
   </div>
   {% else %}
     {% with child_count=comment.children.count %}
-      {% if child_count %}
-        <div class="children more-replies">
+      <div class="children {% if child_count %}more-replies{% endif %}">
+        {% if child_count %}
           <button class="linklike load-more"
                   hx-get="/comments/children?parent={{ comment.pk }}&offset=0"
                   hx-swap="afterend"
                   hx-on="htmx:afterSwap:this.remove()">
             Show more replies ({{ child_count }})
           </button>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
     {% endwith %}
   {% endif %}
 </div>

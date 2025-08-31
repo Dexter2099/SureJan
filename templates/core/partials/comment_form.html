@@ -1,3 +1,5 @@
+{% with base_id=comment.pk|default:parent.pk|default:'new' %}
+{% with preview_id='preview-'|add:base_id %}
 <form {% if comment %}
         hx-post="{% url 'comment_edit' comment.pk %}"
         hx-target="#comment-{{ comment.pk }}"
@@ -6,6 +8,7 @@
         hx-post="{% url 'comment_create' %}"
         {% if parent %}
         hx-swap="afterend"
+        hx-on="htmx:afterSwap:this.remove()"
         {% else %}
         hx-target="#comments"
         hx-swap="beforeend"
@@ -21,20 +24,22 @@
   {% endif %}
   <div class="draft-pill" hidden></div>
   <div class="form-error" role="alert" style="display:none"></div>
-  <div class="editor-container">
-    <div class="editor-tabs">
-      <button type="button" class="tab tab-write active">Write</button>
-      <button type="button"
-              class="tab tab-preview"
-              hx-post="{% url 'preview' %}"
-              hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
-              hx-target="#comment-preview"
-              hx-swap="innerHTML">Preview</button>
+    <div class="editor-container">
+      <div class="editor-tabs">
+        <button type="button" class="tab tab-write active">Write</button>
+        <button type="button"
+                class="tab tab-preview"
+                hx-post="{% url 'preview' %}"
+                hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
+                hx-target="#{{ preview_id }}"
+                hx-swap="innerHTML">Preview</button>
+      </div>
+      {% include "core/partials/editor_toolbar.html" %} {# formatting toolbar #}
+      {{ form.body }}
+      <div class="char-count"></div>
+      <div id="{{ preview_id }}" class="preview" style="display:none"></div>
     </div>
-    {% include "core/partials/editor_toolbar.html" %} {# formatting toolbar #}
-    {{ form.body }}
-    <div id="body-count" class="char-count"></div>
-    <div id="comment-preview" class="preview" style="display:none"></div>
-  </div>
   <button type="submit">{% if comment %}Save{% else %}Comment{% endif %}<span class="spinner" hidden aria-hidden="true"></span></button>
-</form>
+  </form>
+{% endwith %}
+{% endwith %}
