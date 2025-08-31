@@ -16,6 +16,11 @@ document.body.addEventListener('htmx:afterSwap', (e) => {
   const contentUrl = e.detail.elt.querySelector?.('#id_content_url');
   if (contentUrl) setupDomainHint(contentUrl);
 });
+document.body.addEventListener('submit', handleSubmit);
+document.body.addEventListener('htmx:afterRequest', handleAfterRequest);
+document.body.addEventListener('htmx:responseError', handleError);
+document.body.addEventListener('htmx:sendError', handleError);
+
 
 function setupEditor(textarea) {
   if (textarea.dataset.editorReady) return;
@@ -222,6 +227,46 @@ function getDraftKey(form) {
 
 function isOnlyUrl(text) {
   return /^https?:\/\/\S+$/.test(text);
+}
+
+function handleSubmit(e) {
+  const form = e.target;
+  const button = form.querySelector('button[type="submit"]');
+  const spinner = button?.querySelector('.spinner');
+  if (button) {
+    button.disabled = true;
+  }
+  if (spinner) {
+    spinner.hidden = false;
+  }
+  const err = form.querySelector('.form-error');
+  if (err) {
+    err.style.display = 'none';
+    err.textContent = '';
+  }
+}
+
+function handleAfterRequest(e) {
+  const form = e.target.closest('form');
+  if (!form || !form.isConnected) return;
+  const button = form.querySelector('button[type="submit"]');
+  const spinner = button?.querySelector('.spinner');
+  if (button) button.disabled = false;
+  if (spinner) spinner.hidden = true;
+}
+
+function handleError(e) {
+  const form = e.target.closest('form');
+  if (!form) return;
+  const button = form.querySelector('button[type="submit"]');
+  const spinner = button?.querySelector('.spinner');
+  if (button) button.disabled = false;
+  if (spinner) spinner.hidden = true;
+  const err = form.querySelector('.form-error');
+  if (err) {
+    err.textContent = e.detail.xhr?.response || 'An error occurred';
+    err.style.display = '';
+  }
 }
 
 function applyAction(textarea, action) {

@@ -154,6 +154,26 @@ li + li {
     transform: rotate(360deg);
   }
 }
+/* Accessible button styles */
+form button,
+.button {
+  background: #e5e7eb;
+  color: #111111;
+  border: 1px solid #9ca3af;
+  cursor: pointer;
+}
+
+form button:hover,
+.button:hover {
+  background: #d1d5db;
+}
+
+form button:focus,
+.button:focus {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
 
 .form-error {
   color: #b91c1c;
