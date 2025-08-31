@@ -39,15 +39,15 @@
     {% comment %} old subreddit bar removed in favor of hdr-center {% endcomment %}
 
     <!-- Main feed container constrained by --feed-max -->
-    <main class="feed container">
-      {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-      {% block content %}{% endblock %}
+    <main class="layout">
+      <section class="main feed">
+        {% block content %}{% endblock %}
+      </section>
+      <aside class="sidebar">
+        {% block sidebar %}
+          {% include "partials/sidebar_min.html" %}
+        {% endblock %}
+      </aside>
     </main>
     <footer class="site-footer">
       <div class="container" style="text-align:center;">
