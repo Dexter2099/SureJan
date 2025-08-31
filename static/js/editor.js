@@ -46,6 +46,31 @@ function initPreview(root=document){
   });
 }
 
+function setupDraft(form,key,fields){
+  if(!form||form.dataset.draftReady)return;form.dataset.draftReady=1;
+  let data={};try{data=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}
+  if(Object.values(data).some(v=>v)){
+    const banner=document.createElement('div');banner.className='draft-banner';
+    const restore=document.createElement('button');restore.type='button';restore.textContent='Restore';
+    const discard=document.createElement('button');discard.type='button';discard.textContent='Discard';
+    banner.append('Restore draft? ',restore,' ',discard);form.prepend(banner);
+    restore.addEventListener('click',()=>{fields.forEach(f=>{if(form[f]&&data[f]!==undefined){form[f].value=data[f];form[f].dispatchEvent(new Event('input',{bubbles:true}));}});banner.remove();});
+    discard.addEventListener('click',()=>{localStorage.removeItem(key);banner.remove();});
+  }
+  const i=setInterval(()=>{
+    const draft={};let empty=true;
+    fields.forEach(f=>{const v=form[f]?form[f].value:'';draft[f]=v;if(v.trim())empty=false;});
+    if(empty)localStorage.removeItem(key);else localStorage.setItem(key,JSON.stringify(draft));
+  },2000);
+  form.addEventListener('submit',()=>{clearInterval(i);localStorage.removeItem(key);});
+}
+
+function initDrafts(root=document){
+  const pf=root.querySelector('.post-form');
+  if(pf){const path=pf.getAttribute('action')||location.pathname;const m=path.match(/\/r\/([^/]+)/);if(m)setupDraft(pf,`draft:${m[1]}:post`,['title','body','url']);}
+  root.querySelectorAll('form[hx-post*="/comment/"][hx-post$="/reply/"]').forEach(f=>{const hx=f.getAttribute('hx-post');const m=hx&&hx.match(/comment\/(\d+)/);if(m)setupDraft(f,`draft:comment:${m[1]}`,['body']);});
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   const titleField=document.getElementById('id_title');
   const bodyField=document.getElementById('id_body');
@@ -68,6 +93,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   initToolbar();
   initPreview();
+  initDrafts();
 });
 
-document.addEventListener('htmx:load',e=>{initToolbar(e.detail.elt);initPreview(e.detail.elt);});
+document.addEventListener('htmx:load',e=>{initToolbar(e.detail.elt);initPreview(e.detail.elt);initDrafts(e.detail.elt);});
