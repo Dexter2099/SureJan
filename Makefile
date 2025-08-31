@@ -13,7 +13,7 @@ recompute:
         python manage.py recompute_ranks
 
 test:
-        pytest -q
+	python manage.py test
 
 astro:
 	python manage.py compute_astro_baselines

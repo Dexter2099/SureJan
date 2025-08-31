@@ -57,6 +57,33 @@ class PostCreationTests(TestCase):
         self.assertEqual(post.content_url, "https://example.com")
 
 
+class CommentFormTests(TestCase):
+    def setUp(self) -> None:
+        cache.clear()
+        User = get_user_model()
+        self.user = User.objects.create_user("alice", password="pwd")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
+        self.post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="text",
+            title="Post",
+            body="Body",
+        )
+        self.client.login(username="alice", password="pwd")
+
+    def test_submit_comment(self):
+        url = reverse("comment_reply", args=[self.post.pk])
+        resp = self.client.post(url, {"body": "Nice"})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(self.post.comments.count(), 1)
+        comment = self.post.comments.get()
+        self.assertEqual(comment.body, "Nice")
+        self.assertEqual(comment.author, self.user)
+
+
 class PreviewTests(TestCase):
     def test_strips_disallowed_tags_but_keeps_links(self):
         text = "Hello <script>alert(1)</script> [link](http://example.com)"

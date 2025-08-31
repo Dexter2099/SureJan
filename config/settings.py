@@ -88,10 +88,20 @@ if not DEBUG:
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
-            "script-src": ("'self'",),
+            "script-src": (
+                "'self'",
+                "https://platform.twitter.com",
+                "https://cdn.syndication.twimg.com",
+            ),
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": ("'self'", "https:", "data:"),
             "connect-src": ("'self'",),
+            "frame-src": (
+                "'self'",
+                "https://www.youtube.com",
+                "https://www.youtube-nocookie.com",
+                "https://rumble.com",
+            ),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
