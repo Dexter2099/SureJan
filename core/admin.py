@@ -2,7 +2,17 @@ from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Community, Post, Comment, Vote, UserProfile, Report
+from .models import (
+    Community,
+    Post,
+    Comment,
+    Vote,
+    UserProfile,
+    Report,
+    EngagementEvent,
+    PostBurstState,
+    CommunityBaseline,
+)
 
 
 @admin.register(Community)
@@ -101,3 +111,18 @@ admin.site.register(get_user_model(), UserAdmin)
 class ReportAdmin(admin.ModelAdmin):
     list_display = ("id", "reporter", "content_type", "object_id", "created_at")
     list_filter = ("content_type", "reporter")
+
+
+@admin.register(EngagementEvent)
+class EngagementEventAdmin(admin.ModelAdmin):
+    list_filter = ("post", "post__community")
+
+
+@admin.register(PostBurstState)
+class PostBurstStateAdmin(admin.ModelAdmin):
+    list_filter = ("post__community",)
+
+
+@admin.register(CommunityBaseline)
+class CommunityBaselineAdmin(admin.ModelAdmin):
+    list_filter = ("community",)
