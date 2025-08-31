@@ -3,6 +3,7 @@
       hx-swap="beforeend"
       class="comment-form">
   {% csrf_token %}
+  <div class="form-error" role="alert" style="display:none"></div>
   <div class="editor-container" style="line-height:1.5">
     <div class="editor-tabs">
       <button type="button" class="tab tab-write active">Write</button>
@@ -17,5 +18,5 @@
     {{ form.body }}
     <div id="comment-preview" class="preview" style="display:none"></div>
   </div>
-  <button type="submit">Comment</button>
+  <button type="submit">Comment<span class="spinner" hidden aria-hidden="true"></span></button>
 </form>
