@@ -41,6 +41,7 @@ from django.utils.cache import patch_cache_control
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
 from django.urls import reverse
+from urllib.parse import urlparse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
@@ -491,6 +492,12 @@ def submit_post(request, slug):
             post = form.save(commit=False)
             post.community = community
             post.author = request.user
+            if post.content_url:
+                post.link_domain = urlparse(post.content_url).netloc
+                data = fetch_oembed(post.content_url)
+                post.embed_html = render_to_string(
+                    "core/partials/link_preview.html", data
+                )
             post.save()
             messages.success(request, "Post submitted")
             return redirect("community", slug=community.slug)
@@ -511,6 +518,45 @@ def post_detail(request, slug, post_id, post_slug):
     form = CommentForm()
     context = {"post": post, "comments": comments, "form": form}
     return render(request, "core/post_detail.html", context)
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+    if request.user != post.author and not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            if post.content_url:
+                post.link_domain = urlparse(post.content_url).netloc
+                data = fetch_oembed(post.content_url)
+                post.embed_html = render_to_string(
+                    "core/partials/link_preview.html", data
+                )
+            else:
+                post.link_domain = ""
+                post.embed_html = ""
+            post.save()
+            messages.success(request, "Post updated")
+            return redirect(
+                "post_detail",
+                slug=post.community.slug,
+                post_id=post.pk,
+                post_slug=slugify(post.title),
+            )
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PostForm(instance=post)
+
+    context = {"form": form, "community": post.community, "post": post}
+    return render(request, "core/post_form.html", context)
 
 
 @login_required

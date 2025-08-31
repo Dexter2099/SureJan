@@ -8,7 +8,7 @@ from .utils.link_safety import check_url_safety
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "body", "content_url", "image"]
+        fields = ["title", "heading", "body", "content_url", "image"]
         widgets = {"body": forms.Textarea(attrs={"data-editor": "1"})}
 
     def clean_image(self):
@@ -24,10 +24,12 @@ class PostForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         title = (cleaned_data.get("title") or "").strip()
+        heading = (cleaned_data.get("heading") or "").strip()
         body = (cleaned_data.get("body") or "").strip()
         content_url = (cleaned_data.get("content_url") or "").strip()
 
         cleaned_data["title"] = title
+        cleaned_data["heading"] = heading
         cleaned_data["body"] = body
         cleaned_data["content_url"] = content_url
 
