@@ -187,6 +187,8 @@ def mission(request):
 
 
 def transparency_methods(request):
+    if not settings.ASTROTURF_WATCH:
+        raise Http404
     ctx = {
         "ASTRO_WINDOW_S": settings.ASTRO_WINDOW_S,
         "ASTRO_BUCKET_S": settings.ASTRO_BUCKET_S,
@@ -200,6 +202,8 @@ def transparency_methods(request):
 
 
 def transparency_posts(request):
+    if not settings.ASTROTURF_WATCH:
+        raise Http404
     since = timezone.now() - timedelta(hours=24)
     posts = (
         Post.objects.filter(created_at__gte=since)

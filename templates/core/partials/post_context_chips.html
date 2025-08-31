@@ -1,11 +1,12 @@
 {% comment %}Display engagement signal chips for a post{% endcomment %}
+{% if ASTROTURF_WATCH %}
 <div class="post-context-chips">
   {# Render a chip for each active signal flag #}
   {% if signals.flags %}
     {% for key, value in signals.flags.items %}
       {% if value %}
-        <a class="chip" href="{% url 'transparency_methods' %}" title="Learn about {{ key|replace:'_',' ' }} detection">
-          {{ key|replace:'_',' '|title }}
+        <a class="chip" href="{% url 'transparency_methods' %}" title="Learn about {{ key|cut:'_' }} detection">
+          {{ key|cut:'_'|title }}
         </a>
       {% endif %}
     {% endfor %}
@@ -18,4 +19,5 @@
     </a>
   {% endif %}
 </div>
+{% endif %}
 

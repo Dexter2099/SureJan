@@ -5,6 +5,7 @@ from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 from freezegun import freeze_time
 
 from ..models import Community, EngagementEvent, Post, CommunityBaseline
@@ -159,3 +160,36 @@ class AstroEndpointTests(TestCase):
             self.assertEqual(resp.status_code, 404)
             resp = self.client.get(url_chips)
             self.assertEqual(resp.status_code, 404)
+
+
+class AstroFeatureFlagViewTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.author = User.objects.create_user("author", password="pwd")
+        self.community = Community.objects.create(
+            slug="c", name="Comm", title="Comm", created_by=self.author
+        )
+        self.post = Post.objects.create(
+            community=self.community, author=self.author, post_type="text", title="Hello"
+        )
+
+    def test_transparency_views_respect_flag(self):
+        url_methods = reverse("transparency_methods")
+        url_posts = reverse("transparency_posts")
+        self.assertEqual(self.client.get(url_methods).status_code, 200)
+        self.assertEqual(self.client.get(url_posts).status_code, 200)
+        with override_settings(ASTROTURF_WATCH=False):
+            self.assertEqual(self.client.get(url_methods).status_code, 404)
+            self.assertEqual(self.client.get(url_posts).status_code, 404)
+
+    def test_chip_containers_hidden_when_flag_disabled(self):
+        chips_url = reverse("post_signals_chips", args=[self.post.pk])
+        detail_url = reverse(
+            "post_detail",
+            args=[self.community.slug, self.post.pk, slugify(self.post.title)],
+        )
+        self.assertContains(self.client.get(detail_url), chips_url)
+        self.assertContains(self.client.get(reverse("home")), chips_url)
+        with override_settings(ASTROTURF_WATCH=False):
+            self.assertNotContains(self.client.get(detail_url), chips_url)
+            self.assertNotContains(self.client.get(reverse("home")), chips_url)
