@@ -35,6 +35,7 @@ from django import forms
 
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
+from django.urls import reverse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
@@ -871,12 +872,25 @@ def vote_comment(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     try:
-        apply_vote(request.user, "comment", pk, value)
+        _, _, new_value = apply_vote(request.user, "comment", pk, value)
     except ValueError:
         return HttpResponseBadRequest("Invalid vote")
 
-    score = Comment.objects.get(pk=pk).score
-    return HttpResponse(f"<span id='comment-score-{pk}'>{score}</span>")
+    comment = Comment.objects.get(pk=pk)
+    score = comment.score
+    up_pressed = "true" if new_value == 1 else "false"
+    down_pressed = "true" if new_value == -1 else "false"
+    url = reverse("vote_comment", args=[pk])
+    html = (
+        f"<span id='comment-score-{pk}' class='score' hx-swap-oob='outerHTML'>{score}</span>"
+        f"<button id='comment-up-{pk}' hx-post='{url}?v=1' hx-swap='none' "
+        f"hx-disabled-elt='#comment-up-{pk}, #comment-down-{pk}' "
+        f"class='up' aria-label='Upvote' aria-pressed='{up_pressed}' hx-swap-oob='outerHTML'>▲</button>"
+        f"<button id='comment-down-{pk}' hx-post='{url}?v=-1' hx-swap='none' "
+        f"hx-disabled-elt='#comment-up-{pk}, #comment-down-{pk}' "
+        f"class='down' aria-label='Downvote' aria-pressed='{down_pressed}' hx-swap-oob='outerHTML'>▼</button>"
+    )
+    return HttpResponse(html)
 
 
 @login_required
