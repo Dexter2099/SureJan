@@ -35,12 +35,10 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import F
 from django import forms
-codex/create-transparency-posts-view-with-metrics
 from django.core.paginator import Paginator
 
 from django.core.cache import cache
 from django.utils.cache import patch_cache_control
-main
 
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
@@ -50,15 +48,7 @@ from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
-codex/create-transparency-posts-view-with-metrics
-from .services.astro import compute_post_signals
-
-codex/add-user-post-summary-and-ratings
-from .services.astro import compute_user_post_summary
-
-from .services.astro import compute_post_signals
-main
-main
+from .services.astro import compute_post_signals, compute_user_post_summary
 
 
 def _is_banned(user):
@@ -209,7 +199,6 @@ def transparency_methods(request):
     return render(request, "core/transparency_methods.html", ctx)
 
 
-codex/create-transparency-posts-view-with-metrics
 def transparency_posts(request):
     since = timezone.now() - timedelta(hours=24)
     posts = (
@@ -245,7 +234,8 @@ def transparency_posts(request):
 
     ctx = {"page_obj": page_obj, "sort": sort}
     return render(request, "core/transparency_posts.html", ctx)
-=======
+
+
 def _cached_post_signals(pk):
     cache_key = f"post-signals:{pk}"
     data = cache.get(cache_key)
@@ -288,7 +278,6 @@ def post_signals_chips(request, pk):
     response["ETag"] = etag
     patch_cache_control(response, max_age=30)
     return response
-main
 
 
 class SignupForm(forms.Form):
