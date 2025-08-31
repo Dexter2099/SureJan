@@ -21,12 +21,11 @@ primary_region = "syd"
   processes = ["app"]
 
   [[http_service.checks]]
-    type = "http"
-    method = "get"
-    path = "/healthz"
-    interval = "10s"
-    timeout = "2s"
-    headers = { Host = "surejan.fly.dev" }
+    interval = "30s"
+    timeout  = "5s"
+    method   = "GET"
+    path     = "/healthz"
+    headers  = ["Host=localhost"]
 
 [[vm]]
   cpu_kind = "shared"

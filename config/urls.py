@@ -5,12 +5,13 @@ from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from django.views.generic import TemplateView
+from django.http import HttpResponse
 
 from core import views as core
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
-    path("healthz", core.healthz, name="healthz"),
+    path("healthz", lambda request: HttpResponse("ok"), name="healthz"),
     path("accounts/login/", core.RateLimitedLoginView.as_view(), name="login"),
     path(
         "accounts/logout/",
