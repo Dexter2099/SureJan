@@ -534,6 +534,41 @@ def comment_reply(request, post_id):
     )
 
 
+def comment_children(request):
+    """Return a batch of child comments for progressive loading."""
+
+    if request.headers.get("HX-Request") != "true":
+        return HttpResponseBadRequest("Invalid request")
+
+    parent_id = request.GET.get("parent")
+    if not parent_id:
+        return HttpResponseBadRequest("Missing parent")
+
+    try:
+        offset = int(request.GET.get("offset", 0))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid offset")
+
+    parent = get_object_or_404(Comment, pk=parent_id)
+    children_qs = parent.children.select_related("author").order_by("path")
+    total = children_qs.count()
+    children = list(children_qs[offset : offset + PAGE_SIZE])
+    next_offset = offset + len(children)
+    remaining = max(0, total - next_offset)
+
+    html = render_to_string(
+        "core/partials/comment_children.html",
+        {
+            "children": children,
+            "parent": parent,
+            "next_offset": next_offset,
+            "remaining": remaining,
+        },
+        request=request,
+    )
+    return HttpResponse(html)
+
+
 @login_required
 @require_http_methods(["GET"])
 def comment_new(request):

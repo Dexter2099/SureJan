@@ -32,10 +32,10 @@
       {% if child_count %}
         <div class="children more-replies">
           <button class="linklike load-more"
-                  hx-get="/comments/children?parent={{ comment.pk }}"
-                  hx-target="closest .children"
-                  hx-swap="outerHTML">
-            Show {{ child_count }} more repl{{ child_count|pluralize:'y,ies' }}
+                  hx-get="/comments/children?parent={{ comment.pk }}&offset=0"
+                  hx-swap="afterend"
+                  hx-on="htmx:afterSwap:this.remove()">
+            Show more replies ({{ child_count }})
           </button>
         </div>
       {% endif %}

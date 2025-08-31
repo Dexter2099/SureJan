@@ -43,6 +43,7 @@ urlpatterns = [
     path("comment/<int:pk>/delete/", core_views.comment_delete, name="comment_delete"),
     path("comments/new", core_views.comment_new, name="comment_new"),
     path("comments/create", core_views.comment_create, name="comment_create"),
+    path("comments/children", core_views.comment_children, name="comment_children"),
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
     path("vote/comment/<int:pk>/", core_views.vote_comment, name="vote_comment"),
     # Post moderation
