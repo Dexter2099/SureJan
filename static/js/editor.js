@@ -3,7 +3,12 @@ function setupEditor(ta){
   ta.addEventListener('keydown',e=>{
     const ctrl=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
     if(ctrl&&key==='enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
-    else if(key==='enter'&&e.shiftKey){e.stopPropagation();}
+    else if(key==='enter'&&e.shiftKey){
+      e.preventDefault();
+      e.stopPropagation();
+      ta.setRangeText('\n',ta.selectionStart,ta.selectionEnd,'end');
+      ta.dispatchEvent(new Event('input',{bubbles:true}));
+    }
     else if(ctrl&&key==='b'){e.preventDefault();toggleWrap('**');}
     else if(ctrl&&key==='i'){e.preventDefault();toggleWrap('_');}
 
