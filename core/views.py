@@ -434,7 +434,9 @@ def download_recovery_codes(request):
 def render_preview(request):
     text = request.POST.get("text", "")
     html = markdown_renderer(text)
-    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES)
+    clean = bleach.clean(
+        html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
+    )
     return render(
         request, "core/partials/preview.html", {"html": mark_safe(clean)}
     )
