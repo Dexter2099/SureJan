@@ -31,7 +31,9 @@ main, .container, .wrap, .page, #page {
 .prose img, .post-media img { max-width: 100%; height: auto; display: block; }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: var(--line);
   color: var(--text, #1f2937);
 }
