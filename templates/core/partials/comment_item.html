@@ -9,8 +9,8 @@
     <button hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
             hx-target="#comment-score-{{ comment.pk }}"
             hx-swap="outerHTML" aria-label="Downvote" class="down">▼</button>
-    <button hx-get="{% url 'comment_reply_form' comment.post.pk %}?parent_id={{ comment.pk }}"
-            hx-target="#comment-{{ comment.pk }}" hx-swap="afterend">reply</button>
+    <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
+            hx-target="#comment-{{ comment.pk }}" hx-swap="afterend">Reply</button>
     {% if request.user.id == comment.author_id or request.user.is_staff %}
       <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
             hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">
