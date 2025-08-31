@@ -64,19 +64,14 @@
 <div id="comments">
   {% for comment in comments %}
     {% if not comment.parent_id %}
-      {% include "core/partials/comment.html" %}
+      {% include "core/partials/comment_item.html" %}
     {% endif %}
   {% empty %}
     <p>No comments yet.</p>
   {% endfor %}
 </div>
 <div>
-  <form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comments" hx-swap="beforeend">
-    {% csrf_token %}
-    {% include "core/partials/editor_toolbar.html" %}
-    {{ form.body }}
-    <button type="submit">Comment</button>
-  </form>
+  {% include "core/partials/comment_form.html" %}
 </div>
 {% endblock %}
 

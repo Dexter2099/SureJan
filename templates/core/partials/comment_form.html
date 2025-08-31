@@ -1,0 +1,21 @@
+<form hx-post="{% url 'comment_reply' post.pk %}"
+      hx-target="#comments"
+      hx-swap="beforeend"
+      class="comment-form">
+  {% csrf_token %}
+  <div class="editor-container" style="line-height:1.5">
+    <div class="editor-tabs">
+      <button type="button" class="tab tab-write active">Write</button>
+      <button type="button"
+              class="tab tab-preview"
+              hx-post="{% url 'preview' %}"
+              hx-include="[name=body]"
+              hx-target="#comment-preview"
+              hx-swap="innerHTML">Preview</button>
+    </div>
+    {% include "core/partials/editor_toolbar.html" %}
+    {{ form.body }}
+    <div id="comment-preview" class="preview" style="display:none"></div>
+  </div>
+  <button type="submit">Comment</button>
+</form>
