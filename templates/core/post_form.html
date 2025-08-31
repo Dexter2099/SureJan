@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>Create Post</h1>
+<form method="post" action="{% url 'submit_post' community.slug %}" class="post-form" hx-boost="false" hx-swap="none">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  <div class="form-row">
+    <label for="{{ form.title.id_for_label }}">Title</label>
+    {{ form.title }}
+    <div id="title-count" class="char-count">0 / 300</div>
+    {{ form.title.errors }}
+  </div>
+
+  <div class="form-row">
+    <label for="{{ form.body.id_for_label }}">Body</label>
+    {{ form.body }}
+    <div id="body-count" class="char-count">0 / 40000</div>
+    {{ form.body.errors }}
+  </div>
+
+  <div class="form-row">
+    <label for="{{ form.url.id_for_label }}">Content URL</label>
+    {{ form.url }}
+    {{ form.url.errors }}
+  </div>
+
+  <input type="hidden" name="post_type" id="id_post_type" value="text">
+  {{ form.post_type.errors }}
+
+  <div class="form-actions">
+    <button class="button">Submit</button>
+    <a href="{% url 'community' community.slug %}">cancel</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/editor.js' %}" defer></script>
+{% endblock %}
