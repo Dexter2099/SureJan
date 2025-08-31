@@ -11,6 +11,10 @@ urlpatterns = [
     path("preview", core_views.render_preview, name="preview"),
     path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
 
+    # Post signals
+    path("posts/<int:pk>/signals.json", core_views.post_signals_json, name="post_signals_json"),
+    path("posts/<int:pk>/signals/chips", core_views.post_signals_chips, name="post_signals_chips"),
+
     # Recovery codes
     path("accounts/recovery-codes/", core_views.recovery_codes, name="recovery_codes"),
     path(

@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>u/{{ profile_user.username }}</h1>
+<h1>
+  u/{{ profile_user.username }}
+  {% if user_summary %}
+  <span class="badge badge-{{ user_summary.rating }}" title="{{ user_summary.flagged_pct }}% flagged, avg severity {{ user_summary.avg_severity }}">
+    {{ user_summary.rating|title }}
+  </span>
+  {% endif %}
+</h1>
+{% if user_summary %}
+  {% include "core/partials/user_karma_sparkline.html" with severities=user_summary.severities alt="Post severity trend for {{ profile_user.username }} over last 90 days. {{ user_summary.flagged_pct }}% flagged, average severity {{ user_summary.avg_severity }}" %}
+{% endif %}
 {% include "core/partials/user_tab_bar.html" %}
 {% for item in activity %}
   {% if item.type == 'post' %}
