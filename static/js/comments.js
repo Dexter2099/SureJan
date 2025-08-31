@@ -55,6 +55,40 @@ function hideQuoteBubbles(){
   document.querySelectorAll('.quote-btn').forEach(btn=>{btn.hidden=true;});
 }
 
+function showToast(message){
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.position = 'fixed';
+  toast.style.bottom = '1rem';
+  toast.style.left = '50%';
+  toast.style.transform = 'translateX(-50%)';
+  toast.style.background = '#333';
+  toast.style.color = '#fff';
+  toast.style.padding = '0.5rem 1rem';
+  toast.style.borderRadius = '4px';
+  toast.style.zIndex = '1000';
+  toast.style.opacity = '0';
+  toast.style.transition = 'opacity 0.3s';
+  document.body.appendChild(toast);
+  requestAnimationFrame(()=>{toast.style.opacity='1';});
+  setTimeout(()=>{toast.style.opacity='0';},2000);
+  setTimeout(()=>{toast.remove();},2300);
+}
+
+function initCopyLinkButtons(root=document){
+  root.querySelectorAll('.copy-link').forEach(btn=>{
+    if(btn.dataset.ready) return;
+    btn.dataset.ready = '1';
+    btn.addEventListener('click',()=>{
+      const link = btn.dataset.link;
+      if(!link) return;
+      navigator.clipboard.writeText(link).then(()=>{
+        showToast('Link copied');
+      });
+    });
+  });
+}
+
 function handleSelection(){
   const sel = window.getSelection();
   if(!sel.rangeCount || sel.isCollapsed){
@@ -120,6 +154,7 @@ document.addEventListener('click',e=>{if(!e.target.classList.contains('quote-btn
 document.addEventListener('DOMContentLoaded',()=>{
   initCommentCollapse();
   initQuoteButtons();
+  initCopyLinkButtons();
   updateTimeAgo();
   setInterval(updateTimeAgo,60000);
 });
@@ -127,5 +162,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 document.body.addEventListener('htmx:afterSwap',e=>{
   initCommentCollapse(e.detail.elt);
   initQuoteButtons(e.detail.elt);
+  initCopyLinkButtons(e.detail.elt);
   updateTimeAgo(e.detail.elt);
 });
