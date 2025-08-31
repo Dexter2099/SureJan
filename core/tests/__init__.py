@@ -11,7 +11,7 @@ from django.utils import timezone
 from io import BytesIO
 from PIL import Image
 
-from .models import Comment, Community, Post
+from ..models import Comment, Community, Post
 
 
 class SubmitPostTests(TestCase):

@@ -247,6 +247,8 @@ def _cached_post_signals(pk):
 
 @require_GET
 def post_signals_json(request, pk):
+    if not settings.ASTROTURF_WATCH:
+        raise Http404
     try:
         data = _cached_post_signals(pk)
     except Post.DoesNotExist:
@@ -263,6 +265,8 @@ def post_signals_json(request, pk):
 
 @require_GET
 def post_signals_chips(request, pk):
+    if not settings.ASTROTURF_WATCH:
+        raise Http404
     try:
         data = _cached_post_signals(pk)
     except Post.DoesNotExist:
