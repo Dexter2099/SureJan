@@ -221,29 +221,6 @@ a:focus {
   margin-bottom: 8px;
 }
 
-.vote-col {
-  width: 40px;
-  text-align: center;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.vote-col button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: block;
-  width: 100%;
-  padding: 0;
-  font-size: 16px;
-}
-
-.vote-col span {
-  display: block;
-  margin: 4px 0;
-  font-weight: bold;
-}
-
 .vote {
   width: 40px;
   display: flex;
@@ -442,7 +419,7 @@ hr {
 }
 
 /* Post images: responsive + bounded */
-.post-image {
+.post-image img {
   display: block;
   max-width: 100%;
   height: auto;         /* preserve aspect ratio */
@@ -451,22 +428,22 @@ hr {
 }
 
 /* Tighter in feed cards so they don’t eat the page */
-.feed .post-image {
+.feed .post-image img {
   width: 100%;
   max-height: 360px;    /* tweak: 300–480px depending on taste */
   object-fit: cover;    /* crops gracefully to the box */
 }
 
 /* Roomier on the post detail page */
-.post .post-image {
+.post .post-image img {
   width: 100%;
   max-height: 640px;    /* show more of the image on detail */
   object-fit: contain;  /* avoid cropping on detail view */
 }
 
 @media (max-width: 768px) {
-  .feed .post-image { max-height: 240px; }
-  .post .post-image { max-height: 480px; }
+  .feed .post-image img { max-height: 240px; }
+  .post .post-image img { max-height: 480px; }
 }
 
 .linklike {
@@ -498,7 +475,7 @@ hr {
 .post-actions a + a:before { content:"•"; color:#aaa; position:absolute; left:-6px; }
 
 /* Image */
-.post-content .post-image { border:1px solid #e6e6e6; box-shadow:0 1px 0 #eee; }
+.post-content .post-image img { border:1px solid #e6e6e6; box-shadow:0 1px 0 #eee; }
 
 /* Comment tree */
 .comment { background:#fff; border:1px solid #ddd; padding:8px; margin:8px 0; font-size:11px; }
@@ -516,7 +493,7 @@ hr {
 }
 
 /* Feed images: compact cards (does not affect post detail) */
-.feed .post-image {
+.feed .post-image img {
   width: 100%;
   max-height: 360px;
   object-fit: cover;        /* crop to fit the card */
@@ -524,7 +501,7 @@ hr {
   box-shadow: 0 1px 0 #eee;
 }
 @media (max-width: 768px) {
-  .feed .post-image { max-height: 240px; }
+  .feed .post-image img { max-height: 240px; }
 }
 
 /* Submit panel */

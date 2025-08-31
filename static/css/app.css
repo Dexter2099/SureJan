@@ -88,11 +88,6 @@ li + li {
 /* Post card layout */
 .post-card { position: relative; }
 
-.vote-col {
-  flex: 0 0 32px;
-  width: 32px;
-}
-
 .post-title {
   display: -webkit-box;
   -webkit-line-clamp: 2;
