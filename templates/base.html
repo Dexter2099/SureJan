@@ -38,7 +38,7 @@
     </header>
     {% comment %} old subreddit bar removed in favor of hdr-center {% endcomment %}
 
-    <main class="container" style="max-width:980px; margin:16px auto;">
+    <main class="container">
       {% if messages %}
         <ul class="messages">
           {% for message in messages %}
@@ -49,7 +49,7 @@
       {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">
-      <div class="container" style="max-width:980px; margin:16px auto; text-align:center;">
+      <div class="container" style="text-align:center;">
         <a href="{% url 'terms' %}">Terms</a>
         &middot;
         <a href="{% url 'privacy' %}">Privacy</a>

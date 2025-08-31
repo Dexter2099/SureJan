@@ -1,16 +1,37 @@
 /* Global application styles */
 
-:root {
-  --content-max: 70ch;
+/* --- Layout width: wide container for feed --- */
+:root{
+  --page-max: 1200px;   /* overall page */
+  --feed-max: 960px;    /* main feed column target */
+  --prose-max: 70ch;    /* readable text blocks only */
   --line: 1.6;
   --muted: #6b7280;
 }
 
+/* Undo any accidental global prose cap */
+html, body { max-width: none !important; }
+
+/* Generic container/grid */
+main, .container, .wrap, .page, #page {
+  max-width: min(100vw - 2rem, var(--page-max));
+  margin-inline: auto;
+  padding-inline: clamp(12px, 2vw, 24px);
+}
+
+/* Feed column should breathe on desktop */
+.post-list, .feed, .listing, .content-main {
+  max-width: clamp(720px, 92vw, var(--feed-max));
+  margin-inline: auto;
+}
+
+/* Prose: apply the 70ch cap ONLY to long-form text, not layout */
+.prose { max-width: var(--prose-max); }
+.prose img, .post-media img { max-width: 100%; height: auto; display: block; }
+
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: var(--line);
-  max-width: var(--content-max);
-  margin: 0 auto;
   color: var(--text, #1f2937);
 }
 
