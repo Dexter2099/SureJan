@@ -270,6 +270,7 @@ class EngagementEvent(models.Model):
         Post, on_delete=models.CASCADE, related_name="engagement_events"
     )
     event_type = models.CharField(max_length=32)
+    voter_age_days = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -286,6 +287,8 @@ class PostBurstState(models.Model):
     buckets = models.JSONField(default=list)
     bucket_index = models.PositiveSmallIntegerField(default=0)
     bucket_span_seconds = models.PositiveIntegerField(default=60)
+    window_start = models.DateTimeField(default=timezone.now)
+    total_5m = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
 
 
