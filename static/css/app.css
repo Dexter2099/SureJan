@@ -180,3 +180,30 @@ li + li {
   margin-left: 1rem;
   padding-left: 1rem;
 }
+
+/* --- Post context chips -------------------------------------------------- */
+[id^="chips-"] {
+  min-height: 24px;
+}
+
+.post-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.post-context-chips .chip {
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.post-context-chips .chip:hover {
+  background: #d1d5db;
+  text-decoration: underline;
+}

@@ -1,7 +1,21 @@
 {% comment %}Display engagement signal chips for a post{% endcomment %}
 <div class="post-context-chips">
-  {% for key, value in signals.items %}
-    <span class="chip">{{ key }}: {{ value }}</span>
-  {% endfor %}
+  {# Render a chip for each active signal flag #}
+  {% if signals.flags %}
+    {% for key, value in signals.flags.items %}
+      {% if value %}
+        <a class="chip" href="{% url 'transparency_methods' %}" title="Learn about {{ key|replace:'_',' ' }} detection">
+          {{ key|replace:'_',' '|title }}
+        </a>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {# Always show severity chip #}
+  {% if signals.severity is not None %}
+    <a class="chip" href="{% url 'transparency_methods' %}" title="Aggregated anomaly score">
+      Severity: {{ signals.severity }}
+    </a>
+  {% endif %}
 </div>
 
