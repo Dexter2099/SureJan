@@ -131,3 +131,25 @@ li + li {
   color: #b91c1c;
   margin-top: 4px;
 }
+
+/* Comment collapse and load-more controls */
+.comment .collapse-toggle {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.comment.collapsed > .children { display: none; }
+
+.comment.collapsed .collapse-toggle { transform: rotate(-90deg); }
+
+.more-replies { margin-top: 4px; }
+
+.more-replies .load-more {
+  background: none;
+  border: 0;
+  color: var(--link, #1d4ed8);
+  cursor: pointer;
+  padding: 0;
+}

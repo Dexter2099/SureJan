@@ -1,5 +1,6 @@
-<div id="comment-{{ comment.pk }}" class="comment">
+<div id="comment-{{ comment.pk }}" class="comment" data-comment-id="{{ comment.pk }}" data-depth="{{ comment.depth }}">
   <div class="meta">
+    <button class="collapse-toggle" data-comment-id="{{ comment.pk }}" aria-label="Collapse thread">▾</button>
     by <a href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>
     • {{ comment.created_at|timesince }} ago
     <button hx-post="{% url 'vote_comment' comment.pk %}?v=1"
@@ -20,10 +21,25 @@
     {% endif %}
   </div>
   <div class="comment-body prose">{{ comment.body|safe }}</div>
+  {% if comment.depth < 5 %}
   <div class="children">
     {% for child in comment.children.all %}
       {% include "core/partials/comment_item.html" with comment=child %}
     {% endfor %}
   </div>
+  {% else %}
+    {% with child_count=comment.children.count %}
+      {% if child_count %}
+        <div class="children more-replies">
+          <button class="linklike load-more"
+                  hx-get="/comments/children?parent={{ comment.pk }}"
+                  hx-target="closest .children"
+                  hx-swap="outerHTML">
+            Show {{ child_count }} more repl{{ child_count|pluralize:'y,ies' }}
+          </button>
+        </div>
+      {% endif %}
+    {% endwith %}
+  {% endif %}
 </div>
 
