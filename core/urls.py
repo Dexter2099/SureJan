@@ -6,6 +6,7 @@ urlpatterns = [
     # Home / front page
     path("", core_views.home, name="home"),
     path("mission/", core_views.mission, name="mission"),
+    path("anti-astroturf/", core_views.anti_astroturf, name="anti_astroturf"),
     path("transparency/methods", core_views.transparency_methods, name="transparency_methods"),
     path("transparency/posts", core_views.transparency_posts, name="transparency_posts"),
     # Markdown preview endpoint
