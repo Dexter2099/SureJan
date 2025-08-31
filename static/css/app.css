@@ -1,7 +1,57 @@
 /* Global application styles */
 
+:root {
+  --content-max: 70ch;
+  --line: 1.6;
+  --muted: #6b7280;
+}
+
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: var(--line);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  color: var(--text, #1f2937);
+}
+
+a {
+  color: var(--link, #1d4ed8);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+blockquote {
+  margin: 1em auto;
+  padding-left: 1em;
+  border-left: 4px solid var(--muted);
+  color: var(--text, #1f2937);
+  background: #f9fafb;
+}
+
+pre,
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  line-height: var(--line);
+}
+
+pre {
+  overflow-x: auto;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+  margin: 1em auto;
+}
+
+li + li {
+  margin-top: 0.25em;
 }
 
 .post-form {
@@ -29,7 +79,7 @@ body {
 .post-form .char-count {
   align-self: flex-end;
   font-size: 11px;
-  color: var(--muted, #777);
+  color: var(--muted);
 }
 
 .post-form textarea {
