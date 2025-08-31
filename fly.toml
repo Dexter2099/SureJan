@@ -25,7 +25,7 @@ primary_region = "syd"
     timeout  = "5s"
     method   = "GET"
     path     = "/healthz"
-    headers  = ["Host=localhost"]
+    headers  = { Host = "localhost" }
 
 [[vm]]
   cpu_kind = "shared"
