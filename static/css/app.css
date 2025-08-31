@@ -104,10 +104,14 @@ li + li {
   color: var(--muted);
 }
 
+.post-form .char-count.near-limit { color: #d97706; }
+.post-form .char-count.over-limit { color: #b91c1c; }
+
 .post-form textarea {
   resize: none;
   overflow-y: auto;
   max-height: 60vh;
+  transition: height 0.2s ease;
 }
 
 .spinner {
