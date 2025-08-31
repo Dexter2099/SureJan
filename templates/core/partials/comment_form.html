@@ -30,7 +30,7 @@
               hx-target="#comment-preview"
               hx-swap="innerHTML">Preview</button>
     </div>
-    {% include "core/partials/editor_toolbar.html" %}
+    {% include "core/partials/editor_toolbar.html" %} {# formatting toolbar #}
     {{ form.body }}
     <div id="comment-preview" class="preview" style="display:none"></div>
   </div>

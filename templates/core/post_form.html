@@ -16,6 +16,7 @@
   <div class="form-row">
     {{ form.body.label_tag }}
     <div class="prose">
+      {% include "core/partials/editor_toolbar.html" %}
       {{ form.body }}
     </div>
     {{ form.body.errors }}
