@@ -8,7 +8,7 @@ from .utils.link_safety import check_url_safety
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["post_type", "title", "body", "url", "image"]
+        fields = ["title", "body", "url", "image"]
 
     def clean_image(self):
         image = self.cleaned_data.get("image")
@@ -22,11 +22,9 @@ class PostForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        post_type = cleaned_data.get("post_type")
         title = (cleaned_data.get("title") or "").strip()
         body = (cleaned_data.get("body") or "").strip()
         url = (cleaned_data.get("url") or "").strip()
-        image = cleaned_data.get("image")
 
         cleaned_data["title"] = title
         cleaned_data["body"] = body
@@ -35,30 +33,25 @@ class PostForm(forms.ModelForm):
         if not title:
             self.add_error("title", "Title is required.")
 
-        if post_type == "link":
-            if not url:
-                self.add_error("url", "URL is required for link posts.")
-            else:
-                if not check_url_safety(url):
-                    self.add_error("url", "URL flagged as unsafe.")
-            if body:
-                self.add_error("body", "Body must be empty for link posts.")
-            if image:
-                self.add_error("image", "Image must be empty for link posts.")
-        elif post_type == "text":
-            if url:
-                self.add_error("url", "URL must be empty for text posts.")
-            if image:
-                self.add_error("image", "Image must be empty for text posts.")
-        elif post_type == "image":
-            if not image:
-                self.add_error("image", "Image is required for image posts.")
-            if url:
-                self.add_error("url", "URL must be empty for image posts.")
-            if body:
-                self.add_error("body", "Body must be empty for image posts.")
+        if not body and not url:
+            raise forms.ValidationError("Body or URL is required.")
+
+        if url and not check_url_safety(url):
+            self.add_error("url", "URL flagged as unsafe.")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if instance.image:
+            instance.post_type = "image"
+        elif instance.url:
+            instance.post_type = "link"
+        else:
+            instance.post_type = "text"
+        if commit:
+            instance.save()
+        return instance
 
 
 class CommentForm(forms.ModelForm):
