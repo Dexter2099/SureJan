@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page container">
+  <h1>Astroturf detection methods</h1>
+  <p>We monitor voting patterns to spot coordinated campaigns while protecting individual privacy.</p>
+
+  <h2>Time windows</h2>
+  <p>Votes are analysed in {{ ASTRO_WINDOW_S }}‑second windows and grouped into {{ ASTRO_BUCKET_S }}‑second buckets. Baseline activity comes from the last {{ ASTRO_BASELINE_LOOKBACK_D }} days.</p>
+
+  <h2>Definitions</h2>
+  <ul>
+    <li><strong>New accounts:</strong> accounts less than {{ ASTRO_NEW_ACCOUNT_DAYS }} days old.</li>
+    <li><strong>Early votes:</strong> the first {{ ASTRO_EARLY_VOTES_N }} votes on a post.</li>
+  </ul>
+
+  <h2>Thresholds</h2>
+  <p>A post is flagged when at least {{ ASTRO_MIN_EARLY_VOTES }} early votes are cast and {{ ASTRO_EARLY_SHARE_RED_PCT }}% or more come from new accounts.</p>
+
+  <h2>Privacy assurances</h2>
+  <p>Only aggregate patterns are reviewed. Individual identities and private data are never sold or shared.</p>
+
+  <h2>Example</h2>
+  <p>If a post receives {{ ASTRO_EARLY_VOTES_N }} early votes and {{ ASTRO_EARLY_SHARE_RED_PCT }}% are from accounts younger than {{ ASTRO_NEW_ACCOUNT_DAYS }} days, moderators take a closer look.</p>
+</div>
+{% endblock %}

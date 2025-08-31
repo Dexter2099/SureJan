@@ -25,6 +25,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.views.decorators import staff_member_required
 from django_ratelimit.decorators import ratelimit
 from django.template.loader import render_to_string
+from django.conf import settings
 
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -176,6 +177,19 @@ def oembed_preview(request):
 
 def mission(request):
     return render(request, "core/mission.html")
+
+
+def transparency_methods(request):
+    ctx = {
+        "ASTRO_WINDOW_S": settings.ASTRO_WINDOW_S,
+        "ASTRO_BUCKET_S": settings.ASTRO_BUCKET_S,
+        "ASTRO_BASELINE_LOOKBACK_D": settings.ASTRO_BASELINE_LOOKBACK_D,
+        "ASTRO_NEW_ACCOUNT_DAYS": settings.ASTRO_NEW_ACCOUNT_DAYS,
+        "ASTRO_EARLY_VOTES_N": settings.ASTRO_EARLY_VOTES_N,
+        "ASTRO_MIN_EARLY_VOTES": settings.ASTRO_MIN_EARLY_VOTES,
+        "ASTRO_EARLY_SHARE_RED_PCT": int(settings.ASTRO_EARLY_SHARE_RED * 100),
+    }
+    return render(request, "core/transparency_methods.html", ctx)
 
 
 class SignupForm(forms.Form):
