@@ -5,6 +5,7 @@
 <h1>Create Post</h1>
 <form method="post" action="{% url 'submit_post' community.slug %}" class="post-form" hx-boost="false" hx-swap="none">
   {% csrf_token %}
+  <div class="draft-pill" hidden></div>
   {{ form.non_field_errors }}
 
   <div class="form-row">
