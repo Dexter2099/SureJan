@@ -1,7 +1,11 @@
 from datetime import timedelta
 
 from django.conf import settings
+codex/cache-compute_post_signals-results
+from django.core.cache import cache
+
 from django.utils import timezone
+main
 
 from ..models import CommunityBaseline, Post, Vote
 
@@ -18,6 +22,11 @@ def compute_post_signals(post_id):
     The function returns a dictionary with raw metrics, baseline thresholds,
     boolean flags for anomalies and an aggregated severity score (0-100).
     """
+
+    cache_key = f"post_signals:{post_id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
 
     # Retrieve post, burst state and engagement events in a single query
     post = (
@@ -82,8 +91,7 @@ def compute_post_signals(post_id):
     if base_discuss > 0:
         severity += max(0.0, min(10.0, (base_discuss - discuss_ratio) / base_discuss * 10.0))
     severity = round(min(severity, 100.0), 2)
-
-    return {
+    data = {
         "rate5": rate5,
         "rate15": rate15,
         "early_votes": early_votes,
@@ -104,6 +112,10 @@ def compute_post_signals(post_id):
         },
         "severity": severity,
     }
+codex/cache-compute_post_signals-results
+    cache.set(cache_key, data, 30)
+    return data
+
 
 
 def compute_user_post_summary(user_id, days: int = 90):
@@ -152,3 +164,4 @@ def compute_user_post_summary(user_id, days: int = 90):
         "rating": rating,
         "severities": severities,
     }
+main
