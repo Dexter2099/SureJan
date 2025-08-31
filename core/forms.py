@@ -9,6 +9,7 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "body", "url", "image"]
+        widgets = {"body": forms.Textarea(attrs={"data-editor": "1"})}
 
     def clean_image(self):
         image = self.cleaned_data.get("image")
@@ -58,7 +59,7 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["body"]
-        widgets = {"body": forms.Textarea(attrs={"rows": 3})}
+        widgets = {"body": forms.Textarea(attrs={"rows": 3, "data-editor": "1"})}
 
     def clean_body(self):
         body = (self.cleaned_data.get("body") or "").strip()

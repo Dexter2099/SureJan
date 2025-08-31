@@ -1,7 +1,21 @@
+function setupEditor(ta){
+  if(!ta||ta.dataset.editorReady)return;ta.dataset.editorReady=1;
+  ta.addEventListener('keydown',e=>{
+    const ctrl=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
+    if(ctrl&&key==='enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
+    else if(key==='enter'&&e.shiftKey){e.stopPropagation();}
+    else if(ctrl&&key==='b'){e.preventDefault();toggleWrap('**');}
+    else if(ctrl&&key==='i'){e.preventDefault();toggleWrap('_');}
+
+    function toggleWrap(w){const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,b=v.slice(0,s),sel=v.slice(s,e),a=v.slice(e),l=w.length;if(sel.startsWith(w)&&sel.endsWith(w)){ta.setRangeText(sel.slice(l,sel.length-l),s,e,'end');ta.setSelectionRange(s,e-2*l);}else if(b.endsWith(w)&&a.startsWith(w)){ta.setRangeText(sel,s-l,e+l,'end');ta.setSelectionRange(s-l,e-l);}else{ta.setRangeText(w+sel+w,s,e,'end');ta.setSelectionRange(s+l,e+l);}ta.dispatchEvent(new Event('input',{bubbles:true}));}
+  });
+}
+
 function initToolbar(root=document){
   root.querySelectorAll('.editor-toolbar').forEach(tb=>{
     if(tb.dataset.ready)return;tb.dataset.ready=1;
     const ta=tb.nextElementSibling;if(!ta)return;
+    if(!ta.dataset.editor)ta.dataset.editor=1;
     if(!ta.closest('.post-form')){ta.style.lineHeight='1.5';ta.style.maxWidth='var(--prose-max)';if(ta.parentElement){ta.parentElement.style.maxWidth='var(--prose-max)';ta.parentElement.style.lineHeight='1.5';}}
     tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
       const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,sel=v.slice(s,e);
@@ -11,16 +25,9 @@ function initToolbar(root=document){
       ta.focus();ta.dispatchEvent(new Event('input',{bubbles:true}));
     }));
 
-    ta.addEventListener('keydown',e=>{
-      const ctrl=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
-      if(ctrl&&key==='enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
-      else if(key==='enter'&&e.shiftKey){e.stopPropagation();}
-      else if(ctrl&&key==='b'){e.preventDefault();toggleWrap('**');}
-      else if(ctrl&&key==='i'){e.preventDefault();toggleWrap('_');}
-
-      function toggleWrap(w){const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,b=v.slice(0,s),sel=v.slice(s,e),a=v.slice(e),l=w.length;if(sel.startsWith(w)&&sel.endsWith(w)){ta.setRangeText(sel.slice(l,sel.length-l),s,e,'end');ta.setSelectionRange(s,e-2*l);}else if(b.endsWith(w)&&a.startsWith(w)){ta.setRangeText(sel,s-l,e+l,'end');ta.setSelectionRange(s-l,e-l);}else{ta.setRangeText(w+sel+w,s,e,'end');ta.setSelectionRange(s+l,e+l);}ta.dispatchEvent(new Event('input',{bubbles:true}));}
-    });
+    setupEditor(ta);
   });
+  root.querySelectorAll('textarea[data-editor]').forEach(setupEditor);
 }
 
 function initPreview(root=document){
