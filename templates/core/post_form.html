@@ -40,9 +40,19 @@
 
   <div class="form-row">
     <label for="{{ form.url.id_for_label }}">Content URL</label>
-    {{ form.url }}
+    <input type="url"
+           name="url"
+           id="{{ form.url.id_for_label }}"
+           value="{{ form.url.value|default:'' }}"
+           hx-post="{% url 'oembed_preview' %}"
+           hx-trigger="change, keyup delay:500ms"
+           hx-target="#link-preview"
+           hx-swap="innerHTML"
+           hx-include="[name=url]"
+    >
     {{ form.url.errors }}
   </div>
+  <div id="link-preview"></div>
 
   <input type="hidden" name="post_type" id="id_post_type" value="text">
   {{ form.post_type.errors }}
