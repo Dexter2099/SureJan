@@ -29,28 +29,32 @@ class PostCreationTests(TestCase):
         post = Post.objects.get()
         self.assertEqual(post.post_type, "text")
         self.assertEqual(post.body, "Body")
-        self.assertEqual(post.url, "")
+        self.assertEqual(post.content_url, "")
 
     def test_url_only(self):
         resp = self.client.post(
-            self.url, {"title": "Link", "url": "https://example.com"}
+            self.url, {"title": "Link", "content_url": "https://example.com"}
         )
         self.assertEqual(resp.status_code, 302)
         post = Post.objects.get()
         self.assertEqual(post.post_type, "link")
-        self.assertEqual(post.url, "https://example.com")
+        self.assertEqual(post.content_url, "https://example.com")
         self.assertEqual(post.body, "")
 
     def test_body_and_url(self):
         resp = self.client.post(
             self.url,
-            {"title": "Both", "body": "Body", "url": "https://example.com"},
+            {
+                "title": "Both",
+                "body": "Body",
+                "content_url": "https://example.com",
+            },
         )
         self.assertEqual(resp.status_code, 302)
         post = Post.objects.get()
         self.assertEqual(post.post_type, "link")
         self.assertEqual(post.body, "Body")
-        self.assertEqual(post.url, "https://example.com")
+        self.assertEqual(post.content_url, "https://example.com")
 
 
 class PreviewTests(TestCase):

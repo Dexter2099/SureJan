@@ -8,7 +8,7 @@ from .utils.link_safety import check_url_safety
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "body", "url", "image"]
+        fields = ["title", "body", "content_url", "image"]
         widgets = {"body": forms.Textarea(attrs={"data-editor": "1"})}
 
     def clean_image(self):
@@ -25,20 +25,20 @@ class PostForm(forms.ModelForm):
 
         title = (cleaned_data.get("title") or "").strip()
         body = (cleaned_data.get("body") or "").strip()
-        url = (cleaned_data.get("url") or "").strip()
+        content_url = (cleaned_data.get("content_url") or "").strip()
 
         cleaned_data["title"] = title
         cleaned_data["body"] = body
-        cleaned_data["url"] = url
+        cleaned_data["content_url"] = content_url
 
         if not title:
             self.add_error("title", "Title is required.")
 
-        if not body and not url:
+        if not body and not content_url:
             raise forms.ValidationError("Body or URL is required.")
 
-        if url and not check_url_safety(url):
-            self.add_error("url", "URL flagged as unsafe.")
+        if content_url and not check_url_safety(content_url):
+            self.add_error("content_url", "URL flagged as unsafe.")
 
         return cleaned_data
 
@@ -46,7 +46,7 @@ class PostForm(forms.ModelForm):
         instance = super().save(commit=False)
         if instance.image:
             instance.post_type = "image"
-        elif instance.url:
+        elif instance.content_url:
             instance.post_type = "link"
         else:
             instance.post_type = "text"

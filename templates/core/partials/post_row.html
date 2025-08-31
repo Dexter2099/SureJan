@@ -11,9 +11,9 @@
       <em>[deleted]</em>
     {% else %}
       <h2>
-      {% if post.url %}
-        <a href="{{ post.url }}">{{ post.title }}</a>
-        <span class="domain">({{ post.url|domain }})</span>
+      {% if post.content_url %}
+        <a href="{{ post.content_url }}">{{ post.title }}</a>
+        <span class="domain">({{ post.content_url|domain }})</span>
       {% else %}
         <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
       {% endif %}
