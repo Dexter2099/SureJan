@@ -4,11 +4,21 @@ function initToolbar(root=document){
     const ta=tb.nextElementSibling;if(!ta)return;
     tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
       const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,sel=v.slice(s,e);
-      if(b.dataset.wrap){const w=b.dataset.wrap;ta.value=v.slice(0,s)+w+sel+w+v.slice(e);ta.setSelectionRange(s+w.length,s+w.length+sel.length);} 
-      else if(b.dataset.link){const u=prompt('URL','https://');if(!u)return;const t=sel||'text',m=`[${t}](${u})`;ta.value=v.slice(0,s)+m+v.slice(e);ta.setSelectionRange(s+m.length,s+m.length);} 
-      else if(b.dataset.prefix){const p=b.dataset.prefix,l=sel.split('\n').map(x=>p+x).join('\n');ta.value=v.slice(0,s)+l+v.slice(e);ta.setSelectionRange(s,s+l.length);} 
+      if(b.dataset.wrap){const w=b.dataset.wrap;ta.value=v.slice(0,s)+w+sel+w+v.slice(e);ta.setSelectionRange(s+w.length,s+w.length+sel.length);}
+      else if(b.dataset.link){const u=prompt('URL','https://');if(!u)return;const t=sel||'text',m=`[${t}](${u})`;ta.value=v.slice(0,s)+m+v.slice(e);ta.setSelectionRange(s+m.length,s+m.length);}
+      else if(b.dataset.prefix){const p=b.dataset.prefix,l=sel.split('\n').map(x=>p+x).join('\n');ta.value=v.slice(0,s)+l+v.slice(e);ta.setSelectionRange(s,s+l.length);}
       ta.focus();ta.dispatchEvent(new Event('input',{bubbles:true}));
     }));
+
+    ta.addEventListener('keydown',e=>{
+      const ctrl=e.ctrlKey||e.metaKey;
+      if(ctrl&&e.key==='Enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
+      else if(e.key==='Enter'&&e.shiftKey){e.stopPropagation();}
+      else if(ctrl&&(e.key==='b'||e.key==='B')){e.preventDefault();toggleWrap('**');}
+      else if(ctrl&&(e.key==='i'||e.key==='I')){e.preventDefault();toggleWrap('_');}
+
+      function toggleWrap(w){const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,b=v.slice(0,s),sel=v.slice(s,e),a=v.slice(e),l=w.length;if(sel.startsWith(w)&&sel.endsWith(w)){ta.setRangeText(sel.slice(l,sel.length-l),s,e,'end');ta.setSelectionRange(s,e-2*l);}else if(b.endsWith(w)&&a.startsWith(w)){ta.setRangeText(sel,s-l,e+l,'end');ta.setSelectionRange(s-l,e-l);}else{ta.setRangeText(w+sel+w,s,e,'end');ta.setSelectionRange(s+l,e+l);}ta.dispatchEvent(new Event('input',{bubbles:true}));}
+    });
   });
 }
 
