@@ -15,9 +15,19 @@
 
   <div class="form-row">
     {{ form.body.label_tag }}
-    <div class="prose">
+    <div class="editor-container prose">
+      <div class="editor-tabs">
+        <button type="button" class="tab tab-write active">Write</button>
+        <button type="button"
+                class="tab tab-preview"
+                hx-post="{% url 'preview' %}"
+                hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
+                hx-target="#post-preview"
+                hx-swap="innerHTML">Preview</button>
+      </div>
       {% include "core/partials/editor_toolbar.html" %}
       {{ form.body }}
+      <div id="post-preview" class="preview" style="display:none"></div>
     </div>
     {{ form.body.errors }}
   </div>
