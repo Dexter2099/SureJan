@@ -196,11 +196,13 @@ document.addEventListener('htmx:load',e=>{initToolbar(e.detail.elt);initPreview(
 
 function toggleSubmit(form,on){
   if(!form)return;
-  const btn=form.querySelector('button[type="submit"],input[type="submit"]');
-  if(!btn)return;
-  btn.disabled=on;
-  const sp=btn.querySelector('.spinner');
-  if(sp)sp.hidden=!on;
+  const btns=form.querySelectorAll('button[type="submit"],input[type="submit"]');
+  if(!btns.length)return;
+  btns.forEach(btn=>{
+    btn.disabled=on;
+    const sp=btn.querySelector('.spinner');
+    if(sp)sp.hidden=!on;
+  });
   if(on)showFormError(form,'');
 }
 
@@ -211,8 +213,10 @@ function showFormError(form,msg){
 
 document.addEventListener('submit',e=>{toggleSubmit(e.target,true);},true);
 document.body.addEventListener('htmx:beforeRequest',e=>{const f=e.detail.elt.closest('form');toggleSubmit(f,true);});
-document.body.addEventListener('htmx:responseError',e=>{e.preventDefault();const f=e.detail.elt.closest('form');const msg=e.detail.xhr&&e.detail.xhr.responseText?e.detail.xhr.responseText:'Error submitting form';toggleSubmit(f,false);showFormError(f,msg);});
-document.body.addEventListener('htmx:sendError',e=>{e.preventDefault();const f=e.detail.elt.closest('form');toggleSubmit(f,false);showFormError(f,'Network error');});
+function handleHtmxError(e,msg){const f=e.detail.elt.closest('form');toggleSubmit(f,false);showFormError(f,msg||(e.detail.xhr&&e.detail.xhr.responseText)||'Error submitting form');}
+document.body.addEventListener('htmx:responseError',e=>{e.preventDefault();handleHtmxError(e);});
+document.body.addEventListener('htmx:sendError',e=>{e.preventDefault();handleHtmxError(e,'Network error');});
+document.body.addEventListener('htmx:error',e=>{handleHtmxError(e);});
 document.body.addEventListener('htmx:afterRequest',e=>{const f=e.detail.elt.closest('form');if(f&&e.detail.xhr&&e.detail.xhr.status<400)toggleSubmit(f,false);});
 
 let lastFocus=null,lastScroll=null;
