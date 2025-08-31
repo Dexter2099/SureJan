@@ -8,6 +8,12 @@ The Django admin lives at `/secret-admin/`; restrict it by setting an
 allowed IPs. The app exposes `/healthz` for uptime checks; point your
 monitor at this path.
 
+### Feature flags
+
+`ASTROTURF_WATCH` controls all astroturf-detection features. Set it to
+`False` to hide engagement chips and block transparency pages; related
+endpoints will return 404.
+
 ```bash
 git add -A
 git commit -m "alpha: public signup + header auth + submit CTA + seeds"
