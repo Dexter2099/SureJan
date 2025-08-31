@@ -45,8 +45,14 @@ a:visited {
   color: var(--link-visited);
 }
 
-a:hover {
+a:hover,
+a:focus {
   text-decoration: underline;
+}
+
+a:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 /* Header ------------------------------------------------------------- */
@@ -379,7 +385,8 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 textarea:focus {
   border-color: var(--link);
-  outline: none;
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 /* Misc --------------------------------------------------------------- */
@@ -394,6 +401,14 @@ textarea:focus {
 
 .button:hover {
   background: var(--border);
+}
+
+button:focus,
+.button:focus,
+input[type="button"]:focus,
+input[type="submit"]:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 hr {
