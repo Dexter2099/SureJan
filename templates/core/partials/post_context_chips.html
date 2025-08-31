@@ -1,0 +1,7 @@
+{% comment %}Display engagement signal chips for a post{% endcomment %}
+<div class="post-context-chips">
+  {% for key, value in signals.items %}
+    <span class="chip">{{ key }}: {{ value }}</span>
+  {% endfor %}
+</div>
+
