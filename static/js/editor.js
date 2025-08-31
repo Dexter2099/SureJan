@@ -2,7 +2,7 @@ function initToolbar(root=document){
   root.querySelectorAll('.editor-toolbar').forEach(tb=>{
     if(tb.dataset.ready)return;tb.dataset.ready=1;
     const ta=tb.nextElementSibling;if(!ta)return;
-    if(!ta.closest('.post-form')){ta.style.lineHeight='1.5';ta.style.maxWidth='65ch';if(ta.parentElement){ta.parentElement.style.maxWidth='65ch';ta.parentElement.style.lineHeight='1.5';}}
+    if(!ta.closest('.post-form')){ta.style.lineHeight='1.5';ta.style.maxWidth='var(--prose-max)';if(ta.parentElement){ta.parentElement.style.maxWidth='var(--prose-max)';ta.parentElement.style.lineHeight='1.5';}}
     tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
       const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,sel=v.slice(s,e);
       if(b.dataset.wrap){const w=b.dataset.wrap;ta.value=v.slice(0,s)+w+sel+w+v.slice(e);ta.setSelectionRange(s+w.length,s+w.length+sel.length);}

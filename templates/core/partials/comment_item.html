@@ -19,7 +19,7 @@
       </form>
     {% endif %}
   </div>
-  <div class="body" style="line-height:1.5;max-width:65ch">{{ comment.body|linebreaksbr }}</div>
+  <div class="comment-body prose">{{ comment.body|safe }}</div>
   <div class="children">
     {% for child in comment.children.all %}
       {% include "core/partials/comment_item.html" with comment=child %}
