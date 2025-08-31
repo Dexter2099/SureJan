@@ -189,6 +189,7 @@ class Comment(models.Model):
     body = models.TextField()
     score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [

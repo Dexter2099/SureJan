@@ -19,3 +19,16 @@ def can_author_delete(post, user):
     if not created:
         return False
     return timezone.now() - created <= timedelta(minutes=15)
+
+
+@register.filter
+def can_edit_comment(comment, user):
+    """Return True if the user may edit the comment within 15 minutes."""
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(comment, "author_id", None) != getattr(user, "id", None):
+        return False
+    created = getattr(comment, "created_at", None)
+    if not created:
+        return False
+    return timezone.now() - created <= timedelta(minutes=15)
