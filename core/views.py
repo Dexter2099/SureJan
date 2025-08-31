@@ -3,6 +3,8 @@
 import random
 import secrets
 import string
+import hashlib
+import json
 from datetime import timedelta
 
 import re
@@ -20,19 +22,25 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import LoginView
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.views.decorators import staff_member_required
 from django_ratelimit.decorators import ratelimit
 from django.template.loader import render_to_string
 from django.conf import settings
 
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import F
 from django import forms
+codex/create-transparency-posts-view-with-metrics
+from django.core.paginator import Paginator
+
+from django.core.cache import cache
+from django.utils.cache import patch_cache_control
+main
 
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
@@ -42,6 +50,15 @@ from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
+codex/create-transparency-posts-view-with-metrics
+from .services.astro import compute_post_signals
+
+codex/add-user-post-summary-and-ratings
+from .services.astro import compute_user_post_summary
+
+from .services.astro import compute_post_signals
+main
+main
 
 
 def _is_banned(user):
@@ -190,6 +207,88 @@ def transparency_methods(request):
         "ASTRO_EARLY_SHARE_RED_PCT": int(settings.ASTRO_EARLY_SHARE_RED * 100),
     }
     return render(request, "core/transparency_methods.html", ctx)
+
+
+codex/create-transparency-posts-view-with-metrics
+def transparency_posts(request):
+    since = timezone.now() - timedelta(hours=24)
+    posts = (
+        Post.objects.filter(created_at__gte=since)
+        .select_related("community", "author")
+    )
+    rows = []
+    for post in posts:
+        metrics = compute_post_signals(post.pk)
+        if not any(metrics["flags"].values()):
+            continue
+        rows.append(
+            {
+                "post": post,
+                "author_age": (timezone.now() - post.author.date_joined).days,
+                "rate5": metrics["rate5"],
+                "rate15": metrics["rate15"],
+                "base5": metrics["thresholds"].get("p95_votes_5m", 0),
+                "base15": metrics["thresholds"].get("p95_votes_15m", 0),
+                "early_new_share_pct": metrics["early_new_share"] * 100.0,
+                "discuss_ratio": metrics["discuss_ratio"],
+                "severity": metrics["severity"],
+            }
+        )
+    sort = request.GET.get("sort", "-severity")
+    reverse = sort.startswith("-")
+    key = sort.lstrip("-")
+    rows.sort(key=lambda x: x.get(key, 0), reverse=reverse)
+
+    paginator = Paginator(rows, 20)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    ctx = {"page_obj": page_obj, "sort": sort}
+    return render(request, "core/transparency_posts.html", ctx)
+=======
+def _cached_post_signals(pk):
+    cache_key = f"post-signals:{pk}"
+    data = cache.get(cache_key)
+    if data is None:
+        data = compute_post_signals(pk)
+        cache.set(cache_key, data, 30)
+    return data
+
+
+@require_GET
+def post_signals_json(request, pk):
+    try:
+        data = _cached_post_signals(pk)
+    except Post.DoesNotExist:
+        raise Http404
+    body = json.dumps(data)
+    etag = hashlib.md5(body.encode()).hexdigest()
+    if request.headers.get("If-None-Match") == etag:
+        return HttpResponse(status=304)
+    response = HttpResponse(body, content_type="application/json")
+    response["ETag"] = etag
+    patch_cache_control(response, max_age=30)
+    return response
+
+
+@require_GET
+def post_signals_chips(request, pk):
+    try:
+        data = _cached_post_signals(pk)
+    except Post.DoesNotExist:
+        raise Http404
+    response = render(
+        request,
+        "core/partials/post_context_chips.html",
+        {"signals": data},
+    )
+    etag = hashlib.md5(response.content).hexdigest()
+    if request.headers.get("If-None-Match") == etag:
+        return HttpResponse(status=304)
+    response["ETag"] = etag
+    patch_cache_control(response, max_age=30)
+    return response
+main
 
 
 class SignupForm(forms.Form):
@@ -996,10 +1095,13 @@ def user_overview(request, username):
     activity.sort(key=lambda a: a["created_at"], reverse=True)
     activity = activity[:20]
 
+    summary = compute_user_post_summary(profile_user.id)
+
     context = {
         "profile_user": profile_user,
         "activity": activity,
         "tab": "overview",
+        "user_summary": summary,
     }
     return render(request, "core/user_overview.html", context)
 

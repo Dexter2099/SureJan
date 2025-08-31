@@ -1,7 +1,11 @@
 from datetime import timedelta
 
 from django.conf import settings
+codex/cache-compute_post_signals-results
 from django.core.cache import cache
+
+from django.utils import timezone
+main
 
 from ..models import CommunityBaseline, Post, Vote
 
@@ -108,5 +112,56 @@ def compute_post_signals(post_id):
         },
         "severity": severity,
     }
+codex/cache-compute_post_signals-results
     cache.set(cache_key, data, 30)
     return data
+
+
+
+def compute_user_post_summary(user_id, days: int = 90):
+    """Return aggregate post signal stats for a user.
+
+    Looks at posts authored by ``user_id`` within the last ``days`` days and
+    computes:
+
+    - percentage of posts that were flagged (severity > 0)
+    - average severity across all posts
+    - a simple rating bucket based on the average severity
+
+    The function also returns a list of severities in chronological order which
+    can be used to render a sparkline in templates.
+    """
+
+    since = timezone.now() - timedelta(days=days)
+    posts = Post.objects.filter(author_id=user_id, created_at__gte=since).order_by(
+        "created_at"
+    )
+    total = posts.count()
+    severities = []
+    flagged = 0
+
+    for post in posts:
+        signals = compute_post_signals(post.pk)
+        severity = signals.get("severity", 0.0)
+        severities.append(severity)
+        if severity > 0:
+            flagged += 1
+
+    pct_flagged = (flagged / total * 100.0) if total else 0.0
+    avg_severity = (sum(severities) / total) if total else 0.0
+
+    if avg_severity > 60:
+        rating = "red"
+    elif avg_severity >= 25:
+        rating = "amber"
+    else:
+        rating = "green"
+
+    return {
+        "total_posts": total,
+        "flagged_pct": round(pct_flagged, 2),
+        "avg_severity": round(avg_severity, 2),
+        "rating": rating,
+        "severities": severities,
+    }
+main
