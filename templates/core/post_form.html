@@ -15,6 +15,12 @@
   </div>
 
   <div class="form-row">
+    {{ form.heading.label_tag }}
+    {{ form.heading }}
+    {{ form.heading.errors }}
+  </div>
+
+  <div class="form-row">
     {{ form.body.label_tag }}
     <div class="editor-container prose">
       <div class="editor-tabs">
@@ -34,9 +40,9 @@
   </div>
 
   <div class="form-row">
-    {{ form.url.label_tag }}
-    {{ form.url }}
-    {{ form.url.errors }}
+    {{ form.content_url.label_tag }}
+    {{ form.content_url }}
+    {{ form.content_url.errors }}
   </div>
 
   <div class="form-actions">

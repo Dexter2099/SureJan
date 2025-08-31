@@ -29,16 +29,26 @@
         {% if post.is_deleted %}
           <p><em>[deleted by author]</em></p>
         {% else %}
-          {% if post.image %}
-            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          {% if post.heading %}
+            <h2 class="post-heading">{{ post.heading }}</h2>
           {% endif %}
-          {% if post.body %}
-            <div class="post-body prose">
-              {{ post.body|safe }}
+          {% if post.embed_html %}
+            <div class="post-embed" style="position:relative;padding-top:56.25%;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                {{ post.embed_html|safe }}
+              </div>
+            </div>
+          {% elif post.image %}
+            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          {% elif post.content_url %}
+            <div class="link-card">
+              <a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.link_domain }}</a>
             </div>
           {% endif %}
-          {% if post.content_url %}
-            <p><a href="{{ post.content_url }}">{{ post.content_url }}</a></p>
+          {% if post.body %}
+            <div class="post-caption prose">
+              {{ post.body|safe }}
+            </div>
           {% endif %}
         {% endif %}
       </div>
