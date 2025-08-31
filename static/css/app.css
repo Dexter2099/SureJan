@@ -1,16 +1,16 @@
 /* Global application styles */
 
 /* --- Layout width: wide container for feed --- */
-:root{
-  --page-max: 1200px;   /* overall page */
-  --feed-max: 960px;    /* main feed column target */
-  --prose-max: 70ch;    /* readable text blocks only */
-  --content-max: 65ch;  /* comment body width */
+:root {
+  --page-max: 1200px;  /* overall page */
+  --feed-max: 960px;   /* main feed column target */
+  --prose-max: 70ch;   /* readable text blocks only */
   --line: 1.6;
   --muted: #6b7280;
+  --content-max: 65ch; /* comment body width */
 }
 
-/* Undo any accidental global prose cap */
+/* Reset any global width caps */
 html, body { max-width: none !important; }
 
 /* Generic container/grid */
@@ -31,7 +31,7 @@ main, .container, .wrap, .page, #page {
 .prose img, .post-media img { max-width: 100%; height: auto; display: block; }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   line-height: var(--line);
   color: var(--text, #1f2937);
 }
