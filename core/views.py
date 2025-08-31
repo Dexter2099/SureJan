@@ -105,6 +105,10 @@ def mission(request):
     return render(request, "core/mission.html")
 
 
+def anti_astroturf(request):
+    return render(request, "pages/anti_astroturf.html")
+
+
 def transparency_methods(request):
     if not settings.ASTROTURF_WATCH:
         raise Http404
