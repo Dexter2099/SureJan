@@ -151,6 +151,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context.astro_constants",
             ],
         },
     },
@@ -261,6 +262,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+# -----------------------------------------------------------------------------
+# Astroturf detection constants
+# -----------------------------------------------------------------------------
+ASTROTURF_WATCH = True
+ASTRO_WINDOW_S = 300
+ASTRO_BUCKET_S = 30
+ASTRO_BASELINE_LOOKBACK_D = 30
+ASTRO_NEW_ACCOUNT_DAYS = 7
+ASTRO_EARLY_VOTES_N = 50
+ASTRO_MIN_EARLY_VOTES = 20
+ASTRO_EARLY_SHARE_RED = 0.60
 
 # Logging (simple console)
 LOGGING = {
