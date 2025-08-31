@@ -84,9 +84,9 @@
 </div>
 
 <div id="comments">
-  {% for comment in comments %}
-    {% if not comment.parent_id %}
-      {% include "core/partials/comment_item.html" %}
+  {% for c in comments %}
+    {% if not c.parent_id %}
+      {% include "core/partials/comment.html" with comment=c user=request.user %}
     {% endif %}
   {% empty %}
     <p>No comments yet.</p>

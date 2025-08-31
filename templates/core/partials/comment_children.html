@@ -1,6 +1,5 @@
-{% url 'post_detail' parent.post.community.slug parent.post.pk parent.post.slug as post_url %}
-{% for comment in children %}
-  {% include "core/partials/comment_item.html" with comment=comment %}
+{% for child in children %}
+  {% include "core/partials/comment_item.html" with comment=child %}
 {% endfor %}
 {% if remaining > 0 %}
   <button class="linklike load-more"
