@@ -51,12 +51,12 @@ function setupDraft(form,key,fields){
   if(!form||form.dataset.draftReady)return;form.dataset.draftReady=1;
   let data={};try{data=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}
   if(Object.values(data).some(v=>v)){
-    const banner=document.createElement('div');banner.className='draft-banner';
-    const restore=document.createElement('button');restore.type='button';restore.textContent='Restore';
+    const pill=document.createElement('div');pill.className='draft-pill';
+    const restore=document.createElement('button');restore.type='button';restore.textContent='Restore draft';
     const discard=document.createElement('button');discard.type='button';discard.textContent='Discard';
-    banner.append('Restore draft? ',restore,' ',discard);form.prepend(banner);
-    restore.addEventListener('click',()=>{fields.forEach(f=>{if(form[f]&&data[f]!==undefined){form[f].value=data[f];form[f].dispatchEvent(new Event('input',{bubbles:true}));}});banner.remove();});
-    discard.addEventListener('click',()=>{localStorage.removeItem(key);banner.remove();});
+    pill.append(restore,' / ',discard);form.prepend(pill);
+    restore.addEventListener('click',()=>{fields.forEach(f=>{if(form[f]&&data[f]!==undefined){form[f].value=data[f];form[f].dispatchEvent(new Event('input',{bubbles:true}));}});pill.remove();});
+    discard.addEventListener('click',()=>{localStorage.removeItem(key);pill.remove();});
   }
   const i=setInterval(()=>{
     const draft={};let empty=true;
@@ -69,7 +69,13 @@ function setupDraft(form,key,fields){
 function initDrafts(root=document){
   const pf=root.querySelector('.post-form');
   if(pf){const path=pf.getAttribute('action')||location.pathname;const m=path.match(/\/r\/([^/]+)/);if(m)setupDraft(pf,`draft:${m[1]}:post`,['title','body','url']);}
-  root.querySelectorAll('form[hx-post*="/comment/"][hx-post$="/reply/"]').forEach(f=>{const hx=f.getAttribute('hx-post');const m=hx&&hx.match(/comment\/(\d+)/);if(m)setupDraft(f,`draft:comment:${m[1]}`,['body']);});
+  root.querySelectorAll('form.comment-form').forEach(f=>{
+    const postField=f.querySelector('input[name="post"]');
+    const postId=postField&&postField.value;
+    const parentField=f.querySelector('input[name="parent"]');
+    const parentId=parentField&&parentField.value?parentField.value:'root';
+    if(postId)setupDraft(f,`draft:comment:${postId}:${parentId}`,['body']);
+  });
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
