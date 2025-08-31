@@ -79,6 +79,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   const titleCount=document.getElementById('title-count');
   const bodyCount=document.getElementById('body-count');
   const TITLE_MAX=300,BODY_MAX=40000;
+  let domainHint;
+  function updateDomain(){if(!urlField||!domainHint)return;const v=urlField.value.trim();let h='';if(v){try{h=new URL(v).hostname;}catch(e){}}domainHint.textContent=h?`(${h})`:'';}
+  if(urlField){domainHint=document.createElement('div');domainHint.id='link-domain';urlField.insertAdjacentElement('afterend',domainHint);urlField.addEventListener('input',updateDomain);updateDomain();}
 
   function updateCount(f,c,m){if(!f||!c)return;c.textContent=`${f.value.length} / ${m}`;}
 
@@ -87,6 +90,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   function autoResize(el){if(!el)return;el.style.height='auto';const max=window.innerHeight*0.6;el.style.height=Math.min(el.scrollHeight,max)+'px';}
 
   if(bodyField&&bodyCount){updateCount(bodyField,bodyCount,BODY_MAX);autoResize(bodyField);bodyField.addEventListener('input',()=>{updateCount(bodyField,bodyCount,BODY_MAX);autoResize(bodyField);});}
+  if(bodyField&&urlField){bodyField.addEventListener('paste',e=>{const t=e.clipboardData.getData('text/plain').trim();if(/^https?:\/\/\S+$/.test(t)&&!urlField.value.trim()){setTimeout(()=>{if(confirm('Move this to Content URL?')){urlField.value=t;urlField.dispatchEvent(new Event('input',{bubbles:true}));}},0);}});}
 
   const form=document.querySelector('.post-form');
   if(form){form.addEventListener('submit',()=>{if(postTypeField){const urlVal=urlField&&urlField.value.trim();postTypeField.value=urlVal?'link':'text';}});}
