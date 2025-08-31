@@ -15,7 +15,7 @@
           {% if post.url %}<a href="{{ post.url }}" rel="noopener nofollow">{{ post.title }}</a>{% else %}{{ post.title }}{% endif %}
         </h1>
         <div class="post-meta">
-          submitted {{ post.created_at|timesince }} ago by
+          submitted <time datetime="{{ post.created_at|date:'c' }}" data-ts="{{ post.created_at|date:'U' }}" title="{{ post.created_at|date:'Y-m-d H:i' }}">{{ post.created_at|timesince }} ago</time> by
           <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
           to <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
         </div>

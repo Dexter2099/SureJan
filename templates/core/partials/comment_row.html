@@ -4,7 +4,7 @@
   <small>
     in <a href="{% url 'community' comment.post.community.slug %}">/r/{{ comment.post.community.slug }}/</a>
     on <a href="{% url 'post_detail' comment.post.community.slug comment.post.pk comment.post.title|slugify %}">{{ comment.post.title }}</a>
-    · {{ comment.created_at|timesince }} ago
+    · <time datetime="{{ comment.created_at|date:'c' }}" data-ts="{{ comment.created_at|date:'U' }}" title="{{ comment.created_at|date:'Y-m-d H:i' }}">{{ comment.created_at|timesince }} ago</time>
   </small>
 </div>
 
