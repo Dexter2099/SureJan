@@ -16,6 +16,7 @@
 
   <div class="form-row">
     <label for="{{ form.body.id_for_label }}">Body</label>
+    {% include "core/partials/editor_toolbar.html" %}
     {{ form.body }}
     <div id="body-count" class="char-count">0 / 40000</div>
     {{ form.body.errors }}
