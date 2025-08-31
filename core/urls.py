@@ -54,6 +54,7 @@ urlpatterns = [
     path("vote/post/<int:pk>/", core_views.vote_post, name="vote_post"),
     path("comments/vote/<int:pk>/", core_views.vote_comment, name="vote_comment"),
     # Post moderation
+    path("post/<int:pk>/edit/", core_views.post_edit, name="post_edit"),
     path(
         "post/<int:pk>/delete-owner/",
         core_views.post_delete_owner,
