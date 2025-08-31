@@ -98,20 +98,41 @@ li + li {
   box-sizing: border-box;
 }
 
-.post-form .char-count {
+
+.post-form .char-count,
+.comment-form .char-count {
   align-self: flex-end;
   font-size: 11px;
   color: var(--muted);
 }
 
-.post-form .char-count.near-limit { color: #d97706; }
-.post-form .char-count.over-limit { color: #b91c1c; }
+.post-form .char-count.near-limit,
+.comment-form .char-count.near-limit { color: #d97706; }
+.post-form .char-count.over-limit,
+.comment-form .char-count.over-limit { color: #b91c1c; }
 
-.post-form textarea {
+
+.post-form textarea,
+.comment-form textarea {
   resize: none;
   overflow-y: auto;
   max-height: 60vh;
   transition: height 0.2s ease;
+}
+
+.comment-form .editor-container {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--content-max);
+}
+
+.comment-form textarea {
+  font: inherit;
+  padding: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: var(--content-max);
+  line-height: var(--line);
 }
 
 .spinner {
