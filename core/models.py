@@ -265,6 +265,30 @@ class Report(models.Model):
         ]
 
 
+class EngagementEvent(models.Model):
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="engagement_events"
+    )
+    event_type = models.CharField(max_length=32)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["post", "-created_at"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+
+class PostBurstState(models.Model):
+    post = models.OneToOneField(
+        Post, on_delete=models.CASCADE, related_name="burst_state"
+    )
+    buckets = models.JSONField(default=list)
+    bucket_index = models.PositiveSmallIntegerField(default=0)
+    bucket_span_seconds = models.PositiveIntegerField(default=60)
+    last_updated = models.DateTimeField(auto_now=True)
+
+
 # -- Vote side effects ------------------------------------------------------
 
 
