@@ -26,7 +26,7 @@ class AuthFlowTests(TestCase):
     def test_submit_text_post_requires_login(self):
         resp = self.client.post(
             reverse("submit_post", args=[self.community.slug]),
-            {"post_type": "text", "title": "Hi"},
+            {"title": "Hi", "body": "Body"},
         )
         self.assertEqual(resp.status_code, 302)
         self.assertIn(reverse("login"), resp["Location"])
@@ -40,7 +40,7 @@ class AuthFlowTests(TestCase):
         )
         resp = self.client.post(
             reverse("submit_post", args=[self.community.slug]),
-            {"post_type": "text", "title": "Hello", "body": "World"},
+            {"title": "Hello", "body": "World"},
         )
         self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         self.assertTrue(
