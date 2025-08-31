@@ -1,5 +1,9 @@
 <div class="sidebar-card">
-  <a class="button button-primary w-full" href="{% url 'submit_post' %}">Submit Post</a>
+  {% if community %}
+    <a class="button button-primary w-full" href="{% url 'submit_post' community.slug %}">Submit Post</a>
+  {% else %}
+    <a class="button button-primary w-full" href="{% url 'home' %}">Choose a Community</a>
+  {% endif %}
 </div>
 <div class="sidebar-card">
   <a class="link-plain" href="{% url 'anti_astroturf' %}">Anti-Astroturf</a>
