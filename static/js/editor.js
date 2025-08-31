@@ -53,6 +53,33 @@ function setupEditor(textarea) {
   resize();
 
   setupCounter(textarea);
+
+  // Handle Write/Preview tab switching
+  const container = textarea.closest('.editor-container');
+  const writeTab = container?.querySelector('.tab-write');
+  const previewTab = container?.querySelector('.tab-preview');
+  const preview = container?.querySelector('.preview');
+  const showWrite = () => {
+    writeTab?.classList.add('active');
+    previewTab?.classList.remove('active');
+    textarea.style.display = '';
+    if (toolbar) toolbar.style.display = '';
+    if (preview) preview.style.display = 'none';
+  };
+  const showPreview = () => {
+    previewTab?.classList.add('active');
+    writeTab?.classList.remove('active');
+    textarea.style.display = 'none';
+    if (toolbar) toolbar.style.display = 'none';
+    if (preview) preview.style.display = '';
+  };
+  writeTab?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showWrite();
+  });
+  previewTab?.addEventListener('click', () => {
+    showPreview();
+  });
 }
 
 function setupCounter(field) {
