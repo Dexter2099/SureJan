@@ -1,0 +1,12 @@
+{% for comment in children %}
+  {% include "core/partials/comment_item.html" with comment=comment %}
+{% endfor %}
+{% if remaining > 0 %}
+  <button class="linklike load-more"
+          hx-get="/comments/children?parent={{ parent.pk }}&offset={{ next_offset }}"
+          hx-swap="afterend"
+          hx-on="htmx:afterSwap:this.remove()">
+    Show more replies ({{ remaining }})
+  </button>
+{% endif %}
+
