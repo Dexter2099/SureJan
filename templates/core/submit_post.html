@@ -8,6 +8,7 @@
   <form method="post" action="{% url 'submit_post' community.slug %}" enctype="multipart/form-data" class="submit-form" hx-boost="false" hx-swap="none">
     {% csrf_token %}
     {{ form.non_field_errors }}
+    <div class="form-error" role="alert" style="display:none"></div>
 
     {% if form.title %}
     <div class="form-row">
@@ -49,7 +50,7 @@
     {% endif %}
 
     <div class="form-actions">
-      <button class="button">Submit</button>
+      <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
       <a href="{% url 'community' community.slug %}">cancel</a>
     </div>
   </form>

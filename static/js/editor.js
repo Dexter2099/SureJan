@@ -102,3 +102,45 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 document.addEventListener('htmx:load',e=>{initToolbar(e.detail.elt);initPreview(e.detail.elt);initDrafts(e.detail.elt);});
+
+function toggleSubmit(form,on){
+  if(!form)return;
+  const btn=form.querySelector('button[type="submit"],input[type="submit"]');
+  if(!btn)return;
+  btn.disabled=on;
+  const sp=btn.querySelector('.spinner');
+  if(sp)sp.hidden=!on;
+  if(on)showFormError(form,'');
+}
+
+function showFormError(form,msg){
+  const box=form.querySelector('.form-error');
+  if(box){box.textContent=msg;box.style.display=msg?'block':'none';}
+}
+
+document.addEventListener('submit',e=>{toggleSubmit(e.target,true);},true);
+document.body.addEventListener('htmx:beforeRequest',e=>{const f=e.detail.elt.closest('form');toggleSubmit(f,true);});
+document.body.addEventListener('htmx:responseError',e=>{e.preventDefault();const f=e.detail.elt.closest('form');const msg=e.detail.xhr&&e.detail.xhr.responseText?e.detail.xhr.responseText:'Error submitting form';toggleSubmit(f,false);showFormError(f,msg);});
+document.body.addEventListener('htmx:sendError',e=>{e.preventDefault();const f=e.detail.elt.closest('form');toggleSubmit(f,false);showFormError(f,'Network error');});
+document.body.addEventListener('htmx:afterRequest',e=>{const f=e.detail.elt.closest('form');if(f&&e.detail.xhr&&e.detail.xhr.status<400)toggleSubmit(f,false);});
+
+let lastFocus=null,lastScroll=null;
+document.body.addEventListener('htmx:beforeSwap',()=>{
+  const ae=document.activeElement;
+  lastFocus=null;
+  if(ae&&(ae.id||ae.name)){
+    lastFocus={id:ae.id,name:ae.name,start:ae.selectionStart,end:ae.selectionEnd};
+  }
+  lastScroll={x:window.scrollX,y:window.scrollY};
+});
+document.body.addEventListener('htmx:afterSwap',()=>{
+  if(lastScroll)window.scrollTo(lastScroll.x,lastScroll.y);
+  if(lastFocus){
+    const el=lastFocus.id?document.getElementById(lastFocus.id):document.querySelector(`[name="${lastFocus.name}"]`);
+    if(el){
+      el.focus();
+      if(lastFocus.start!=null)try{el.setSelectionRange(lastFocus.start,lastFocus.end);}catch{}
+    }
+  }
+  lastFocus=null;lastScroll=null;
+});
