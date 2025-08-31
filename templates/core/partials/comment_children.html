@@ -1,3 +1,4 @@
+{% url 'post_detail' parent.post.community.slug parent.post.pk parent.post.slug as post_url %}
 {% for comment in children %}
   {% include "core/partials/comment_item.html" with comment=comment %}
 {% endfor %}

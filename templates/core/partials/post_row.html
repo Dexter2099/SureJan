@@ -11,11 +11,7 @@
       <em>[deleted]</em>
     {% else %}
       <h2>
-      {% if post.content_url %}
-        <a href="{{ post.content_url }}">{{ post.title }}</a>
-      {% else %}
-        <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
-      {% endif %}
+        <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}">{{ post.title }}</a>
       </h2>
       {% if post.heading %}
         <h3 class="post-heading">{{ post.heading }}</h3>
@@ -45,7 +41,7 @@
       <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}/</a>
       · {{ post.author.username }}
       · <time datetime="{{ post.created_at|date:'c' }}" data-ts="{{ post.created_at|date:'U' }}" title="{{ post.created_at|date:'Y-m-d H:i' }}">{{ post.created_at|timesince }} ago</time>
-      · <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.comment_count }} comments</a>
+      · <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a>
       {% if user.is_authenticated %}
       · <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
       {% endif %}

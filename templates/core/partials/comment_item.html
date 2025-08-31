@@ -5,7 +5,7 @@
     <button class="collapse-toggle" data-comment-id="{{ comment.pk }}" aria-label="Collapse thread">▾</button>
     by <a href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>
     • <time datetime="{{ comment.created_at|date:'c' }}" data-ts="{{ comment.created_at|date:'U' }}" title="{{ comment.created_at|date:'Y-m-d H:i' }}">{{ comment.created_at|timesince }} ago</time>
-    <button type="button" class="copy-link" data-link="{{ request.META.HTTP_HX_CURRENT_URL|default:request.build_absolute_uri }}#c{{ comment.pk }}" aria-label="Copy link to comment">🔗</button>
+    <a href="{{ post_url }}#c{{ comment.pk }}" class="copy-link" data-link="{{ post_url }}#c{{ comment.pk }}" aria-label="Copy link to comment">🔗</a>
     {% if comment.edited_at %}
       <span class="edited" title="Edited {{ comment.edited_at|date:'Y-m-d H:i' }}">edited</span>
     {% endif %}

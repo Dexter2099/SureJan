@@ -30,7 +30,6 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.utils.text import slugify
 from django.db.models import F
 from django import forms
 from django.core.paginator import Paginator
@@ -510,10 +509,10 @@ def submit_post(request, slug):
     return render(request, "core/post_form.html", context)
 
 
-def post_detail(request, slug, post_id, post_slug):
+def post_detail(request, community, pk, slug):
     """Display a single post and its comments."""
 
-    post = get_object_or_404(Post, pk=post_id, community__slug=slug)
+    post = get_object_or_404(Post, pk=pk, community__slug=community)
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
     context = {"post": post, "comments": comments, "form": form}
@@ -546,9 +545,9 @@ def post_edit(request, pk):
             messages.success(request, "Post updated")
             return redirect(
                 "post_detail",
-                slug=post.community.slug,
-                post_id=post.pk,
-                post_slug=slugify(post.title),
+                community=post.community.slug,
+                pk=post.pk,
+                slug=post.slug,
             )
         else:
             messages.error(request, "Please correct the errors below.")
@@ -606,9 +605,9 @@ def comment_reply(request, post_id):
 
     return redirect(
         "post_detail",
-        slug=post.community.slug,
-        post_id=post.pk,
-        post_slug=slugify(post.title),
+        community=post.community.slug,
+        pk=post.pk,
+        slug=post.slug,
     )
 
 
@@ -731,9 +730,9 @@ def comment_create(request):
 
     return redirect(
         "post_detail",
-        slug=post.community.slug,
-        post_id=post.pk,
-        post_slug=slugify(post.title),
+        community=post.community.slug,
+        pk=post.pk,
+        slug=post.slug,
     )
 
 
@@ -780,7 +779,12 @@ def comment_edit(request, pk):
         form = CommentForm(instance=comment)
         html = render_to_string(
             "core/partials/comment_form.html",
-            {"form": form, "comment": comment, "post": comment.post},
+            {
+                "form": form,
+                "comment": comment,
+                "post": comment.post,
+                "parent": comment,
+            },
             request=request,
         )
         return HttpResponse(html)
@@ -801,9 +805,9 @@ def comment_edit(request, pk):
 
     return redirect(
         "post_detail",
-        slug=comment.post.community.slug,
-        post_id=comment.post.pk,
-        post_slug=slugify(comment.post.title),
+        community=comment.post.community.slug,
+        pk=comment.post.pk,
+        slug=comment.post.slug,
     )
 
 
@@ -823,7 +827,7 @@ def post_delete_owner(request, pk):
 
     has_comments = Comment.objects.filter(post=post).exists()
     if has_comments:
-        post_slug = slugify(post.title)
+        post_slug = post.slug
         post.soft_delete(request.user)
         # HTMX: swap the row to a deleted stub in feeds
         if request.headers.get("HX-Request") == "true":
@@ -831,9 +835,9 @@ def post_delete_owner(request, pk):
             return HttpResponse(html)
         return redirect(
             "post_detail",
-            slug=post.community.slug,
-            post_id=post.id,
-            post_slug=post_slug,
+            community=post.community.slug,
+            pk=post.id,
+            slug=post_slug,
         )
     else:
         community_slug = post.community.slug
@@ -895,9 +899,9 @@ def comment_delete(request, pk):
 
     return redirect(
         "post_detail",
-        slug=post.community.slug,
-        post_id=post.pk,
-        post_slug=slugify(post.title),
+        community=post.community.slug,
+        pk=post.pk,
+        slug=post.slug,
     )
 
 

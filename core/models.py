@@ -11,6 +11,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from datetime import timedelta
 from django.utils import timezone
+from django.utils.text import slugify
 from urllib.parse import urlparse
 
 from PIL import Image
@@ -124,6 +125,10 @@ class Post(models.Model):
         related_name="+",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def slug(self):
+        return slugify(self.title)
 
     class Meta:
         indexes = [
