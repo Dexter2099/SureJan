@@ -1,0 +1,9 @@
+{# Render a simple bar sparkline for a series of severities (0-100). #}
+<div class="user-karma-sparkline" role="img" aria-label="{{ alt }}">
+  {% for v in severities %}
+    <span
+      style="display:inline-block;width:4px;height:{{ v|floatformat:0 }}%;background-color:currentColor;margin-right:1px;"
+    ></span>
+  {% endfor %}
+</div>
+
