@@ -321,7 +321,7 @@ def download_recovery_codes(request):
 
 @require_POST
 def render_preview(request):
-    text = request.POST.get("text") or request.POST.get("body", "")
+    text = request.POST.get("text", "")
     html = markdown_renderer(text)
     clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES)
     return render(
