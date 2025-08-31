@@ -3,6 +3,7 @@
           hx-target="#comment-{{ parent.pk }}"
           hx-swap="afterend">
         {% csrf_token %}
+        {% include "core/partials/editor_toolbar.html" %}
         {{ form.body }}
         <input type="hidden" name="parent_id" value="{{ parent.pk }}">
         <button type="submit">Reply</button>

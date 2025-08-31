@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <h1>Submit to {{ community.title|default:community.slug }}</h1>
@@ -25,6 +26,7 @@
     {% if form.body %}
     <div class="form-row type-block" id="type-text">
       {{ form.body.label_tag }}
+      {% include "core/partials/editor_toolbar.html" %}
       {{ form.body }}
       {{ form.body.errors }}
     </div>
@@ -61,4 +63,9 @@
     if (sel){ show(sel.value || "text"); sel.addEventListener("change", e => show(e.target.value)); }
   })();
 </script>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/editor.js' %}" defer></script>
 {% endblock %}
