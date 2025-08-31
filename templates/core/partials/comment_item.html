@@ -4,7 +4,7 @@
   <a id="c{{ comment.pk }}"></a>
   <div class="meta">
     <button class="collapse-toggle" data-comment-id="{{ comment.pk }}" aria-label="Collapse thread">▾</button>
-    by <a href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username|default:"[deleted]" }}</a>
+    by {% if comment.author %}<a href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>{% else %}[deleted]{% endif %}
     • <time datetime="{{ comment.created_at|date:'c' }}" data-ts="{{ comment.created_at|date:'U' }}" title="{{ comment.created_at|date:'Y-m-d H:i' }}">{{ comment.created_at|timesince }} ago</time>
     <a href="{{ post_url }}#c{{ comment.pk }}" class="copy-link" data-link="{{ post_url }}#c{{ comment.pk }}" aria-label="Copy link to comment">🔗</a>
     {% if comment.edited_at %}

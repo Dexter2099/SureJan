@@ -39,7 +39,7 @@
     {% endif %}
     <p class="meta">
       <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}/</a>
-      · {{ post.author.username }}
+      · <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
       · <time datetime="{{ post.created_at|date:'c' }}" data-ts="{{ post.created_at|date:'U' }}" title="{{ post.created_at|date:'Y-m-d H:i' }}">{{ post.created_at|timesince }} ago</time>
       · <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a>
       {% if user.is_authenticated %}
