@@ -1,8 +1,12 @@
+{% load permissions %}
 <div id="comment-{{ comment.pk }}" class="comment" data-comment-id="{{ comment.pk }}" data-depth="{{ comment.depth }}">
   <div class="meta">
     <button class="collapse-toggle" data-comment-id="{{ comment.pk }}" aria-label="Collapse thread">▾</button>
     by <a href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>
     • {{ comment.created_at|timesince }} ago
+    {% if comment.edited_at %}
+      <span class="edited" title="Edited {{ comment.edited_at|date:'Y-m-d H:i' }}">edited</span>
+    {% endif %}
     <button hx-post="{% url 'vote_comment' comment.pk %}?v=1"
             hx-target="#comment-score-{{ comment.pk }}"
             hx-swap="outerHTML" aria-label="Upvote" class="up">▲</button>
@@ -12,6 +16,11 @@
             hx-swap="outerHTML" aria-label="Downvote" class="down">▼</button>
     <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
             hx-target="#comment-{{ comment.pk }}" hx-swap="afterend">Reply</button>
+    {% if comment|can_edit_comment:request.user %}
+      <button hx-get="{% url 'comment_edit' comment.pk %}"
+              hx-target="#comment-body-{{ comment.pk }}"
+              hx-swap="outerHTML">Edit</button>
+    {% endif %}
     {% if request.user.id == comment.author_id or request.user.is_staff %}
       <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
             hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">
@@ -20,7 +29,7 @@
       </form>
     {% endif %}
   </div>
-  <div class="comment-body prose">{{ comment.body|safe }}</div>
+  <div id="comment-body-{{ comment.pk }}" class="comment-body prose">{{ comment.body|safe }}</div>
   <button type="button" class="quote-btn" hidden>Quote</button>
   {% if comment.depth < 5 %}
   <div class="children">

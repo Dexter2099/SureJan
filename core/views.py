@@ -684,6 +684,52 @@ def comment_reply_form(request, post_id):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
+def comment_edit(request, pk):
+    """Edit an existing comment within a 15-minute window."""
+
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.user != comment.author:
+        return HttpResponseForbidden("Forbidden")
+
+    if timezone.now() - comment.created_at > timedelta(minutes=15):
+        return HttpResponseForbidden("Edit window expired")
+
+    if request.method == "GET":
+        form = CommentForm(instance=comment)
+        html = render_to_string(
+            "core/partials/comment_form.html",
+            {"form": form, "comment": comment, "post": comment.post},
+            request=request,
+        )
+        return HttpResponse(html)
+
+    form = CommentForm(request.POST, instance=comment)
+    if not form.is_valid():
+        return HttpResponseBadRequest("Invalid comment")
+
+    comment.body = form.cleaned_data["body"]
+    comment.edited_at = timezone.now()
+    comment.save(update_fields=["body", "edited_at"])
+
+    if request.headers.get("HX-Request") == "true":
+        html = render_to_string(
+            "core/partials/comment_item.html", {"comment": comment}, request=request
+        )
+        return HttpResponse(html)
+
+    return redirect(
+        "post_detail",
+        slug=comment.post.community.slug,
+        post_id=comment.post.pk,
+        post_slug=slugify(comment.post.title),
+    )
+
+
+@login_required
 @require_POST
 @ratelimit(key="user", rate="10/m", block=False)
 def post_delete_owner(request, pk):

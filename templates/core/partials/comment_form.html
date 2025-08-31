@@ -1,15 +1,23 @@
-<form hx-post="{% url 'comment_create' %}"
-      {% if parent %}
-      hx-swap="afterend"
+<form {% if comment %}
+        hx-post="{% url 'comment_edit' comment.pk %}"
+        hx-target="#comment-{{ comment.pk }}"
+        hx-swap="outerHTML"
       {% else %}
-      hx-target="#comments"
-      hx-swap="beforeend"
+        hx-post="{% url 'comment_create' %}"
+        {% if parent %}
+        hx-swap="afterend"
+        {% else %}
+        hx-target="#comments"
+        hx-swap="beforeend"
+        {% endif %}
       {% endif %}
       class="comment-form">
   {% csrf_token %}
-  <input type="hidden" name="post" value="{{ post.pk }}">
-  {% if parent %}
-  <input type="hidden" name="parent" value="{{ parent.pk }}">
+  {% if not comment %}
+    <input type="hidden" name="post" value="{{ post.pk }}">
+    {% if parent %}
+      <input type="hidden" name="parent" value="{{ parent.pk }}">
+    {% endif %}
   {% endif %}
   <div class="form-error" role="alert" style="display:none"></div>
   <div class="editor-container">
@@ -23,12 +31,8 @@
               hx-swap="innerHTML">Preview</button>
     </div>
     {% include "core/partials/editor_toolbar.html" %}
-    {% if parent %}
-      {{ form.body.as_widget(attrs={"autofocus": "autofocus"}) }}
-    {% else %}
-      {{ form.body }}
-    {% endif %}
+    {{ form.body }}
     <div id="comment-preview" class="preview" style="display:none"></div>
   </div>
-  <button type="submit">Comment<span class="spinner" hidden aria-hidden="true"></span></button>
+  <button type="submit">{% if comment %}Save{% else %}Comment{% endif %}<span class="spinner" hidden aria-hidden="true"></span></button>
 </form>
