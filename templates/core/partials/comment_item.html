@@ -21,6 +21,7 @@
     {% endif %}
   </div>
   <div class="comment-body prose">{{ comment.body|safe }}</div>
+  <button type="button" class="quote-btn" hidden>Quote</button>
   {% if comment.depth < 5 %}
   <div class="children">
     {% for child in comment.children.all %}
