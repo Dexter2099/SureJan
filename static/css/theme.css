@@ -222,7 +222,7 @@ a:focus {
 }
 
 .vote {
-  width: 40px;
+  width: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -230,8 +230,8 @@ a:focus {
 }
 
 .vote button {
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: none;
   background: none;
@@ -240,6 +240,11 @@ a:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.vote button:focus {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
 }
 
 .vote .score {
@@ -372,7 +377,12 @@ textarea:focus {
 
 /* Misc --------------------------------------------------------------- */
 .button {
-  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-width: 44px;
+  min-height: 44px;
   border: 1px solid #ccc;
   background: #eee;
   color: var(--text);
@@ -390,9 +400,11 @@ textarea:focus {
 }
 
 .w-full {
-  display: block;
+  display: flex;
   width: 100%;
   text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 
 button:focus,
@@ -425,11 +437,6 @@ hr {
 
   .tab-bar {
     overflow-x: auto;
-  }
-
-  .subreddit-bar {
-    overflow-x: auto;
-    white-space: nowrap;
   }
 }
 
@@ -471,11 +478,13 @@ hr {
 
 /* Post page wrapper + 2-column thing */
 .post-page { max-width: 740px; margin: 12px auto 48px; }
-.post-thing { display: grid; grid-template-columns: 40px 1fr; gap: 10px; background:#fff; border:1px solid #ddd; padding:10px; }
+
+.post-thing { display: grid; grid-template-columns: 44px 1fr; gap: 10px; background:#fff; border:1px solid #ddd; padding:10px; }
 
 /* Vote rail like old reddit */
-.vote { display:flex; flex-direction:column; align-items:center; gap:2px; width:40px; color:#888; }
-.vote .up, .vote .down { background:none; border:0; cursor:pointer; }
+.vote { display:flex; flex-direction:column; align-items:center; gap:2px; width:44px; color:#888; }
+.vote .up, .vote .down { background:none; border:0; cursor:pointer; width:44px; height:44px; display:flex; align-items:center; justify-content:center; }
+.vote .up:focus, .vote .down:focus { outline:2px solid var(--link); outline-offset:2px; }
 .vote .score { font-weight:bold; font-size:11px; }
 .vote .up[aria-pressed="true"] { color:#ff8b60; } /* up */
 .vote .down[aria-pressed="true"] { color:#5f99cf; } /* down */
@@ -502,10 +511,10 @@ hr {
 .sort-tabs a { color:#777; }
 .sort-tabs a.active { color:#111; border-bottom:2px solid #3366cc; }
 
-@media (max-width: 768px) {
-  .post-page { margin:8px auto 32px; }
-  .post-thing { grid-template-columns: 32px 1fr; }
-}
+  @media (max-width: 768px) {
+    .post-page { margin:8px auto 32px; }
+    .post-thing { grid-template-columns: 44px 1fr; }
+  }
 
 /* Feed images: compact cards (does not affect post detail) */
 .feed .post-image img {
@@ -530,7 +539,7 @@ hr {
 .submit-form textarea { width:100%; max-width:600px; font:12px Verdana, Arial, sans-serif; border:1px solid #ccc; padding:4px; background:#fff; }
 .submit-form textarea { min-height:140px; resize:vertical; }
 .form-actions { margin-top:14px; font-size:11px; }
-.form-actions .button { padding:2px 8px; border:1px solid #ccc; background:#eee; cursor:pointer; }
+.form-actions .button { padding:8px 12px; border:1px solid #ccc; background:#eee; cursor:pointer; }
 .form-actions a { margin-left:8px; color:#3366cc; }
 
 .brand-mission { font-size:12px; margin-left:8px; color:#3366cc; }
