@@ -289,6 +289,16 @@ class PostBurstState(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
 
+class CommunityBaseline(models.Model):
+    community = models.OneToOneField(
+        Community, on_delete=models.CASCADE, related_name="baseline"
+    )
+    p95_votes_5m = models.FloatField(default=0)
+    p95_votes_15m = models.FloatField(default=0)
+    p10_comments_per_100_upvotes = models.FloatField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 # -- Vote side effects ------------------------------------------------------
 
 
