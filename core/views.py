@@ -8,9 +8,7 @@ import json
 from datetime import timedelta
 
 import re
-from urllib.parse import urlparse, quote
 
-import requests
 import bleach
 import mistune
 from django.utils.safestring import mark_safe
@@ -49,6 +47,7 @@ from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
+from .oembed import fetch_oembed
 
 
 def _is_banned(user):
@@ -90,86 +89,6 @@ ALLOWED_TAGS = [
     "br",
 ]
 ALLOWED_ATTRIBUTES = {"a": ["href"]}
-
-
-def fetch_oembed(url: str):
-    """Fetch and sanitize oEmbed HTML for supported providers.
-
-    If unsupported or fetch fails, return a fallback link card.
-    """
-
-    providers = {
-        "youtube.com": "https://www.youtube.com/oembed?format=json&url=",
-        "youtu.be": "https://www.youtube.com/oembed?format=json&url=",
-        "rumble.com": "https://rumble.com/api/oembed.json?url=",
-        "twitter.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
-        "x.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
-    }
-
-    parsed = urlparse(url)
-    domain = parsed.netloc
-    endpoint = None
-    for key, base in providers.items():
-        if key in domain:
-            endpoint = f"{base}{quote(url, safe='')}"
-            break
-
-    if endpoint:
-        try:
-            resp = requests.get(endpoint, timeout=5)
-            resp.raise_for_status()
-            data = resp.json()
-            html = data.get("html", "")
-            clean = bleach.clean(
-                html,
-                tags=[
-                    "iframe",
-                    "blockquote",
-                    "a",
-                    "p",
-                    "span",
-                    "img",
-                    "br",
-                    "div",
-                ],
-                attributes={
-                    "iframe": [
-                        "src",
-                        "width",
-                        "height",
-                        "frameborder",
-                        "allow",
-                        "allowfullscreen",
-                    ],
-                    "blockquote": ["class", "data-theme"],
-                    "a": ["href", "class"],
-                    "img": ["src", "alt"],
-                    "div": ["class"],
-                },
-                strip=True,
-            )
-            return {"type": "embed", "html": clean}
-        except Exception:
-            pass
-
-    # Fallback link card
-    title = None
-    try:
-        resp = requests.get(url, timeout=5)
-        resp.raise_for_status()
-        match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
-        if match:
-            title = match.group(1).strip()
-    except Exception:
-        pass
-    favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
-    return {
-        "type": "link",
-        "url": url,
-        "domain": domain,
-        "title": title,
-        "favicon": favicon,
-    }
 
 
 @require_POST
