@@ -6,7 +6,7 @@ urlpatterns = [
     # Home / front page
     path("", core_views.home, name="home"),
     path("mission/", core_views.mission, name="mission"),
-    path("preview/", core_views.render_preview, name="preview"),
+    path("preview", core_views.render_preview, name="preview"),
     path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
 
     # Recovery codes

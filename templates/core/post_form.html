@@ -24,7 +24,7 @@
           type="button"
           class="tab tab-preview"
           hx-post="{% url 'preview' %}"
-          hx-include="[name=body]"
+          hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
           hx-target="#post-preview"
           hx-swap="innerHTML"
         >
