@@ -33,6 +33,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import F
 from django import forms
+from django.core.paginator import Paginator
 
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
@@ -42,6 +43,7 @@ from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
+from .services.astro import compute_post_signals
 
 
 def _is_banned(user):
@@ -190,6 +192,43 @@ def transparency_methods(request):
         "ASTRO_EARLY_SHARE_RED_PCT": int(settings.ASTRO_EARLY_SHARE_RED * 100),
     }
     return render(request, "core/transparency_methods.html", ctx)
+
+
+def transparency_posts(request):
+    since = timezone.now() - timedelta(hours=24)
+    posts = (
+        Post.objects.filter(created_at__gte=since)
+        .select_related("community", "author")
+    )
+    rows = []
+    for post in posts:
+        metrics = compute_post_signals(post.pk)
+        if not any(metrics["flags"].values()):
+            continue
+        rows.append(
+            {
+                "post": post,
+                "author_age": (timezone.now() - post.author.date_joined).days,
+                "rate5": metrics["rate5"],
+                "rate15": metrics["rate15"],
+                "base5": metrics["thresholds"].get("p95_votes_5m", 0),
+                "base15": metrics["thresholds"].get("p95_votes_15m", 0),
+                "early_new_share_pct": metrics["early_new_share"] * 100.0,
+                "discuss_ratio": metrics["discuss_ratio"],
+                "severity": metrics["severity"],
+            }
+        )
+    sort = request.GET.get("sort", "-severity")
+    reverse = sort.startswith("-")
+    key = sort.lstrip("-")
+    rows.sort(key=lambda x: x.get(key, 0), reverse=reverse)
+
+    paginator = Paginator(rows, 20)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    ctx = {"page_obj": page_obj, "sort": sort}
+    return render(request, "core/transparency_posts.html", ctx)
 
 
 class SignupForm(forms.Form):
