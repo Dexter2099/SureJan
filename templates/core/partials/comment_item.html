@@ -19,10 +19,10 @@
       </form>
     {% endif %}
   </div>
-  <div class="body">{{ comment.body|linebreaksbr }}</div>
+  <div class="body" style="line-height:1.5;max-width:65ch">{{ comment.body|linebreaksbr }}</div>
   <div class="children">
     {% for child in comment.children.all %}
-      {% include "core/partials/comment.html" with comment=child %}
+      {% include "core/partials/comment_item.html" with comment=child %}
     {% endfor %}
   </div>
 </div>
