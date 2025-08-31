@@ -22,6 +22,30 @@ function initToolbar(root=document){
   });
 }
 
+function initPreview(root=document){
+  root.querySelectorAll('.editor-container').forEach(ed=>{
+    if(ed.dataset.previewReady)return;ed.dataset.previewReady=1;
+    const write=ed.querySelector('.tab-write');
+    const preview=ed.querySelector('.tab-preview');
+    const ta=ed.querySelector('textarea');
+    const pv=ed.querySelector('.preview');
+    if(write&&preview&&ta&&pv){
+      write.addEventListener('click',()=>{
+        write.classList.add('active');
+        preview.classList.remove('active');
+        ta.style.display='';
+        pv.style.display='none';
+      });
+      preview.addEventListener('click',()=>{
+        preview.classList.add('active');
+        write.classList.remove('active');
+        ta.style.display='none';
+        pv.style.display='';
+      });
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   const titleField=document.getElementById('id_title');
   const bodyField=document.getElementById('id_body');
@@ -43,6 +67,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(form){form.addEventListener('submit',()=>{if(postTypeField){const urlVal=urlField&&urlField.value.trim();postTypeField.value=urlVal?'link':'text';}});}
 
   initToolbar();
+  initPreview();
 });
 
-document.addEventListener('htmx:load',e=>initToolbar(e.detail.elt));
+document.addEventListener('htmx:load',e=>{initToolbar(e.detail.elt);initPreview(e.detail.elt);});

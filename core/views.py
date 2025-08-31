@@ -5,6 +5,10 @@ import secrets
 import string
 from datetime import timedelta
 
+import bleach
+import mistune
+from django.utils.safestring import mark_safe
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -53,6 +57,26 @@ def limit_or_429(request, group, rate):
         method=["POST"],
         increment=True,
     )
+
+
+markdown_renderer = mistune.create_markdown()
+ALLOWED_TAGS = [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "a",
+    "strong",
+    "em",
+    "code",
+    "pre",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "br",
+]
+ALLOWED_ATTRIBUTES = {"a": ["href"]}
 def mission(request):
     return render(request, "core/mission.html")
 
@@ -197,6 +221,16 @@ def download_recovery_codes(request):
     resp = HttpResponse("\n".join(codes), content_type="text/plain")
     resp["Content-Disposition"] = "attachment; filename=recovery-codes.txt"
     return resp
+
+
+@require_POST
+def render_preview(request):
+    text = request.POST.get("text") or request.POST.get("body", "")
+    html = markdown_renderer(text)
+    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES)
+    return render(
+        request, "core/partials/preview.html", {"html": mark_safe(clean)}
+    )
 
 
 @login_required
