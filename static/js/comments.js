@@ -82,11 +82,50 @@ function handleSelection(){
   btn.hidden = false;
 }
 
+function formatTimeAgo(seconds){
+  if(seconds < 60) return seconds + 's';
+  const minutes = Math.floor(seconds / 60);
+  if(minutes < 60) return minutes + 'm';
+  const hours = Math.floor(minutes / 60);
+  if(hours < 24) return hours + 'h';
+  const days = Math.floor(hours / 24);
+  if(days < 30) return days + 'd';
+  const months = Math.floor(days / 30);
+  if(months < 12) return months + 'mo';
+  const years = Math.floor(months / 12);
+  return years + 'y';
+}
+
+function updateTimeAgo(root=document){
+  root.querySelectorAll('time[data-ts]').forEach(el=>{
+    const ts = parseInt(el.dataset.ts, 10);
+    if(isNaN(ts)) return;
+    const diff = Math.floor(Date.now()/1000 - ts);
+    el.textContent = formatTimeAgo(diff);
+    if(!el.getAttribute('title')){
+      const d = new Date(ts*1000);
+      const pad = n=>n.toString().padStart(2,'0');
+      el.setAttribute('title',
+        d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())
+      );
+    }
+  });
+}
+
 document.addEventListener('mouseup',handleSelection);
 document.addEventListener('keyup',handleSelection);
 document.addEventListener('selectionchange',handleSelection);
 document.addEventListener('click',e=>{if(!e.target.classList.contains('quote-btn')) hideQuoteBubbles();});
 
-document.addEventListener('DOMContentLoaded',()=>{initCommentCollapse();initQuoteButtons();});
+document.addEventListener('DOMContentLoaded',()=>{
+  initCommentCollapse();
+  initQuoteButtons();
+  updateTimeAgo();
+  setInterval(updateTimeAgo,60000);
+});
 
-document.body.addEventListener('htmx:afterSwap',e=>{initCommentCollapse(e.detail.elt);initQuoteButtons(e.detail.elt);});
+document.body.addEventListener('htmx:afterSwap',e=>{
+  initCommentCollapse(e.detail.elt);
+  initQuoteButtons(e.detail.elt);
+  updateTimeAgo(e.detail.elt);
+});
