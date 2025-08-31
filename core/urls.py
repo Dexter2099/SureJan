@@ -7,6 +7,7 @@ urlpatterns = [
     path("", core_views.home, name="home"),
     path("mission/", core_views.mission, name="mission"),
     path("preview/", core_views.render_preview, name="preview"),
+    path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
 
     # Recovery codes
     path("accounts/recovery-codes/", core_views.recovery_codes, name="recovery_codes"),
