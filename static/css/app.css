@@ -5,6 +5,7 @@
   --page-max: 1200px;   /* overall page */
   --feed-max: 960px;    /* main feed column target */
   --prose-max: 70ch;    /* readable text blocks only */
+  --content-max: 65ch;  /* comment body width */
   --line: 1.6;
   --muted: #6b7280;
 }
@@ -152,4 +153,30 @@ li + li {
   color: var(--link, #1d4ed8);
   cursor: pointer;
   padding: 0;
+}
+
+/* Comment layout */
+.comment .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.comment .meta a {
+  color: inherit;
+}
+
+.comment-body {
+  max-width: var(--content-max);
+  line-height: var(--line);
+}
+
+.comment .children {
+  border-left: 2px solid var(--muted);
+  margin-left: 1rem;
+  padding-left: 1rem;
 }
