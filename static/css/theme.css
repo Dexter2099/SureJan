@@ -334,6 +334,10 @@ a:focus {
   color: var(--link);
 }
 
+.sidebar-card {
+  margin-bottom: 12px;
+}
+
 /* Comments ----------------------------------------------------------- */
 .comment {
   background: var(--panel);
@@ -378,6 +382,17 @@ textarea:focus {
 
 .button:hover {
   background: var(--border);
+}
+
+.button-primary {
+  background: var(--link);
+  color: #fff;
+}
+
+.w-full {
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 button:focus,
