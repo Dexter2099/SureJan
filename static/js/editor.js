@@ -12,11 +12,11 @@ function initToolbar(root=document){
     }));
 
     ta.addEventListener('keydown',e=>{
-      const ctrl=e.ctrlKey||e.metaKey;
-      if(ctrl&&e.key==='Enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
-      else if(e.key==='Enter'&&e.shiftKey){e.stopPropagation();}
-      else if(ctrl&&(e.key==='b'||e.key==='B')){e.preventDefault();toggleWrap('**');}
-      else if(ctrl&&(e.key==='i'||e.key==='I')){e.preventDefault();toggleWrap('_');}
+      const ctrl=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
+      if(ctrl&&key==='enter'){e.preventDefault();const f=ta.closest('form');if(f){if(f.requestSubmit)f.requestSubmit();else f.submit();}}
+      else if(key==='enter'&&e.shiftKey){e.stopPropagation();}
+      else if(ctrl&&key==='b'){e.preventDefault();toggleWrap('**');}
+      else if(ctrl&&key==='i'){e.preventDefault();toggleWrap('_');}
 
       function toggleWrap(w){const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,b=v.slice(0,s),sel=v.slice(s,e),a=v.slice(e),l=w.length;if(sel.startsWith(w)&&sel.endsWith(w)){ta.setRangeText(sel.slice(l,sel.length-l),s,e,'end');ta.setSelectionRange(s,e-2*l);}else if(b.endsWith(w)&&a.startsWith(w)){ta.setRangeText(sel,s-l,e+l,'end');ta.setSelectionRange(s-l,e-l);}else{ta.setRangeText(w+sel+w,s,e,'end');ta.setSelectionRange(s+l,e+l);}ta.dispatchEvent(new Event('input',{bubbles:true}));}
     });
