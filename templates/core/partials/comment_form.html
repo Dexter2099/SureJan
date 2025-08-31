@@ -33,6 +33,7 @@
     </div>
     {% include "core/partials/editor_toolbar.html" %} {# formatting toolbar #}
     {{ form.body }}
+    <div id="body-count" class="char-count"></div>
     <div id="comment-preview" class="preview" style="display:none"></div>
   </div>
   <button type="submit">{% if comment %}Save{% else %}Comment{% endif %}<span class="spinner" hidden aria-hidden="true"></span></button>

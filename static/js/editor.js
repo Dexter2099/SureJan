@@ -21,7 +21,17 @@ function initToolbar(root=document){
     if(tb.dataset.ready)return;tb.dataset.ready=1;
     const ta=tb.nextElementSibling;if(!ta)return;
     if(!ta.dataset.editor)ta.dataset.editor=1;
-    if(!ta.closest('.post-form')){ta.style.lineHeight='1.5';ta.style.maxWidth='var(--prose-max)';if(ta.parentElement){ta.parentElement.style.maxWidth='var(--prose-max)';ta.parentElement.style.lineHeight='1.5';}}
+    const cf=ta.closest('.comment-form');
+    const pf=ta.closest('.post-form');
+    if(cf){
+      ta.style.lineHeight='var(--line)';
+      ta.style.maxWidth='var(--content-max)';
+      if(ta.parentElement){ta.parentElement.style.maxWidth='var(--content-max)';ta.parentElement.style.lineHeight='var(--line)';}
+    }else if(!pf){
+      ta.style.lineHeight='1.5';
+      ta.style.maxWidth='var(--prose-max)';
+      if(ta.parentElement){ta.parentElement.style.maxWidth='var(--prose-max)';ta.parentElement.style.lineHeight='1.5';}
+    }
     tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
       const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value,sel=v.slice(s,e);
       if(b.dataset.wrap){const w=b.dataset.wrap;ta.value=v.slice(0,s)+w+sel+w+v.slice(e);ta.setSelectionRange(s+w.length,s+w.length+sel.length);}
@@ -104,9 +114,7 @@ function updateCount(f,c,m){
 
 function initCounts(root=document){
   const titleField=root.querySelector('#id_title');
-  const bodyField=root.querySelector('#id_body');
   const titleCount=root.querySelector('#title-count');
-  const bodyCount=root.querySelector('#body-count');
   function bind(field,count,max){
     if(!field||!count||field.dataset.countReady)return;
     field.dataset.countReady=1;
@@ -115,7 +123,11 @@ function initCounts(root=document){
     field.addEventListener('input',upd);
   }
   bind(titleField,titleCount,TITLE_MAX);
-  bind(bodyField,bodyCount,BODY_MAX);
+  root.querySelectorAll('textarea#id_body').forEach(field=>{
+    const form=field.closest('form');
+    const count=form&&form.querySelector('#body-count');
+    bind(field,count,BODY_MAX);
+  });
 }
 
 function initAutogrow(root=document){
