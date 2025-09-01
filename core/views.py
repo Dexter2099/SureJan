@@ -424,14 +424,14 @@ def _render_posts(request, posts, next_page, show_community=False, sort_query=""
 
     html = render_to_string(
         "core/partials/post_list.html",
-        {"posts": posts, "show_community": show_community},
+        {
+            "posts": posts,
+            "show_community": show_community,
+            "next_page": next_page,
+            "sort_query": sort_query,
+        },
         request=request,
     )
-    if next_page:
-        next_url = f"{request.path}?page={next_page}{sort_query}"
-        html += render_to_string(
-            "core/partials/load_more.html", {"next_url": next_url}, request=request
-        )
     return HttpResponse(html)
 
 
