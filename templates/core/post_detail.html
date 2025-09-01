@@ -37,14 +37,18 @@
           {% if post.heading %}
             <h2 class="post-heading">{{ post.heading }}</h2>
           {% endif %}
-          {% if post.embed_html %}
-            <div class="post-embed" style="position:relative;padding-top:56.25%;overflow:hidden;">
-              <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
-                {{ post.embed_html|safe }}
-              </div>
+          {% if embed %}
+            <div class="post-embed" data-src="{{ embed.src }}" style="position:relative;padding-top:56.25%;overflow:hidden;">
+              <a href="{{ embed.url }}" rel="noopener nofollow" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">
+                <img src="{{ embed.thumb }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">
+              </a>
             </div>
           {% elif post.image %}
             <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          {% elif images %}
+            {% include "partials/post_images.html" with images=images %}
+          {% elif post.embed_html %}
+            <div class="post-embed">{{ post.embed_html|safe }}</div>
           {% elif post.content_url %}
             <div class="link-card">
               <a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.link_domain }}</a>
@@ -101,5 +105,27 @@
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
 <script src="{% static 'js/comments.js' %}" defer></script>
+<script>
+document.querySelectorAll('.post-embed[data-src]').forEach(function(wrapper){
+  var link = wrapper.querySelector('a');
+  var src = wrapper.dataset.src;
+  if(!link) return;
+  link.addEventListener('click', function(e){
+    e.preventDefault();
+    var iframe=document.createElement('iframe');
+    iframe.src=src;
+    iframe.setAttribute('sandbox','allow-scripts allow-same-origin');
+    iframe.setAttribute('allowfullscreen','');
+    iframe.setAttribute('loading','lazy');
+    iframe.style.position='absolute';
+    iframe.style.top='0';
+    iframe.style.left='0';
+    iframe.style.width='100%';
+    iframe.style.height='100%';
+    wrapper.innerHTML='';
+    wrapper.appendChild(iframe);
+  });
+});
+</script>
 {% endblock %}
 
