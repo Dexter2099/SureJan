@@ -8,7 +8,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from ..models import Community, EngagementEvent, Post, CommunityBaseline
-from ..services.votes import apply_vote
+from ..votes import apply_vote
 from ..services.astro import compute_post_signals
 
 
