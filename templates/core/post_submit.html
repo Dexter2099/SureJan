@@ -9,16 +9,18 @@
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">
-      {{ form.community.label_tag }} {{ form.community }}
-      {{ form.community.errors }}
+      <label>Type</label>
+      <div>
+        <label><input type="radio" name="post_type" value="text" checked> Text</label>
+        <label><input type="radio" name="post_type" value="link"> Link</label>
+        <label><input type="radio" name="post_type" value="images"> Images</label>
+      </div>
     </div>
+    {{ form.community.as_hidden }}
+    {{ form.community.errors }}
     <div class="form-row">
       {{ form.title.label_tag }} {{ form.title }}
       {{ form.title.errors }}
-    </div>
-    <div class="form-row">
-      {{ form.heading.label_tag }} {{ form.heading }}
-      {{ form.heading.errors }}
     </div>
     <div class="form-row">
       {{ form.body.label_tag }}
@@ -28,31 +30,29 @@
       </div>
       {{ form.body.errors }}
     </div>
-    <div class="form-row">
-      {{ form.media.label_tag }} {{ form.media }}
-      {{ form.media.errors }}
-    </div>
-    <div class="form-row">
-      {{ form.caption.label_tag }}
-      <div class="editor-container prose">
-        {% include "core/partials/editor_toolbar.html" %}
-        {{ form.caption }}
-      </div>
-      {{ form.caption.errors }}
-    </div>
-    <div class="form-row">
+    <div class="form-row" id="link-row" style="display:none">
       {{ form.link.label_tag }} {{ form.link }}
       {{ form.link.errors }}
     </div>
-    <div class="form-row">
-      {{ form.image_urls.label_tag }} {{ form.image_urls }}
+    <div class="form-row" id="images-row" style="display:none">
+      <label for="image-url-1">Image URL 1</label>
+      <input type="url" id="image-url-1" name="image_url_1" class="image-url-input">
+      <label for="image-url-2">Image URL 2</label>
+      <input type="url" id="image-url-2" name="image_url_2" class="image-url-input">
+      <label for="image-url-3">Image URL 3</label>
+      <input type="url" id="image-url-3" name="image_url_3" class="image-url-input">
+      <label for="image-url-4">Image URL 4</label>
+      <input type="url" id="image-url-4" name="image_url_4" class="image-url-input">
+      <label for="image-url-5">Image URL 5</label>
+      <input type="url" id="image-url-5" name="image_url_5" class="image-url-input">
       {{ form.image_urls.errors }}
     </div>
+    {{ form.image_urls.as_hidden }}
     <div class="form-actions desktop-actions">
       <label><input type="checkbox" id="live-preview-toggle"> Live preview</label>
       <button type="button" class="button secondary" id="preview-btn" aria-label="Preview post"
               hx-post="{% url 'preview_markdown' %}"
-              hx-include="[name='body'], [name='caption']"
+              hx-include="[name='body']"
               hx-target="#preview" hx-swap="innerHTML">Preview</button>
       <button type="submit" class="button primary" id="post-btn" disabled aria-label="Submit post">Post</button>
       <button type="submit" name="save_draft" value="1" class="button secondary" aria-label="Save draft">Save draft</button>
@@ -66,7 +66,7 @@
 <div class="sticky-bar mobile-actions">
   <label><input type="checkbox" id="live-preview-toggle-mobile"> Live preview</label>
   <button type="button" class="button secondary" hx-post="{% url 'preview_markdown' %}"
-          hx-include="[name='body'], [name='caption']" hx-target="#preview" hx-swap="innerHTML" aria-label="Preview post">Preview</button>
+          hx-include="[name='body']" hx-target="#preview" hx-swap="innerHTML" aria-label="Preview post">Preview</button>
   <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled aria-label="Submit post">Post</button>
 </div>
 {% endblock %}
@@ -75,24 +75,40 @@
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
 <script>
+function collectImages(){
+  const inputs=document.querySelectorAll('.image-url-input');
+  const urls=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
+  document.getElementById('id_image_urls').value=urls.join('\n');
+  return urls;
+}
+
 function validatePost(){
   const title=document.getElementById('id_title').value.trim();
   const body=document.getElementById('id_body').value.trim();
-  const media=document.getElementById('id_media').value;
   const link=document.getElementById('id_link').value.trim();
-  const images=document.getElementById('id_image_urls').value.trim();
+  const images=collectImages();
   const buttons=document.querySelectorAll('#post-btn,#post-btn-mobile');
-  const valid=title && (body || media || link || images);
+  const valid=title && (body || link || images.length);
   buttons.forEach(btn=>btn.disabled=!valid);
 }
 document.addEventListener('input', validatePost);
+
+function updateType(){
+  const type=document.querySelector('input[name="post_type"]:checked').value;
+  document.getElementById('link-row').style.display=type==='link'?'':'none';
+  document.getElementById('images-row').style.display=type==='images'?'':'none';
+  validatePost();
+}
+document.querySelectorAll('input[name="post_type"]').forEach(r=>r.addEventListener('change', updateType));
+updateType();
+document.getElementById('post-form').addEventListener('submit', collectImages);
 
 const liveToggle=document.getElementById('live-preview-toggle');
 const liveToggleMobile=document.getElementById('live-preview-toggle-mobile');
 const previewUrl="{% url 'preview_markdown' %}";
 function updateLivePreview(){
   const enabled=liveToggle.checked || liveToggleMobile.checked;
-  const fields=[document.getElementById('id_body'), document.getElementById('id_caption')];
+  const fields=[document.getElementById('id_body')];
   fields.forEach(f=>{
     if(enabled){
       f.setAttribute('hx-post', previewUrl);
