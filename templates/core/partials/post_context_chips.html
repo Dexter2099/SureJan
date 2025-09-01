@@ -1,23 +1,13 @@
-{% comment %}Display engagement signal chips for a post{% endcomment %}
-{% if ASTROTURF_WATCH %}
+{% load astro %}{% comment %}Display engagement signal chips for a post{% endcomment %}
+{% if ASTROTURF_WATCH and signals.score %}
 <div class="post-context-chips">
-  {# Render a chip for each active signal flag #}
-  {% if signals.flags %}
-    {% for key, value in signals.flags.items %}
-      {% if value %}
-        <a class="chip" href="{% url 'transparency_methods' %}" title="Learn about {{ key|cut:'_' }} detection">
-          {{ key|cut:'_'|title }}
-        </a>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
-  {# Always show severity chip #}
-  {% if signals.severity is not None %}
-    <a class="chip" href="{% url 'transparency_methods' %}" title="Aggregated anomaly score">
-      Severity: {{ signals.severity }}
-    </a>
-  {% endif %}
+  <details class="astro-why">
+    <summary class="chip {{ signals.score|astro_band }}">Astro {{ signals.score }}</summary>
+    <ul>
+      <li>Vote rate 15m: {{ signals.rate15 }}</li>
+      <li>Early new-account share: {{ signals.early_new_share|floatformat:2 }}</li>
+      <li>Discuss ratio: {{ signals.discuss_ratio|floatformat:2 }}</li>
+    </ul>
+  </details>
 </div>
 {% endif %}
-

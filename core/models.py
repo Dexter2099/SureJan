@@ -379,8 +379,27 @@ class AstroScore(models.Model):
     rate15 = models.IntegerField(default=0)
     early_new_share = models.FloatField(default=0)
     discuss_ratio = models.FloatField(default=0)
+    score = models.IntegerField(default=1)
     severity = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AstroUserSummary(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="astro_summary"
+    )
+    avg_score = models.FloatField(default=0)
+    post_count = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class AstroCommunitySummary(models.Model):
+    community = models.OneToOneField(
+        Community, on_delete=models.CASCADE, related_name="astro_summary"
+    )
+    avg_score = models.FloatField(default=0)
+    post_count = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 # -- Vote side effects ------------------------------------------------------

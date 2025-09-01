@@ -5,7 +5,8 @@ from django.core.cache import cache
 
 from django.utils import timezone
 
-from ..models import CommunityBaseline, Post, Vote
+from ..models import CommunityBaseline, Post, Vote, AstroScore, AstroUserSummary, AstroCommunitySummary
+from django.db.models import Avg, Count
 
 
 def compute_post_signals(post_id):
@@ -89,6 +90,7 @@ def compute_post_signals(post_id):
     if base_discuss > 0:
         severity += max(0.0, min(10.0, (base_discuss - discuss_ratio) / base_discuss * 10.0))
     severity = round(min(severity, 100.0), 2)
+    score = max(1, round(severity))
     data = {
         "rate5": rate5,
         "rate15": rate15,
@@ -109,9 +111,44 @@ def compute_post_signals(post_id):
             "discuss_low": discuss_low,
         },
         "severity": severity,
+        "score": score,
     }
+    AstroScore.objects.update_or_create(
+        post=post,
+        defaults={
+            "community": post.community,
+            "author": post.author,
+            "rate5": rate5,
+            "rate15": rate15,
+            "early_new_share": early_new_share,
+            "discuss_ratio": discuss_ratio,
+            "severity": severity,
+            "score": score,
+        },
+    )
+    _update_rollups(post.author_id, post.community_id)
     cache.set(cache_key, data, 30)
     return data
+
+
+
+def _update_rollups(user_id, community_id):
+    u = AstroScore.objects.filter(author_id=user_id).aggregate(avg=Avg("score"), count=Count("id"))
+    AstroUserSummary.objects.update_or_create(
+        user_id=user_id,
+        defaults={
+            "avg_score": u["avg"] or 0.0,
+            "post_count": u["count"],
+        },
+    )
+    c = AstroScore.objects.filter(community_id=community_id).aggregate(avg=Avg("score"), count=Count("id"))
+    AstroCommunitySummary.objects.update_or_create(
+        community_id=community_id,
+        defaults={
+            "avg_score": c["avg"] or 0.0,
+            "post_count": c["count"],
+        },
+    )
 
 
 
