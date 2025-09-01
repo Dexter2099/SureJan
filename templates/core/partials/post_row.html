@@ -34,5 +34,6 @@
       <li><a href="#">save</a></li>
     </ul>
     <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="read-more">Read more</a>
+    {% include "core/partials/mod_controls.html" with post=post %}
   </div>
 </article>

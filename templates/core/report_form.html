@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Report</h1>
+<h1>{% if mode == 'note' %}Mod Note{% else %}Report{% endif %}</h1>
 {% if thanks %}
-<p>Thanks for your report.</p>
+<p>{% if mode == 'note' %}Note recorded.{% else %}Thanks for your report.{% endif %}</p>
 {% else %}
 <form method="post">
   {% csrf_token %}
   <input type="hidden" name="target_type" value="{{ target_type }}">
   <input type="hidden" name="object_id" value="{{ object_id }}">
+  {% if mode == 'note' %}<input type="hidden" name="mode" value="note">{% endif %}
   {% if target %}<p>Reporting {{ target }}</p>{% endif %}
   <label for="id_reason">Reason:</label>
   <textarea id="id_reason" name="reason" required></textarea>

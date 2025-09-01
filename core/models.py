@@ -139,6 +139,9 @@ class Post(models.Model):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    is_locked = models.BooleanField(default=False)
+    slowmode = models.PositiveIntegerField(default=0)
+    domain_weight = models.FloatField(default=1.0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -320,6 +323,7 @@ class Report(models.Model):
     object_id = models.PositiveIntegerField()
     target = GenericForeignKey("content_type", "object_id")
     reason = models.TextField()
+    is_note = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
