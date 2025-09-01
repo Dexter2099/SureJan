@@ -102,25 +102,13 @@ def oembed_preview(request):
     return HttpResponse(html)
 
 
-@login_required
 @require_POST
-def preview_post(request):
-    """Validate post data and render a preview fragment."""
-    form = PostForm(request.POST, request.FILES)
-    if not form.is_valid():
-        return HttpResponseBadRequest("Invalid post data")
-    post = form.save(commit=False)
-    if post.content_url:
-        post.link_domain = urlparse(post.content_url).netloc
-        data = fetch_oembed(post.content_url)
-        post.embed_html = render_to_string("core/partials/link_preview.html", data)
-    if post.body:
-        html = markdown_renderer(post.body)
-        clean = bleach.clean(
-            html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
-        )
-        post.body = mark_safe(clean)
-    return render(request, "core/partials/post_preview.html", {"post": post})
+def preview_markdown(request):
+    """Render sanitized markdown for body or caption preview."""
+    text = request.POST.get("body", "").strip() or request.POST.get("caption", "").strip()
+    html = markdown_renderer(text)
+    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+    return render(request, "core/partials/preview.html", {"html": mark_safe(clean)})
 
 
 def mission(request):
@@ -495,30 +483,38 @@ def home(request):
     return render(request, "core/home.html", context)
 
 
-@login_required
 @require_http_methods(["GET", "POST"])
-def submit_post(request):
-    """Submit a new post selecting a community."""
+def post_submit(request):
+    """Handle post submission, redirecting unauthenticated users to login."""
+
+    if not request.user.is_authenticated:
+        if request.method == "POST":
+            request.session["post_data"] = request.POST.dict()
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
 
+    initial = request.session.pop("post_data", None)
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            if request.POST.get("save_as_draft"):
+            post = Post(
+                community=form.cleaned_data["community"],
+                author=request.user,
+                title=form.cleaned_data["title"],
+                heading=form.cleaned_data.get("heading", ""),
+                body=form.cleaned_data.get("body", ""),
+                content_url=form.cleaned_data.get("link", ""),
+            )
+            media = form.cleaned_data.get("media")
+            if media:
+                post.image = media
+            if request.POST.get("save_draft"):
                 post.is_draft = True
                 post.save()
                 messages.success(request, "Draft saved")
-                return redirect("submit_post")
-            if post.content_url:
-                post.link_domain = urlparse(post.content_url).netloc
-                data = fetch_oembed(post.content_url)
-                post.embed_html = render_to_string(
-                    "core/partials/link_preview.html", data
-                )
+                return redirect("post_submit")
             post.save()
             messages.success(request, "Post submitted")
             return redirect(
@@ -530,10 +526,9 @@ def submit_post(request):
         else:
             messages.error(request, "Please correct the errors below.")
     else:
-        form = PostForm()
+        form = PostForm(initial=initial)
 
-    context = {"form": form}
-    return render(request, "core/submit_post.html", context)
+    return render(request, "core/post_submit.html", {"form": form})
 
 
 def community(request, slug):
@@ -566,43 +561,6 @@ def community(request, slug):
     return render(request, "core/community.html", context)
 
 
-@login_required
-@require_http_methods(["GET", "POST"])
-def submit_post_community(request, slug):
-    """Submit a new post to a community."""
-
-    community = get_object_or_404(Community, slug=slug)
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
-
-    if request.method == "POST":
-        if is_new_user(request.user):
-            if limit_or_429(request, "submit_new_user", "3/m"):
-                return render(request, "429.html", status=429)
-        else:
-            if limit_or_429(request, "submit_established", "10/m"):
-                return render(request, "429.html", status=429)
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.community = community
-            post.author = request.user
-            if post.content_url:
-                post.link_domain = urlparse(post.content_url).netloc
-                data = fetch_oembed(post.content_url)
-                post.embed_html = render_to_string(
-                    "core/partials/link_preview.html", data
-                )
-            post.save()
-            messages.success(request, "Post submitted")
-            return redirect("community", slug=community.slug)
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = PostForm()
-
-    context = {"form": form, "community": community}
-    return render(request, "core/submit_post.html", context)
 
 
 def post_detail(request, community, pk, slug):

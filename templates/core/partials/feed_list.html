@@ -1,7 +1,7 @@
 {% for post in posts %}
   {% include "core/partials/post_row.html" with post=post %}
 {% empty %}
-  <p class="empty">No posts yet. <a href="{% url 'submit_post' %}">Submit Post</a></p>
+  <p class="empty">No posts yet. <a href="{% url 'post_submit' %}">Submit Post</a></p>
 {% endfor %}
 {% if next_page %}
 <div class="load-more">

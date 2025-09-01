@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Create Post</h1>
-<form method="post" action="{% if community %}{% url 'submit_post' community.slug %}{% else %}{% url 'submit_post' %}{% endif %}" class="post-form" hx-boost="false" hx-swap="none">
+<form method="post" action="{% url 'post_submit' %}" class="post-form" hx-boost="false" hx-swap="none">
   {% csrf_token %}
   <div class="draft-pill" hidden></div>
   {{ form.non_field_errors }}
@@ -34,8 +34,8 @@
         <button type="button" class="tab tab-write active">Write</button>
         <button type="button"
                 class="tab tab-preview"
-                hx-post="{% url 'preview' %}"
-                hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
+                hx-post="{% url 'preview_markdown' %}"
+                hx-vals="js:{body: this.closest('.editor-container').querySelector('textarea').value}"
                 hx-target="#post-preview"
                 hx-swap="innerHTML">Preview</button>
       </div>
@@ -57,7 +57,7 @@
     {% if community %}
     <a href="{% url 'community' community.slug %}">cancel</a>
     {% else %}
-    <a href="{% url 'feed_list' %}">cancel</a>
+    <a href="{% url 'home' %}">cancel</a>
     {% endif %}
   </div>
 </form>

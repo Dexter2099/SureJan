@@ -2,7 +2,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <div class="hdr-left">
-      <a href="{% url 'feed_list' %}" class="site-brand" aria-label="Home">
+      <a href="{% url 'home' %}" class="site-brand" aria-label="Home">
         <img src="{% static 'SureJanLogo.png' %}" alt="SureJan" class="site-logo">
       </a>
     </div>
@@ -21,6 +21,6 @@
         <a href="{% url 'signup' %}" aria-label="Sign up">Sign up</a>
       {% endif %}
     </div>
-    <a href="{% url 'submit_post' %}" class="mobile-submit" aria-label="Submit Post">Submit Post</a>
+    <a href="{% url 'post_submit' %}" class="mobile-submit" aria-label="Submit Post">Submit Post</a>
   </div>
 </header>
