@@ -100,10 +100,13 @@ def oembed_preview(request):
     if not url:
         return HttpResponse("")
     try:
-        data = fetch_oembed(url)
+        embed, data = _build_embed(url)
+        ctx = {"type": "embed", **embed} if embed else data
     except Exception:
+        ctx = None
+    if not ctx:
         return HttpResponse("<p role='alert'>Preview unavailable.</p>", status=400)
-    html = render_to_string("core/partials/link_preview.html", data)
+    html = render_to_string("core/partials/link_preview.html", ctx)
     return HttpResponse(html)
 
 
@@ -206,23 +209,22 @@ def _cached_post_signals(pk):
 
 
 def _build_embed(url):
-    """Return embed metadata for known providers.
+    """Return (embed_meta, data) for known providers.
 
-    Generates a click-to-play "safe" embed using a sandboxed iframe for
-    YouTube and Rumble URLs.  Returns ``None`` if the URL is unsupported or
-    if fetching oEmbed data fails.
+    Generates a click-to-play "safe" embed using a sandboxed iframe. Returns
+    ``(None, data)`` when the URL is unsupported.
     """
 
     if not url:
-        return None
+        return None, None
     parsed = urlparse(url)
     domain = parsed.netloc.lower()
     try:
         data = fetch_oembed(url)
     except Exception:
-        return None
+        return None, None
     if data.get("type") != "embed":
-        return None
+        return None, data
     thumb = data.get("thumbnail_url")
 
     if "youtube" in domain:
@@ -242,16 +244,25 @@ def _build_embed(url):
         if not thumb:
             thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
         src = f"https://www.youtube-nocookie.com/embed/{vid}"
-        return {"src": src, "thumb": thumb, "url": url}
+        return {"src": src, "thumb": thumb, "url": url}, data
 
     if "rumble.com" in domain:
         m = re.search(r'src="([^"]+)"', data.get("html", ""))
         if not m:
             return None
         src = m.group(1)
-        return {"src": src, "thumb": thumb, "url": url}
+        return {"src": src, "thumb": thumb, "url": url}, data
 
-    return None
+    if "twitter.com" in domain or "x.com" in domain:
+        if not settings.ENABLE_TWITTER_EMBEDS:
+            return None, data
+        m = re.search(r"status/(\d+)", url)
+        if not m:
+            return None, data
+        src = f"https://platform.twitter.com/embed/Tweet.html?id={m.group(1)}"
+        return {"src": src, "thumb": thumb, "url": url}, data
+
+    return None, data
 
 
 @require_GET
@@ -671,7 +682,7 @@ def post_detail(request, community, pk, slug):
     )
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    embed = _build_embed(post.content_url)
+    embed, _ = _build_embed(post.content_url)
     images = list(post.image_links.all())
     context = {
         "post": post,
@@ -689,7 +700,7 @@ def post_detail_id(request, pk):
     post = get_object_or_404(Post.objects.prefetch_related("image_links"), pk=pk)
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    embed = _build_embed(post.content_url)
+    embed, _ = _build_embed(post.content_url)
     images = list(post.image_links.all())
     context = {
         "post": post,

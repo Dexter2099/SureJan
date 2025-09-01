@@ -77,6 +77,27 @@ SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG
 
+ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
+    "1",
+    "true",
+    "True",
+)
+
+EMBED_WHITELIST = [
+    "https://www.youtube.com",
+    "https://www.youtube-nocookie.com",
+    "https://rumble.com",
+]
+if ENABLE_TWITTER_EMBEDS:
+    EMBED_WHITELIST.append("https://platform.twitter.com")
+
+# Simple per-user rate limits
+RATE_LIMITS = {
+    "post": {"limit": 20, "window": 86400},  # posts per day
+    "comment": {"limit": 60, "window": 60},  # comments per minute
+    "vote": {"limit": 120, "window": 60},  # votes per minute
+}
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     # Exempt Fly’s HTTP health probe hitting internal :8000
@@ -88,20 +109,11 @@ if not DEBUG:
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
-            "script-src": (
-                "'self'",
-                "https://platform.twitter.com",
-                "https://cdn.syndication.twimg.com",
-            ),
+            "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": ("'self'", "https:", "data:"),
             "connect-src": ("'self'",),
-            "frame-src": (
-                "'self'",
-                "https://www.youtube.com",
-                "https://www.youtube-nocookie.com",
-                "https://rumble.com",
-            ),
+            "frame-src": tuple(["'self'"] + EMBED_WHITELIST),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
@@ -146,6 +158,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "core.middleware.ActionRateLimitMiddleware",
     "csp.middleware.CSPMiddleware",  # django-csp v4
 ]
 
