@@ -5,6 +5,6 @@
   {% else %}
     {% include "partials/feed_card.html" with post=post %}
   {% endif %}
-{% empty %}
-  <p class="empty">No posts yet. <a href="{% url 'post_submit' %}">Submit Post</a></p>
-{% endfor %}
+  {% empty %}
+    <div class="empty-state" data-testid="empty-state">No posts yet.</div>
+  {% endfor %}

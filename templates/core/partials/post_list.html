@@ -4,6 +4,6 @@
   {% else %}
     {% include "partials/feed_card.html" with post=post %}
   {% endif %}
-{% empty %}
-  <p>No posts yet. Be the first to submit!</p>
-{% endfor %}
+  {% empty %}
+    <div class="empty-state" data-testid="empty-state">No posts yet.</div>
+  {% endfor %}
