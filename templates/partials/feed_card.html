@@ -1,5 +1,5 @@
 {% load url_domain astro_filters %}
-<article class="card feed-card" id="post-{{ post.pk }}"{% if load_more_url %} hx-get="{{ load_more_url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-target="this" hx-push-url="true"{% endif %}>
+<article class="card feed-card" id="post-{{ post.pk }}" data-testid="post-card"{% if load_more_url %} hx-get="{{ load_more_url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-target="this" hx-push-url="true"{% endif %}>
   <div class="vote">
     <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
     <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
