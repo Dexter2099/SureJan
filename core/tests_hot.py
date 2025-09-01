@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import Community, Post, apply_vote
+from .models import Community, Post
+from .votes import apply_vote
 
 
 class HotRankTests(TestCase):

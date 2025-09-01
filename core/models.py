@@ -462,5 +462,3 @@ def _update_scores_on_vote_delete(sender, instance, **kwargs):
     _apply_vote_delta(instance, -instance.value)
 
 
-# Re-export apply_vote for backwards compatibility
-from .votes import apply_vote  # noqa: E402
