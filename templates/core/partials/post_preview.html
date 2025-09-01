@@ -1,0 +1,14 @@
+<article class="post-preview">
+  <h2>{{ post.title }}</h2>
+  {% if post.heading %}
+  <h3 class="post-heading">{{ post.heading }}</h3>
+  {% endif %}
+  {% if post.embed_html %}
+  <div class="post-embed">{{ post.embed_html|safe }}</div>
+  {% elif post.content_url %}
+  <div class="link-card"><a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.link_domain }}</a></div>
+  {% endif %}
+  {% if post.body %}
+  <div class="post-caption prose">{{ post.body|safe }}</div>
+  {% endif %}
+</article>
