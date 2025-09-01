@@ -1,50 +1,50 @@
-name: UI Contract
-
+name: ui-contract
 on:
-  push:
-    branches: [main]
-  pull_request:
-
+  push: { branches: [main] }
+  pull_request: {}
 jobs:
-  contract:
+  check-ui-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify guard docs exist
+      - name: Verify guard docs exist with change-control line
         run: |
-          for doc in docs/UI-contract.md docs/Design-Tokens.md; do
-            if [ ! -s "$doc" ]; then
-              echo "Missing contract doc: $doc"
-              exit 1
-            fi
+          for f in \
+            docs/UI-contract.md \
+            docs/Components-and-Selectors.md \
+            docs/Routes-and-Params.md \
+            docs/Design-Tokens.md \
+            docs/States-and-Empty.md; do
+            test -f "$f"
+            head -n1 "$f" | grep -Fq "Change control: If templates affecting this surface change, update this file in the same PR."
           done
 
-      - name: Verify design tokens are declared
+      - name: Verify tokens file + required vars
         run: |
-          tokens=(--maxw --feed --side --g --s1 --s2 --s3 --bg --panel --border --text --muted --link --link-visited --accent --accent-down --brand-font)
-          for token in "${tokens[@]}"; do
-            if ! grep -R "$token" static/css >/dev/null; then
-              echo "Design token $token not found"
-              exit 1
-            fi
-          done
+          test -f static/css/tokens.css
+          grep -q -- "--color-bg" static/css/tokens.css
+          grep -q -- "--space-4" static/css/tokens.css
+          grep -q -- "--bp-md" static/css/tokens.css
 
-      - name: Check for stray stylesheet links
+      - name: Ensure only core/base.html links stylesheets
         run: |
-          if grep -R "<link rel=\"stylesheet\"" -n --exclude=templates/core/base.html --exclude-dir=.venv --exclude-dir=node_modules templates; then
-            echo "Stray <link rel=\"stylesheet\"> tags detected outside core/base.html"
-            exit 1
+          set -e
+          hits=$(grep -R --line-number "<link rel=\"stylesheet\"" templates || true)
+          if [ -n "$hits" ]; then
+            echo "$hits" | grep -v "templates/core/base.html" && { echo "Extra stylesheet links found outside core/base.html"; exit 1; } || true
           fi
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings
         run: pytest -q
