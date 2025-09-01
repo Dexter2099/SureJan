@@ -13,8 +13,8 @@ TAB_ORDER = {
 }
 
 RANGE_MAP = {
-    "24h": timedelta(hours=24),
-    "week": timedelta(days=7),
+    "day": timedelta(days=1),
+    "7days": timedelta(days=7),
     "month": timedelta(days=30),
     "year": timedelta(days=365),
 }

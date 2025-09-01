@@ -68,6 +68,6 @@ class HotRankTests(TestCase):
         )
         p2.recompute_hot()
         resp = self.client.get(
-            reverse("feed_list"), {"tab": "hot", "range": "24h"}, HTTP_HX_REQUEST="true"
+            reverse("feed_list"), {"tab": "hot", "range": "day"}, HTTP_HX_REQUEST="true"
         )
         self.assertEqual(resp.context["posts"][0].pk, p1.pk)
