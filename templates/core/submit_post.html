@@ -2,78 +2,94 @@
 {% load static %}
 
 {% block content %}
-<h1>Submit to {{ community.title|default:community.slug }}</h1>
-<!-- submit-stacked v1 -->
-<div class="submit-box">
-  <form method="post" action="{% url 'submit_post' community.slug %}" enctype="multipart/form-data" class="submit-form" hx-boost="false" hx-swap="none">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="form-error" role="alert" style="display:none"></div>
+<h1>Submit a Post</h1>
+<form method="post" action="{% if community %}{% url 'submit_post' community.slug %}{% else %}{% url 'submit_post' %}{% endif %}"
+      enctype="multipart/form-data" class="post-form" hx-boost="false" hx-swap="none">
+  {% csrf_token %}
+  <div class="draft-pill" hidden></div>
+  {{ form.non_field_errors }}
 
-    {% if form.title %}
-    <div class="form-row">
-      <label for="{{ form.title.id_for_label }}">Title</label>
-      {{ form.title }}
-      {{ form.title.errors }}
-    </div>
-    {% endif %}
+  {% if not community %}
+  <div class="form-row">
+    {{ form.community.label_tag }}
+    {{ form.community }}
+    {{ form.community.errors }}
+  </div>
+  {% endif %}
 
-    <div class="form-row">
-      <label for="{{ form.post_type.id_for_label }}">Post type</label>
-      {{ form.post_type }}
-      {{ form.post_type.errors }}
-    </div>
+  <div class="form-row">
+    {{ form.title.label_tag }}
+    {{ form.title }}
+    {{ form.title.errors }}
+  </div>
 
-    {% if form.body %}
-    <div class="form-row type-block" id="type-text">
-      {{ form.body.label_tag }}
-      <div class="editor-container">
-        <div class="editor-tabs">
-          <button type="button" class="tab tab-write active">Write</button>
-          <button type="button"
-                  class="tab tab-preview"
-                  hx-post="{% url 'preview' %}"
-                  hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
-                  hx-target="#post-preview"
-                  hx-swap="innerHTML">Preview</button>
-        </div>
-        {% include "core/partials/editor_toolbar.html" %}
-        {{ form.body }}
-        <div id="post-preview" class="preview" style="display:none"></div>
-      </div>
-      {{ form.body.errors }}
-    </div>
-    {% endif %}
+  <div class="form-row">
+    {{ form.heading.label_tag }}
+    {{ form.heading }}
+    {{ form.heading.errors }}
+  </div>
 
-    {% if form.url %}
-    <div class="form-row type-block" id="type-link">
-      {{ form.url.label_tag }}
-      {{ form.url }}
-      {{ form.url.errors }}
+  <div class="form-row">
+    {{ form.post_type.label_tag }}
+    <div class="segmented-control">
+      {% for value, label in form.post_type.field.choices %}
+      <label class="segment">
+        <input type="radio" name="{{ form.post_type.html_name }}" value="{{ value }}"{% if form.post_type.value == value %} checked{% endif %}>
+        {{ label }}
+      </label>
+      {% endfor %}
     </div>
-    {% endif %}
+    {{ form.post_type.errors }}
+  </div>
 
-    {% if form.image %}
-    <div class="form-row type-block" id="type-image">
-      {{ form.image.label_tag }}
-      {{ form.image }}
-      {{ form.image.errors }}
+  <div class="form-row type-block" id="type-text">
+    {{ form.body.label_tag }}
+    <div class="editor-container prose">
+      {% include "core/partials/editor_toolbar.html" %}
+      {{ form.body }}
     </div>
-    {% endif %}
+    {{ form.body.errors }}
+  </div>
 
-    <div class="form-actions">
-      <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
-      <a href="{% url 'community' community.slug %}">cancel</a>
-    </div>
-  </form>
-</div>
+  <div class="form-row type-block" id="type-link">
+    {{ form.content_url.label_tag }}
+    {{ form.content_url }}
+    {{ form.content_url.errors }}
+  </div>
+
+  <div class="form-row type-block" id="type-image">
+    {{ form.image.label_tag }}
+    {{ form.image }}
+    {{ form.image.errors }}
+  </div>
+
+  <div class="form-actions">
+    <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
+    <button class="button secondary" type="button"
+            hx-post="{% url 'preview_post' %}"
+            hx-include="closest form"
+            hx-encoding="multipart/form-data"
+            hx-target="#preview-panel" hx-swap="innerHTML">Preview</button>
+    <button class="button secondary" type="submit" name="save_as_draft" value="1">Save Draft</button>
+  </div>
+</form>
+
+<div id="preview-panel"></div>
 
 <script>
   (function() {
-    const sel = document.getElementById("{{ form.post_type.id_for_label }}") || document.querySelector('select[name="{{ form.post_type.name }}"]');
     const blocks = {text: "#type-text", link: "#type-link", image: "#type-image"};
-    function show(v){ for (const k in blocks){ const el = document.querySelector(blocks[k]); if (el) el.style.display = (k===v ? "" : "none"); } }
-    if (sel){ show(sel.value || "text"); sel.addEventListener("change", e => show(e.target.value)); }
+    function show(v){
+      for (const k in blocks){
+        const el = document.querySelector(blocks[k]);
+        if (el) el.style.display = (k === v) ? "" : "none";
+      }
+    }
+    const inputs = document.querySelectorAll('input[name="{{ form.post_type.html_name }}"]');
+    inputs.forEach(inp => {
+      if (inp.checked) show(inp.value);
+      inp.addEventListener('change', e => show(e.target.value));
+    });
   })();
 </script>
 {% endblock %}
@@ -82,3 +98,4 @@
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
 {% endblock %}
+
