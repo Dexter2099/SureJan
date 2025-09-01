@@ -115,6 +115,7 @@ class Post(models.Model):
     controversy = models.FloatField(default=0, db_index=True)
     best_rank = models.FloatField(default=0, db_index=True)
     comment_count = models.IntegerField(default=0)
+    is_draft = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False, db_index=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
