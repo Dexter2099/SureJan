@@ -28,7 +28,15 @@ class SubmitPostTests(TestCase):
 
     def test_submit_text_post(self):
         url = reverse("submit_post", args=[self.community.slug])
-        resp = self.client.post(url, {"title": "Hello", "body": "Body"})
+        resp = self.client.post(
+            url,
+            {
+                "community": self.community.pk,
+                "post_type": "text",
+                "title": "Hello",
+                "body": "Body",
+            },
+        )
         self.assertRedirects(resp, reverse("community", args=[self.community.slug]))
         post = Post.objects.get()
         self.assertEqual(post.post_type, "text")
@@ -40,8 +48,9 @@ class SubmitPostTests(TestCase):
         resp = self.client.post(
             url,
             {
+                "community": self.community.pk,
+                "post_type": "link",
                 "title": "Link",
-                "body": "",
                 "content_url": "https://example.com",
             },
         )
@@ -60,9 +69,10 @@ class SubmitPostTests(TestCase):
         resp = self.client.post(
             url,
             {
+                "community": self.community.pk,
+                "post_type": "image",
                 "title": "Pic",
                 "body": "caption",
-                "content_url": "",
                 "image": SimpleUploadedFile("pic.png", buf.read(), content_type="image/png"),
             },
         )
@@ -74,14 +84,38 @@ class SubmitPostTests(TestCase):
     def test_requires_login(self):
         self.client.logout()
         url = reverse("submit_post", args=[self.community.slug])
-        resp = self.client.post(url, {"title": "Hello", "body": "Body"})
+        resp = self.client.post(
+            url,
+            {
+                "community": self.community.pk,
+                "post_type": "text",
+                "title": "Hello",
+                "body": "Body",
+            },
+        )
         self.assertEqual(resp.status_code, 302)
 
     def test_rate_limit(self):
         url = reverse("submit_post", args=[self.community.slug])
         for i in range(3):
-            self.client.post(url, {"title": f"H{i}", "body": "test"})
-        resp = self.client.post(url, {"title": "H3", "body": "test"})
+            self.client.post(
+                url,
+                {
+                    "community": self.community.pk,
+                    "post_type": "text",
+                    "title": f"H{i}",
+                    "body": "test",
+                },
+            )
+        resp = self.client.post(
+            url,
+            {
+                "community": self.community.pk,
+                "post_type": "text",
+                "title": "H3",
+                "body": "test",
+            },
+        )
         self.assertEqual(resp.status_code, 429)
 
     def test_rate_limit_established_user(self):
@@ -89,9 +123,25 @@ class SubmitPostTests(TestCase):
         self.user.save()
         url = reverse("submit_post", args=[self.community.slug])
         for i in range(10):
-            resp = self.client.post(url, {"title": f"E{i}", "body": "test"})
+            resp = self.client.post(
+                url,
+                {
+                    "community": self.community.pk,
+                    "post_type": "text",
+                    "title": f"E{i}",
+                    "body": "test",
+                },
+            )
             self.assertNotEqual(resp.status_code, 429)
-        resp = self.client.post(url, {"title": "E10", "body": "test"})
+        resp = self.client.post(
+            url,
+            {
+                "community": self.community.pk,
+                "post_type": "text",
+                "title": "E10",
+                "body": "test",
+            },
+        )
         self.assertEqual(resp.status_code, 429)
 
 
