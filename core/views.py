@@ -193,6 +193,55 @@ def _cached_post_signals(pk):
     return data
 
 
+def _build_embed(url):
+    """Return embed metadata for known providers.
+
+    Generates a click-to-play "safe" embed using a sandboxed iframe for
+    YouTube and Rumble URLs.  Returns ``None`` if the URL is unsupported or
+    if fetching oEmbed data fails.
+    """
+
+    if not url:
+        return None
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    try:
+        data = fetch_oembed(url)
+    except Exception:
+        return None
+    if data.get("type") != "embed":
+        return None
+    thumb = data.get("thumbnail_url")
+
+    if "youtube" in domain:
+        vid = None
+        # Try to extract the 11-char video id from various URL formats
+        for pattern in [r"v=([\w-]{11})", r"be/([\w-]{11})", r"embed/([\w-]{11})"]:
+            m = re.search(pattern, url)
+            if m:
+                vid = m.group(1)
+                break
+        if not vid:
+            m = re.search(r"embed/([\w-]{11})", data.get("html", ""))
+            if m:
+                vid = m.group(1)
+        if not vid:
+            return None
+        if not thumb:
+            thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+        src = f"https://www.youtube-nocookie.com/embed/{vid}"
+        return {"src": src, "thumb": thumb, "url": url}
+
+    if "rumble.com" in domain:
+        m = re.search(r'src="([^"]+)"', data.get("html", ""))
+        if not m:
+            return None
+        src = m.group(1)
+        return {"src": src, "thumb": thumb, "url": url}
+
+    return None
+
+
 @require_GET
 def post_signals_json(request, pk):
     if not settings.ASTROTURF_WATCH:
@@ -585,20 +634,38 @@ def community(request, slug):
 def post_detail(request, community, pk, slug):
     """Display a single post and its comments."""
 
-    post = get_object_or_404(Post, pk=pk, community__slug=community)
+    post = get_object_or_404(
+        Post.objects.prefetch_related("image_links"), pk=pk, community__slug=community
+    )
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    context = {"post": post, "comments": comments, "form": form}
+    embed = _build_embed(post.content_url)
+    images = list(post.image_links.all())
+    context = {
+        "post": post,
+        "comments": comments,
+        "form": form,
+        "embed": embed,
+        "images": images,
+    }
     return render(request, "core/post_detail.html", context)
 
 
 def post_detail_id(request, pk):
     """Simpler post detail view addressed by ID only."""
 
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.prefetch_related("image_links"), pk=pk)
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    context = {"post": post, "comments": comments, "form": form}
+    embed = _build_embed(post.content_url)
+    images = list(post.image_links.all())
+    context = {
+        "post": post,
+        "comments": comments,
+        "form": form,
+        "embed": embed,
+        "images": images,
+    }
     return render(request, "core/post_detail.html", context)
 
 

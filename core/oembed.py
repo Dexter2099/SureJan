@@ -40,6 +40,7 @@ def fetch_oembed(url: str) -> dict:
             resp.raise_for_status()
             data = resp.json()
             html = data.get("html", "")
+            thumb = data.get("thumbnail_url")
             clean = bleach.clean(
                 html,
                 tags=[
@@ -68,7 +69,7 @@ def fetch_oembed(url: str) -> dict:
                 },
                 strip=True,
             )
-            return {"type": "embed", "html": clean}
+            return {"type": "embed", "html": clean, "thumbnail_url": thumb}
         except Exception:
             pass
 
