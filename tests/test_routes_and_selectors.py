@@ -44,8 +44,7 @@ def test_required_selectors_present(client):
     assert home_resp.status_code in {200, 302, 404}
     html = home_resp.content.decode()
     assert 'data-testid="post-card"' in html
-    assert 'data-testid="sidebar-submit"' in html
-    assert 'data-testid="sidebar-astro"' in html
+    assert 'data-testid="sidebar-cta"' in html
 
     client.force_login(user)
     submit_resp = client.get(reverse('post_submit'))
