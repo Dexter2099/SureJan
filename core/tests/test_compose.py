@@ -24,7 +24,15 @@ class PostCreationTests(TestCase):
         self.client.login(username="alice", password="pwd")
 
     def test_body_only(self):
-        resp = self.client.post(self.url, {"title": "Hello", "body": "Body"})
+        resp = self.client.post(
+            self.url,
+            {
+                "community": self.community.pk,
+                "post_type": "text",
+                "title": "Hello",
+                "body": "Body",
+            },
+        )
         self.assertEqual(resp.status_code, 302)
         post = Post.objects.get()
         self.assertEqual(post.post_type, "text")
@@ -33,7 +41,13 @@ class PostCreationTests(TestCase):
 
     def test_url_only(self):
         resp = self.client.post(
-            self.url, {"title": "Link", "content_url": "https://example.com"}
+            self.url,
+            {
+                "community": self.community.pk,
+                "post_type": "link",
+                "title": "Link",
+                "content_url": "https://example.com",
+            },
         )
         self.assertEqual(resp.status_code, 302)
         post = Post.objects.get()
@@ -45,6 +59,8 @@ class PostCreationTests(TestCase):
         resp = self.client.post(
             self.url,
             {
+                "community": self.community.pk,
+                "post_type": "link",
                 "title": "Both",
                 "body": "Body",
                 "content_url": "https://example.com",
