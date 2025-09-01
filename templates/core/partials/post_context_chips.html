@@ -1,4 +1,4 @@
-{% load astro %}{% comment %}Display engagement signal chips for a post{% endcomment %}
+{% load astro_filters %}{% comment %}Display engagement signal chips for a post{% endcomment %}
 {% if ASTROTURF_WATCH and signals.score %}
 <div class="post-context-chips">
   <details class="astro-why">
