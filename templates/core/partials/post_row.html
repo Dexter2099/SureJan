@@ -6,20 +6,22 @@
     <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
     <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote" class="down" aria-pressed="false">▼</button>
   </div>
-  {% if not post.is_deleted and (post.embed_html or post.image_thumb or post.image) %}
-  <div class="post-image">
-    {% if post.embed_html %}
-      <div class="post-embed" style="position:relative;padding-top:56.25%;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
-          {{ post.embed_html|safe }}
+  {% if not post.is_deleted %}
+    {% if post.embed_html or post.image_thumb or post.image %}
+    <div class="post-image">
+      {% if post.embed_html %}
+        <div class="post-embed" style="position:relative;padding-top:56.25%;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
+            {{ post.embed_html|safe }}
+          </div>
         </div>
-      </div>
-    {% elif post.image_thumb %}
-      <img src="{{ post.image_thumb.url }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-    {% elif post.image %}
-      <img src="{{ post.image.url }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      {% elif post.image_thumb %}
+        <img src="{{ post.image_thumb.url }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      {% elif post.image %}
+        <img src="{{ post.image.url }}" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      {% endif %}
+    </div>
     {% endif %}
-  </div>
   {% endif %}
   <div class="post-body">
     {% if post.is_deleted %}
