@@ -43,12 +43,13 @@ from django.urls import reverse
 from urllib.parse import urlparse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, RecoveryCode, Report
+from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from .oembed import fetch_oembed
+from .rate_limit import check_rate_limit
 
 
 def _is_banned(user):
@@ -548,17 +549,35 @@ def post_submit(request):
 
     initial = request.session.pop("post_data", None)
     if request.method == "POST":
+        limited, retry_after = check_rate_limit(request.user, "post", limit=(3, 10), window=60)
         form = PostForm(request.POST, request.FILES)
+        if limited:
+            form.add_error(None, "You're posting too fast. Please wait before trying again.")
+            resp = render(request, "core/post_submit.html", {"form": form}, status=429)
+            resp.headers["Retry-After"] = str(retry_after)
+            return resp
         if form.is_valid():
+            link = form.cleaned_data.get("link", "")
+            image_urls = form.cleaned_data.get("image_urls", [])
+            media = form.cleaned_data.get("media")
+            body = form.cleaned_data.get("body") or form.cleaned_data.get("caption", "")
+
+            if link:
+                post_type = "link"
+            elif media or image_urls:
+                post_type = "image"
+            else:
+                post_type = "text"
+
             post = Post(
                 community=form.cleaned_data["community"],
                 author=request.user,
+                post_type=post_type,
                 title=form.cleaned_data["title"],
                 heading=form.cleaned_data.get("heading", ""),
-                body=form.cleaned_data.get("body", ""),
-                content_url=form.cleaned_data.get("link", ""),
+                body=body,
+                content_url=link,
             )
-            media = form.cleaned_data.get("media")
             if media:
                 post.image = media
             if request.POST.get("save_draft"):
@@ -567,6 +586,8 @@ def post_submit(request):
                 messages.success(request, "Draft saved")
                 return redirect("post_submit")
             post.save()
+            for url in image_urls:
+                PostImageLink.objects.create(post=post, url=url)
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
