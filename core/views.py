@@ -101,6 +101,27 @@ def oembed_preview(request):
     return HttpResponse(html)
 
 
+@login_required
+@require_POST
+def preview_post(request):
+    """Validate post data and render a preview fragment."""
+    form = PostForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return HttpResponseBadRequest("Invalid post data")
+    post = form.save(commit=False)
+    if post.content_url:
+        post.link_domain = urlparse(post.content_url).netloc
+        data = fetch_oembed(post.content_url)
+        post.embed_html = render_to_string("core/partials/link_preview.html", data)
+    if post.body:
+        html = markdown_renderer(post.body)
+        clean = bleach.clean(
+            html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
+        )
+        post.body = mark_safe(clean)
+    return render(request, "core/partials/post_preview.html", {"post": post})
+
+
 def mission(request):
     return render(request, "core/mission.html")
 
@@ -444,6 +465,47 @@ def home(request):
     return render(request, "core/home.html", context)
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
+def submit_post(request):
+    """Submit a new post selecting a community."""
+
+    if _is_banned(request.user):
+        return HttpResponseForbidden("Account banned")
+
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            if request.POST.get("save_as_draft"):
+                post.is_draft = True
+                post.save()
+                messages.success(request, "Draft saved")
+                return redirect("submit_post")
+            if post.content_url:
+                post.link_domain = urlparse(post.content_url).netloc
+                data = fetch_oembed(post.content_url)
+                post.embed_html = render_to_string(
+                    "core/partials/link_preview.html", data
+                )
+            post.save()
+            messages.success(request, "Post submitted")
+            return redirect(
+                "post_detail",
+                community=post.community.slug,
+                pk=post.pk,
+                slug=post.slug,
+            )
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PostForm()
+
+    context = {"form": form}
+    return render(request, "core/post_form.html", context)
+
+
 def community(request, slug):
     """Display posts for a specific community."""
     community = get_object_or_404(Community, slug=slug)
@@ -476,7 +538,7 @@ def community(request, slug):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def submit_post(request, slug):
+def submit_post_community(request, slug):
     """Submit a new post to a community."""
 
     community = get_object_or_404(Community, slug=slug)

@@ -3,10 +3,17 @@
 
 {% block content %}
 <h1>Create Post</h1>
-<form method="post" action="{% url 'submit_post' community.slug %}" class="post-form" hx-boost="false" hx-swap="none">
+<form method="post" action="{% if community %}{% url 'submit_post' community.slug %}{% else %}{% url 'submit_post' %}{% endif %}" class="post-form" hx-boost="false" hx-swap="none">
   {% csrf_token %}
   <div class="draft-pill" hidden></div>
   {{ form.non_field_errors }}
+  {% if not community %}
+  <div class="form-row">
+    {{ form.community.label_tag }}
+    {{ form.community }}
+    {{ form.community.errors }}
+  </div>
+  {% endif %}
 
   <div class="form-row">
     {{ form.title.label_tag }}
@@ -47,7 +54,11 @@
 
   <div class="form-actions">
     <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
+    {% if community %}
     <a href="{% url 'community' community.slug %}">cancel</a>
+    {% else %}
+    <a href="{% url 'home' %}">cancel</a>
+    {% endif %}
   </div>
 </form>
 {% endblock %}

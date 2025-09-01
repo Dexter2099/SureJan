@@ -12,6 +12,8 @@ urlpatterns = [
     # Markdown preview endpoint
     path("preview", core_views.render_preview, name="preview"),
     path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
+    path("submit/", core_views.submit_post, name="submit_post"),
+    path("submit/preview/", core_views.preview_post, name="preview_post"),
 
     # Post signals
     path("posts/<int:pk>/signals.json", core_views.post_signals_json, name="post_signals_json"),
@@ -35,7 +37,7 @@ urlpatterns = [
 
     # Community pages (slug-based, /r/<slug>/…)
     path("r/<slug:slug>/", core_views.community, name="community"),
-    path("r/<slug:slug>/submit/", core_views.submit_post, name="submit_post"),
+    path("r/<slug:slug>/submit/", core_views.submit_post_community, name="submit_post"),
     path("r/<slug:slug>/wiki/", core_views.community_wiki, name="community_wiki"),
 
     # Post detail (nested under community, with id + slug)
