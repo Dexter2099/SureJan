@@ -83,6 +83,7 @@
         <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
         {% endif %}
       </nav>
+      {% include "core/partials/mod_controls.html" with post=post %}
     </div>
   </article>
 </div>

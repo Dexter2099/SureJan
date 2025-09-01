@@ -1,0 +1,30 @@
+{% if request.user.is_staff %}
+<div class="mod-controls" hx-target="this" hx-swap="outerHTML">
+  {% if not post.is_deleted %}
+  <form method="post" hx-post="{% url 'post_remove' post.pk %}" hx-confirm="Remove post?" hx-target="closest article" hx-swap="outerHTML">
+    {% csrf_token %}
+    <button type="submit">remove</button>
+  </form>
+  {% endif %}
+  <form method="post" hx-post="{% url 'post_lock' post.pk %}" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="hidden" name="state" value="{% if post.is_locked %}0{% else %}1{% endif %}">
+    <button type="submit">{% if post.is_locked %}unlock{% else %}lock{% endif %}</button>
+  </form>
+  <form method="post" hx-post="{% url 'post_slowmode' post.pk %}" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <select name="seconds" onchange="this.form.submit()">
+      <option value="0" {% if post.slowmode == 0 %}selected{% endif %}>no slow</option>
+      <option value="30" {% if post.slowmode == 30 %}selected{% endif %}>30s</option>
+      <option value="60" {% if post.slowmode == 60 %}selected{% endif %}>60s</option>
+      <option value="120" {% if post.slowmode == 120 %}selected{% endif %}>120s</option>
+    </select>
+  </form>
+  <form method="post" hx-post="{% url 'post_domain_throttle' post.pk %}" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="hidden" name="state" value="{% if post.domain_weight < 1 %}0{% else %}1{% endif %}">
+    <button type="submit">{% if post.domain_weight < 1 %}unthrottle domain{% else %}throttle domain{% endif %}</button>
+  </form>
+  <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}&mode=note">mod note</a>
+</div>
+{% endif %}

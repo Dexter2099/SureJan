@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="page container">
-  <h1>Moderator Astro Tools</h1>
-  <p>Guidelines for identifying and handling astroturfing campaigns.</p>
+  <h1>Astro Alerts</h1>
+  <ul>
+    {% for p in posts %}
+    <li><a href="{% url 'post_detail' p.community.slug p.pk p.slug %}">{{ p.title }}</a> ({{ p.astro_score.score }})</li>
+    {% empty %}
+    <li>No flagged posts.</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}

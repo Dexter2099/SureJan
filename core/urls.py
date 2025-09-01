@@ -66,6 +66,14 @@ urlpatterns = [
         name="post_delete_owner",
     ),
     path("post/<int:pk>/delete/", core_views.post_delete, name="post_delete"),
+    path("post/<int:pk>/remove/", core_views.post_remove, name="post_remove"),
+    path("post/<int:pk>/lock/", core_views.post_lock, name="post_lock"),
+    path("post/<int:pk>/slowmode/", core_views.post_slowmode, name="post_slowmode"),
+    path(
+        "post/<int:pk>/domain-throttle/",
+        core_views.post_domain_throttle,
+        name="post_domain_throttle",
+    ),
     path("report/", core_views.report, name="report"),
     path("reports/", core_views.report_list, name="report_list"),
 

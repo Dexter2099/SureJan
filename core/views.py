@@ -125,10 +125,17 @@ def anti_astroturf(request):
     return render(request, "pages/anti_astroturf.html")
 
 
+@staff_member_required
 def mod_astro(request):
-    """Moderator information about astroturf detection."""
-
-    return render(request, "core/mod_astro.html")
+    """List posts with high astroturf scores for moderators."""
+    posts = (
+        Post.objects.filter(
+            astro_score__score__gte=settings.ASTRO_BAND_RED, is_deleted=False
+        )
+        .select_related("community", "author", "astro_score")
+        .order_by("-astro_score__score")
+    )
+    return render(request, "core/mod_astro.html", {"posts": posts})
 
 
 def transparency_methods(request):
@@ -740,6 +747,12 @@ def comment_reply(request, post_id):
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
     post = get_object_or_404(Post, pk=post_id)
+    if post.is_locked:
+        return HttpResponseForbidden("Comments locked")
+    if post.slowmode:
+        rate = f"1/{post.slowmode}s"
+        if limit_or_429(request, f"slow_{post.pk}", rate):
+            return render(request, "429.html", status=429)
     if getattr(post, 'astro_score', None) and post.astro_score.score >= settings.ASTRO_SLOWMODE_THRESHOLD:
         if limit_or_429(request, f'astro_slow_{post.pk}', settings.ASTRO_SLOWMODE_RATE):
             return render(request, '429.html', status=429)
@@ -840,6 +853,8 @@ def comment_new(request):
     if not post_id:
         return HttpResponseBadRequest("Missing post")
     post = get_object_or_404(Post, pk=post_id)
+    if post.is_locked:
+        return HttpResponseForbidden("Comments locked")
     parent = None
     if parent_id:
         parent = get_object_or_404(Comment, pk=parent_id, post=post)
@@ -863,6 +878,12 @@ def comment_create(request):
     if not post_id:
         return HttpResponseBadRequest("Missing post")
     post = get_object_or_404(Post, pk=post_id)
+    if post.is_locked:
+        return HttpResponseForbidden("Comments locked")
+    if post.slowmode:
+        rate = f"1/{post.slowmode}s"
+        if limit_or_429(request, f"slow_{post.pk}", rate):
+            return render(request, "429.html", status=429)
     if getattr(post, 'astro_score', None) and post.astro_score.score >= settings.ASTRO_SLOWMODE_THRESHOLD:
         if limit_or_429(request, f'astro_slow_{post.pk}', settings.ASTRO_SLOWMODE_RATE):
             return render(request, '429.html', status=429)
@@ -927,6 +948,8 @@ def comment_reply_form(request, post_id):
         return HttpResponseBadRequest("Invalid request")
 
     post = get_object_or_404(Post, pk=post_id)
+    if post.is_locked:
+        return HttpResponseForbidden("Comments locked")
     parent_id = request.GET.get("parent_id")
     if not parent_id:
         return HttpResponseBadRequest("Missing parent_id")
@@ -1042,6 +1065,78 @@ def post_delete(request, pk):
 @login_required
 @require_POST
 @csrf_protect
+def post_remove(request, pk):
+    """Soft delete a post (moderator remove)."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    post = get_object_or_404(Post, pk=pk)
+    post.soft_delete(request.user)
+    if request.headers.get("HX-Request") == "true":
+        html = render_to_string("core/partials/post_deleted_stub.html", {"post": post})
+        return HttpResponse(html)
+    return redirect(
+        "post_detail",
+        community=post.community.slug,
+        pk=post.id,
+        slug=post.slug,
+    )
+
+
+@login_required
+@require_POST
+@csrf_protect
+def post_lock(request, pk):
+    """Lock or unlock a post's comments."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    post = get_object_or_404(Post, pk=pk)
+    state = request.POST.get("state")
+    post.is_locked = state == "1"
+    post.save(update_fields=["is_locked"])
+    html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
+    return HttpResponse(html)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def post_slowmode(request, pk):
+    """Adjust per-post slowmode comment rate."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    post = get_object_or_404(Post, pk=pk)
+    try:
+        seconds = int(request.POST.get("seconds", 0))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid value")
+    if seconds not in {0, 30, 60, 120}:
+        return HttpResponseBadRequest("Invalid value")
+    post.slowmode = seconds
+    post.save(update_fields=["slowmode"])
+    html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
+    return HttpResponse(html)
+
+
+@login_required
+@require_POST
+@csrf_protect
+def post_domain_throttle(request, pk):
+    """Toggle domain throttling (-50% weight) for a post."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
+    post = get_object_or_404(Post, pk=pk)
+    state = request.POST.get("state")
+    if state not in {"0", "1"}:
+        return HttpResponseBadRequest("Invalid value")
+    post.domain_weight = 0.5 if state == "1" else 1.0
+    post.save(update_fields=["domain_weight"])
+    html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
+    return HttpResponse(html)
+
+
+@login_required
+@require_POST
+@csrf_protect
 def comment_delete(request, pk):
     """Delete a comment if the requester is the author or staff."""
     if _is_banned(request.user):
@@ -1148,9 +1243,15 @@ def report(request):
     if request.method == "POST":
         target_type = request.POST.get("target_type")
         object_id = request.POST.get("object_id")
+        mode = request.POST.get("mode")
     else:
         target_type = request.GET.get("target_type")
         object_id = request.GET.get("object_id")
+        mode = request.GET.get("mode")
+
+    is_note = mode == "note"
+    if is_note and not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
 
     if target_type not in {"post", "comment"}:
         return HttpResponseBadRequest("Invalid target")
@@ -1170,13 +1271,14 @@ def report(request):
             content_type=ContentType.objects.get_for_model(target),
             object_id=target.pk,
             reason=reason,
+            is_note=is_note,
         )
-        return render(request, "core/report_form.html", {"thanks": True})
+        return render(request, "core/report_form.html", {"thanks": True, "mode": mode})
 
     return render(
         request,
         "core/report_form.html",
-        {"target": target, "target_type": target_type, "object_id": object_id},
+        {"target": target, "target_type": target_type, "object_id": object_id, "mode": mode},
     )
 
 
