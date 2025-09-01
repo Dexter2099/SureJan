@@ -3,6 +3,18 @@
   <section aria-labelledby="feed-heading">
     <h1 id="feed-heading" class="sr-only">Feed</h1>
 
+    <form method="get" class="range-selector" style="margin-bottom:1rem;">
+      <input type="hidden" name="tab" value="{{ tab }}">
+      <label for="range">Time range:</label>
+      <select name="range" id="range">
+        <option value="day" {% if range == 'day' %}selected{% endif %}>Last Day</option>
+        <option value="7days" {% if range == '7days' %}selected{% endif %}>Last 7 Days</option>
+        <option value="month" {% if range == 'month' %}selected{% endif %}>Last Month</option>
+        <option value="year" {% if range == 'year' %}selected{% endif %}>Last Year</option>
+      </select>
+      <button type="submit" class="btn">Apply</button>
+    </form>
+
     {% for post in page.object_list %}
       <article class="card">
         <div class="meta">
