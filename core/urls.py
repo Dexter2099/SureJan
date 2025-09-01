@@ -4,7 +4,7 @@ from . import views as core_views
 
 urlpatterns = [
     # Home / front page
-    path("", core_views.home, name="home"),
+    path("", core_views.feed_list, name="feed_list"),
     path("mission/", core_views.mission, name="mission"),
     path("anti-astroturf/", core_views.anti_astroturf, name="anti_astroturf"),
     path("transparency/methods", core_views.transparency_methods, name="transparency_methods"),

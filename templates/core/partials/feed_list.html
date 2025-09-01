@@ -1,0 +1,10 @@
+{% for post in posts %}
+  {% include "core/partials/post_row.html" with post=post %}
+{% empty %}
+  <p class="empty">No posts yet. <a href="{% url 'submit_post' %}">Submit Post</a></p>
+{% endfor %}
+{% if next_page %}
+<div class="load-more">
+  <button hx-get="{% url 'feed_list' %}?tab={{ tab }}&range={{ range }}&page={{ next_page }}" hx-target="#feed-list" hx-swap="beforeend" hx-push-url="true">Load more</button>
+</div>
+{% endif %}

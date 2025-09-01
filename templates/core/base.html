@@ -10,7 +10,9 @@
   </head>
   <body>
     {% include 'core/partials/header.html' %}
-    {% block subnav %}{% endblock %}
+    {% block subnav %}
+      {% include "core/partials/feed_controls.html" %}
+    {% endblock %}
     <main id="feed-root">
       <section class="main" id="content">
         {% block content %}{% endblock %}
