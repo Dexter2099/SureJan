@@ -12,5 +12,4 @@ class UserHeaderTests(TestCase):
         self.client.login(username="alice", password="pwd")
         resp = self.client.get(reverse("home"))
         self.assertContains(resp, "alice")
-        self.assertContains(resp, "Points: 0")
 

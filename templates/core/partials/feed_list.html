@@ -5,6 +5,6 @@
 {% endfor %}
 {% if next_page %}
 <div class="load-more">
-  <button hx-get="{% url 'feed_list' %}?tab={{ tab }}&range={{ range }}&page={{ next_page }}" hx-target="#feed-list" hx-swap="beforeend" hx-push-url="true">Load more</button>
+  <button hx-get="{% url 'feed_list' %}?tab={{ tab }}&range={{ range }}&page={{ next_page }}" hx-target="#feed-list" hx-swap="beforeend" hx-push-url="true" aria-label="Load more posts">Load more</button>
 </div>
 {% endif %}

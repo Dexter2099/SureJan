@@ -93,16 +93,21 @@ ALLOWED_ATTRIBUTES = {"a": ["href"]}
 
 
 @require_POST
+@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
 def oembed_preview(request):
     url = request.POST.get("url", "").strip()
     if not url:
         return HttpResponse("")
-    data = fetch_oembed(url)
+    try:
+        data = fetch_oembed(url)
+    except Exception:
+        return HttpResponse("<p role='alert'>Preview unavailable.</p>", status=400)
     html = render_to_string("core/partials/link_preview.html", data)
     return HttpResponse(html)
 
 
 @require_POST
+@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
 def preview_markdown(request):
     """Render sanitized markdown for body or caption preview."""
     text = request.POST.get("body", "").strip() or request.POST.get("caption", "").strip()
@@ -453,36 +458,13 @@ def feed_list(request):
     return render(request, "core/feed.html", ctx)
 
 
+@require_GET
 def home(request):
-    """Display a feed of posts across all communities."""
-    sort = request.GET.get("sort", "best")
-    if sort not in FEED_ORDER:
-        sort = "best"
-    order = FEED_ORDER[sort]
-    page = int(request.GET.get("page", "1") or 1)
-
-    qs = Post.objects.select_related("community", "author").order_by(*order)
-
-    offset = (page - 1) * PAGE_SIZE
-    posts = list(qs[offset : offset + PAGE_SIZE + 1])
-    next_page = page + 1 if len(posts) > PAGE_SIZE else None
-    posts = posts[:PAGE_SIZE]
-
-    sort_query = f"&sort={sort}" if sort and sort != "best" else ""
-    context = {
-        "posts": posts,
-        "next_page": next_page,
-        "sort_query": sort_query,
-        "sort": sort,
-        "sort_tabs": SORT_TABS,
-    }
-    if request.headers.get("HX-Request") == "true":
-        return _render_posts(
-            request, posts, next_page, show_community=True, sort_query=sort_query
-        )
-    return render(request, "core/home.html", context)
+    """Homepage uses the feed list with default parameters."""
+    return feed_list(request)
 
 
+@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
 @require_http_methods(["GET", "POST"])
 def post_submit(request):
     """Handle post submission, redirecting unauthenticated users to login."""

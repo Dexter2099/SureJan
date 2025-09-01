@@ -226,6 +226,8 @@ else:
         }
     }
 
+STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
+
 # Temporary guard to avoid 500s from missing manifest entries while iterating.
 # REMOVE once favicon/static references are correct and collectstatic is clean.
 WHITENOISE_MANIFEST_STRICT = False
