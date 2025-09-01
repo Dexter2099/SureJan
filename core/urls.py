@@ -1,6 +1,6 @@
 # core/urls.py
 from django.urls import path
-from . import views as core_views
+from core import views as core_views
 
 urlpatterns = [
     # Home / front page
