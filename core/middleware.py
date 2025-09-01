@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
-
-from .rate_limit import check_rate_limit
+from django_ratelimit.core import is_ratelimited
 
 
 def _client_ip(request):
@@ -56,11 +55,20 @@ class ActionRateLimitMiddleware:
                 action = "vote"
             if action and action in self.limits:
                 cfg = self.limits[action]
-                limited, retry_after = check_rate_limit(
-                    request.user, action, cfg.get("limit"), cfg.get("window")
+                limit = cfg.get("limit")
+                window = cfg.get("window")
+                rate = f"{limit}/{window}s"
+                group = f"{action}_{window}s"
+                limited = is_ratelimited(
+                    request,
+                    group=group,
+                    key="user",
+                    rate=rate,
+                    method=["POST"],
+                    increment=True,
                 )
                 if limited:
                     resp = HttpResponse("Rate limit exceeded", status=429)
-                    resp.headers["Retry-After"] = str(retry_after)
+                    resp.headers["Retry-After"] = str(window)
                     return resp
         return self.get_response(request)

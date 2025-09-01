@@ -49,7 +49,6 @@ from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from .oembed import fetch_oembed
-from .rate_limit import check_rate_limit
 
 
 def _is_banned(user):
@@ -571,12 +570,24 @@ def post_submit(request):
 
     initial = request.session.pop("post_data", None)
     if request.method == "POST":
-        limited, retry_after = check_rate_limit(request.user, "post", limit=(3, 10), window=60)
+        limit = 3 if is_new_user(request.user) else 10
+        window = 60
+        rate = f"{limit}/{window}s"
+        limited = is_ratelimited(
+            request,
+            group="post_submit",
+            key="user",
+            rate=rate,
+            method=["POST"],
+            increment=True,
+        )
         form = PostForm(request.POST, request.FILES)
         if limited:
-            form.add_error(None, "You're posting too fast. Please wait before trying again.")
+            form.add_error(
+                None, "You're posting too fast. Please wait before trying again."
+            )
             resp = render(request, "core/post_submit.html", {"form": form}, status=429)
-            resp.headers["Retry-After"] = str(retry_after)
+            resp.headers["Retry-After"] = str(window)
             return resp
         if form.is_valid():
             link = form.cleaned_data.get("link", "")
