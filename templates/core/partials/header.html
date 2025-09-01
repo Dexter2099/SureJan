@@ -1,0 +1,26 @@
+{% load static %}
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="hdr-left">
+      <a href="{% url 'home' %}" class="site-brand" aria-label="Home">
+        <img src="{% static 'SureJanLogo.png' %}" alt="SureJan" class="site-logo">
+      </a>
+    </div>
+    <nav class="hdr-center" aria-label="Main navigation">
+      <a href="{% url 'community' 'news' %}" aria-label="News">NEWS</a>
+      <a href="{% url 'community' 'brisbane' %}" aria-label="Brisbane">BRISBANE</a>
+      <a href="{% url 'community' 'politics' %}" aria-label="Politics">POLITICS</a>
+      <a href="{% url 'community' 'social' %}" aria-label="Social">SOCIAL</a>
+    </nav>
+    <div class="hdr-right">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'user_overview' request.user.username %}" aria-label="Account">{{ request.user.username }}</a>
+      {% else %}
+        <a href="{% url 'login' %}" aria-label="Login">Login</a>
+        <span>/</span>
+        <a href="{% url 'signup' %}" aria-label="Sign up">Sign up</a>
+      {% endif %}
+    </div>
+    <a href="{% url 'submit_post' %}" class="mobile-submit" aria-label="Submit Post">Submit Post</a>
+  </div>
+</header>

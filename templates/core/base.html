@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}SureJan{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body>
+    {% include 'core/partials/header.html' %}
+    {% block subnav %}{% endblock %}
+    <main id="feed-root">
+      <section class="main" id="content">
+        {% block content %}{% endblock %}
+      </section>
+      <aside id="right-gutter">
+        {% block sidebar %}
+          {% include 'core/partials/sidebar_minimal.html' %}
+        {% endblock %}
+      </aside>
+    </main>
+    <footer class="site-footer">
+      <div class="container" style="text-align:center;">
+        <a href="{% url 'terms' %}" aria-label="Terms">Terms</a>
+        &middot;
+        <a href="{% url 'privacy' %}" aria-label="Privacy">Privacy</a>
+        &middot;
+        <a href="{% url 'rules' %}" aria-label="Rules">Rules</a>
+      </div>
+    </footer>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
