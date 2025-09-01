@@ -1,1 +1,31 @@
-*.ico text diff
+# Normalize text files to LF in repo and working tree
+* text eol=lf
+
+# Ensure common text types stay LF (explicit, though redundant)
+*.py text eol=lf
+*.html text eol=lf
+*.htm text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+
+# Windows-specific scripts may use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets (never modify line endings)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
