@@ -1,10 +1,10 @@
 <div class="sidebar-card">
   {% if community %}
-    <a class="button button-primary w-full" href="{% url 'post_submit' %}">Submit Post</a>
+    <a class="button button-primary w-full" href="{% url 'post_submit' %}" data-testid="sidebar-submit">Submit Post</a>
   {% else %}
     <a class="button button-primary w-full" href="{% url 'home' %}">Choose a Community</a>
   {% endif %}
 </div>
 <div class="sidebar-card">
-  <a class="link-plain" href="{% url 'anti_astroturf' %}">Anti-Astroturf</a>
+  <a class="link-plain" href="{% url 'anti_astroturf' %}" data-testid="sidebar-astro">Anti-Astroturf</a>
 </div>

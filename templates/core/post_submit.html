@@ -5,7 +5,7 @@
 <div class="submit-wrapper">
   <a href="{% url 'home' %}">← Back to feed</a>
   <h1>Submit Post</h1>
-  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false">
+  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false" data-testid="submit-form">
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">

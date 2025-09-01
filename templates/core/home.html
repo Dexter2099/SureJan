@@ -16,7 +16,7 @@
     </form>
 
     {% for post in page.object_list %}
-      <article class="card">
+      <article class="card" data-testid="post-card">
         <div class="meta">
           r/{{ post.community.slug }} · u/{{ post.author.username }} · {{ post.created_at|timesince }} ago
         </div>

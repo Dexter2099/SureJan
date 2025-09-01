@@ -1,5 +1,5 @@
 {% load url_domain %}
-<article class="post-row" id="post-{{ post.pk }}">
+<article class="post-row" id="post-{{ post.pk }}" data-testid="post-card">
   <div class="vote">
     <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
     <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
