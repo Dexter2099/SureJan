@@ -514,9 +514,9 @@ def feed_list(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    range_ = request.GET.get("range", "24h")
+    range_ = request.GET.get("range", "day")
     if range_ not in RANGE_MAP and range_ != "all":
-        range_ = "24h"
+        range_ = "day"
 
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
@@ -544,9 +544,9 @@ def home(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    rng = request.GET.get("range", "24h")
+    rng = request.GET.get("range", "day")
     if rng not in RANGE_MAP and rng != "all":
-        rng = "24h"
+        rng = "day"
 
     page_number = request.GET.get("page") or 1
     qs = feed_queryset(tab, rng)
@@ -632,9 +632,9 @@ def community(request, slug):
     if sort not in FEED_ORDER:
         sort = "best"
 
-    rng = request.GET.get("range", "24h")
+    rng = request.GET.get("range", "day")
     if rng not in RANGE_MAP and rng != "all":
-        rng = "24h"
+        rng = "day"
 
     order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
@@ -654,7 +654,7 @@ def community(request, slug):
     sort_query = ""
     if sort and sort != "best":
         sort_query += f"&sort={sort}"
-    if rng and rng != "24h":
+    if rng and rng != "day":
         sort_query += f"&range={rng}"
 
     context = {

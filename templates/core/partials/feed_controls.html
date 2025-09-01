@@ -7,13 +7,11 @@
     <a href="?tab=top&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=top&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'top' %}active{% endif %}" aria-label="Show top posts">TOP</a>
   </div>
   <div class="sort">
-    <label for="feed-range">Sort by</label>
-    <select id="feed-range" name="range" hx-get="{% url 'feed_list' %}?tab={{ tab }}" hx-target="#feed-list" hx-trigger="change" hx-push-url="true" aria-label="Select time range">
-      <option value="24h" {% if range == '24h' %}selected{% endif %}>24h</option>
-      <option value="week" {% if range == 'week' %}selected{% endif %}>Week</option>
-      <option value="month" {% if range == 'month' %}selected{% endif %}>Month</option>
-      <option value="year" {% if range == 'year' %}selected{% endif %}>Year</option>
-      <option value="all" {% if range == 'all' %}selected{% endif %}>All</option>
-    </select>
+    <div class="btn-group" role="group" aria-label="Select time range">
+      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&range=day" hx-target="#feed-list" hx-push-url="true" class="{% if range == 'day' %}active{% endif %}">Last Day</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&range=7days" hx-target="#feed-list" hx-push-url="true" class="{% if range == '7days' %}active{% endif %}">Last 7 Days</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&range=month" hx-target="#feed-list" hx-push-url="true" class="{% if range == 'month' %}active{% endif %}">Last Month</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&range=year" hx-target="#feed-list" hx-push-url="true" class="{% if range == 'year' %}active{% endif %}">Last Year</button>
+    </div>
   </div>
 </nav>
