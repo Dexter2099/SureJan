@@ -1,46 +1,8 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 
 {% block content %}
-  {% for _ in "12345"|make_list %}
-  <article class="thing">
-    <div class="vote">
-      <button class="up" aria-label="upvote">▲</button>
-      <div class="score">123</div>
-      <button class="down" aria-label="downvote">▼</button>
-    </div>
-    <div class="entry">
-      <h3 class="title"><a href="#">Example post title</a> <span class="domain">(example.com)</span></h3>
-      <div class="byline">submitted 5 hours ago by <a href="#">username</a> to <a href="#">r/brisbane</a></div>
-      <ul class="flat-list actions">
-        <li><a href="#">123 comments</a></li>
-        <li><a href="#">share</a></li>
-        <li><a href="#">save</a></li>
-        <li><a href="#">hide</a></li>
-        <li><a href="#">report</a></li>
-      </ul>
-    </div>
-  </article>
-  {% endfor %}
-  <div class="paginator">
-    <a href="#">prev</a> | <a href="#">next</a>
-  </div>
-{% endblock %}
-
-{% block sidebar %}
-  <h3>About this community</h3>
-  <p>
-    A place to share and discuss the latest stories and happenings.
-  </p>
-
-  <h4>Moderators</h4>
-  <ul style="list-style: disc; padding-left: 16px; margin: 8px 0;">
-    <li><a href="#">u/mod1</a></li>
-    <li><a href="#">u/mod2</a></li>
-  </ul>
-
-  <h4>Rules</h4>
-  <ol style="padding-left: 16px; margin: 8px 0;">
-    <li>Be respectful to others.</li>
-    <li>No spam or self-promotion.</li>
-  </ol>
+<div id="feed-list" hx-get="{% url 'feed_list' %}?tab={{ tab }}&range={{ range }}" hx-trigger="load" hx-swap="innerHTML">
+  <div class="skeleton" style="height:80px;margin-bottom:1rem;"></div>
+  <div class="skeleton" style="height:80px;"></div>
+</div>
 {% endblock %}

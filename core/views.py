@@ -47,6 +47,7 @@ from .models import Comment, Community, Post, RecoveryCode, Report
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
+from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from .oembed import fetch_oembed
 
 
@@ -433,6 +434,35 @@ def _render_posts(request, posts, next_page, show_community=False, sort_query=""
             "core/partials/load_more.html", {"next_url": next_url}, request=request
         )
     return HttpResponse(html)
+
+
+@require_GET
+def feed_list(request):
+    """Render the feed list or the full feed page."""
+    tab = request.GET.get("tab", "hot")
+    if tab not in TAB_ORDER:
+        tab = "hot"
+
+    range_ = request.GET.get("range", "24h")
+    if range_ not in RANGE_MAP and range_ != "all":
+        range_ = "24h"
+
+    if request.headers.get("HX-Request") == "true":
+        page = int(request.GET.get("page", "1") or 1)
+        size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
+        qs = feed_queryset(tab, range_)
+        paginator = Paginator(qs, size)
+        page_obj = paginator.get_page(page)
+        ctx = {
+            "posts": list(page_obj.object_list),
+            "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
+            "tab": tab,
+            "range": range_,
+        }
+        return render(request, "core/partials/feed_list.html", ctx)
+
+    ctx = {"tab": tab, "range": range_}
+    return render(request, "core/feed.html", ctx)
 
 
 def home(request):
