@@ -1,0 +1,35 @@
+{% load url_domain %}
+<article class="card feed-card" id="post-{{ post.pk }}"{% if load_more_url %} hx-get="{{ load_more_url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-target="this" hx-push-url="true"{% endif %}>
+  <div class="vote">
+    <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
+    <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
+    <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+  </div>
+  {% if post.image_thumb or post.image %}
+  <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="thumb">
+    {% if post.image_thumb %}
+    <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+    {% else %}
+    <img src="{{ post.image.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+    {% endif %}
+  </a>
+  {% endif %}
+  <div class="entry">
+    <div class="meta">
+      <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}</a>
+      &middot;
+      <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
+      &middot;
+      <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} ago</time>
+    </div>
+    <h3 class="title line-clamp"><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}">{{ post.title }}</a></h3>
+    {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
+    {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
+    <ul class="actions">
+      <li><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a></li>
+      <li><a href="#" class="copy-link" data-link="{% url 'post_detail' post.community.slug post.pk post.slug %}">share</a></li>
+      <li><a href="#">save</a></li>
+    </ul>
+    <span class="astro-chip"></span>
+  </div>
+</article>

@@ -6,12 +6,9 @@
   <p><a class="button" href="{% url 'post_submit' %}" hx-boost="false">Submit</a></p>
 {% endif %}
 {% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
-<div class="feed">
-  <div id="feed-list">
-    {% include "core/partials/post_list.html" with posts=posts %}
+  <div class="feed">
+    <div id="feed-list">
+    {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
   </div>
 </div>
-{% if next_page %}
-  {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}
-{% endif %}
 {% endblock %}

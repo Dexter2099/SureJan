@@ -1,10 +1,10 @@
+{% url 'feed_list' as feed_url %}
 {% for post in posts %}
-  {% include "core/partials/post_row.html" with post=post %}
+  {% if forloop.last and next_page %}
+    {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&range='|add:range|add:'&page='|add:next_page %}
+  {% else %}
+    {% include "partials/feed_card.html" with post=post %}
+  {% endif %}
 {% empty %}
   <p class="empty">No posts yet. <a href="{% url 'post_submit' %}">Submit Post</a></p>
 {% endfor %}
-{% if next_page %}
-<div class="load-more">
-  <button hx-get="{% url 'feed_list' %}?tab={{ tab }}&range={{ range }}&page={{ next_page }}" hx-target="#feed-list" hx-swap="beforeend" hx-push-url="true" aria-label="Load more posts">Load more</button>
-</div>
-{% endif %}
