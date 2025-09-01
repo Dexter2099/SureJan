@@ -1,18 +1,9 @@
 Change control: If templates affecting this surface change, update this file in the same PR.
 
-# Routes and Params
-
-Authoritative map of core routes and their accepted parameters.
-
-| Route | Path params | Query params | Description |
-|-------|-------------|--------------|-------------|
-| `/` | – | `tab`, `range`, `page` | Home feed |
-| `/r/<slug>/` | `slug` | `tab`, `range`, `page` | Community feed |
-| `/r/<community>/comments/<pk>/<slug>/` | `community`, `pk`, `slug` | – | Post detail + comments |
-| `/p/<pk>/` | `pk` | – | Post detail by id |
-| `/submit/` | – | – | Submit post form |
-| `/mod/astro/` | – | – | Astro alerts for moderators |
-| `/methods/` | – | – | Transparency methods |
-| `/transparency/posts` | – | `page`, `sort` | Flagged posts list |
-| `/mission/` | – | – | Mission page |
-| `/anti-astroturf/` | – | – | Anti-astroturf info |
+Route | Params | Defaults | Notes
+---|---|---|---
+/ | sort, t | sort=hot, t=24h | Front page feed
+/r/<slug> | sort=hot|new|top, t=24h|7d|30d|all | sort=hot, t=24h | Community feed
+/p/<id> | — | — | Post detail; 404 allowed if not found
+/submit | — | — | GET form, POST create
+/methods | — | — | Static info page

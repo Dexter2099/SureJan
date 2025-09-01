@@ -1,67 +1,22 @@
-@import url("{% static 'css/tokens.css' %}");
+/* app.css */
+@import "tokens.css";
 
-/* Global styles */
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-body {
-  font-family: var(--font-base);
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.5;
+html,body{background:var(--color-bg); color:var(--color-text); font-family:var(--font-sans);}
+
+header.header-bar{
+  position:sticky; top:0; z-index:1000;
+  background:var(--color-surface);
+  border-bottom:1px solid #23232a;
+  display:flex; align-items:center; gap:var(--space-4);
+  padding: var(--space-3) var(--space-6);
 }
 
-a { color: var(--color-link); }
-a:visited { color: var(--color-link-visited); }
-a:hover { text-decoration: underline; }
+.header-logo img,
+.site-logo{ display:block; max-height:28px; width:auto; }
 
-/* Header */
-.site-header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-.header-inner {
-  max-width: var(--bp-lg);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3);
-}
-.hdr-left, .hdr-center, .hdr-right { flex: 1; }
-.hdr-center { text-align: center; }
-.hdr-right { text-align: right; }
-.mobile-submit { display: none; }
+.nav-links a{ padding:4px 8px; border-radius:6px; text-decoration:none; }
+.nav-links a[aria-current="page"]{ background:rgba(255,255,255,.06); }
 
-@media (max-width: var(--bp-md)) {
-  .header-inner { flex-wrap: wrap; }
-  .mobile-submit { display: inline-block; }
-}
-
-.site-logo {
-  display: block;
-  max-height: 28px;
-  width: auto;
-}
-
-/* Components */
-.sidebar-cta {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  background: var(--color-surface);
-  text-align: center;
-}
-
-.post-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  background: var(--color-surface);
-  margin-bottom: var(--space-5);
-}
-
-.empty-state {
-  text-align: center;
-  color: var(--color-muted);
-  padding: var(--space-5) 0;
-}
+.sidebar-cta{ background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); }
+.post-card{ background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); margin-bottom:var(--space-5); }
+.empty-state{ color:#a7a7b3; padding:var(--space-6) 0; text-align:center; }
