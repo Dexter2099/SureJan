@@ -55,146 +55,6 @@ a:focus {
   outline-offset: 2px;
 }
 
-/* Header ------------------------------------------------------------- */
-.site-header {
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.header-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 12px;
-}
-
-.site-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.site-logo {
-  height: 108px;
-  width: auto;
-  display: block;
-}
-
-.site-title, h1, .page-title {
-  font-family: var(--brand-font);
-  letter-spacing: 0.25px;
-}
-
-.site-title {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text);
-}
-
-.header-nav {
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.user-info a {
-  color: var(--link);
-}
-
-.tab-bar {
-  display: flex;
-  gap: 4px;
-  padding: 4px 6px;
-  background: var(--panel);
-}
-
-.tab-bar a {
-  padding: 2px 4px;
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-size: 11px;
-}
-
-.tab-bar a:visited {
-  color: var(--muted);
-}
-
-.tab-bar a:hover {
-  text-decoration: underline;
-}
-
-.tab-bar a.active {
-  font-weight: bold;
-  color: var(--text);
-  border-bottom: 2px solid var(--link);
-}
-
-.tab-bar a.active:visited {
-  color: var(--text);
-}
-
-.tab-bar a.active:hover {
-  text-decoration: none;
-}
-
-/* Subreddit bar ------------------------------------------------------ */
-.subreddit-bar {
-  background: #f2f2f2;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.subreddit-bar a {
-  display: inline-block;
-  white-space: nowrap;
-  padding: 4px 6px;
-  color: var(--link);
-}
-
-/* Sort tabs ---------------------------------------------------------- */
-.sort-tabs ul {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 16px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sort-tabs li {
-  display: inline;
-}
-
-.sort-tabs a {
-  text-decoration: none;
-  color: #1a1a1a;
-}
-
-.sort-tabs a.active {
-  font-weight: bold;
-  border-bottom: 2px solid #2b6cb0;
-  padding-bottom: 3px;
-}
-
 /* Layout ------------------------------------------------------------- */
 .layout {
   max-width: 960px;
@@ -423,9 +283,6 @@ hr {
 
 /* Responsive --------------------------------------------------------- */
 @media (max-width: 768px) {
-  .site-logo { height: 24px; }
-  .site-title { display: none; }
-  .header-inner { padding: 6px 10px; }
   .layout {
     flex-direction: column;
   }
@@ -435,9 +292,6 @@ hr {
     width: auto;
   }
 
-  .tab-bar {
-    overflow-x: auto;
-  }
 }
 
 /* Post images: responsive + bounded */
@@ -568,74 +422,9 @@ hr {
 
 .preview-card { margin-top:12px; }
 
-.brand-mission { font-size:12px; margin-left:8px; color:#3366cc; }
-.brand-mission:hover { text-decoration:underline; }
 .mission h1 { font: normal 16px/1.2 Verdana, Arial, sans-serif; margin: 0 0 8px; }
 .mission h2 { font-size:13px; margin:12px 0 6px; }
 .mission h3 { font-size:12px; margin:10px 0 6px; }
 .mission p, .mission li { font-size:12px; }
 .mission .muted { color:#777; font-size:11px; }
 
-/* 3-column header layout */
-.header-3col {
-  max-width: 960px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: auto 1fr auto; /* left | center | right */
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-}
-
-/* Left cluster: logo sits already, mission sits beside it */
-.hdr-left { display: flex; align-items: center; gap: 10px; }
-.brand-mission { font-size:12px; color:#3366cc; }
-.brand-mission:hover { text-decoration: underline; }
-
-/* Center communities */
-.hdr-center {
-  display:flex; justify-content:center; gap:16px;
-  text-transform: uppercase; font-size:12px;
-}
-.hdr-center a { color:#3366cc; }
-.hdr-center a:hover { text-decoration: underline; }
-
-/* Right: user menu sits inline */
-.hdr-right { display:flex; justify-content:flex-end; }
-.hdr-right .user-box a { color:#3366cc; }
-
-/* Mobile */
-@media (max-width: 768px) {
-  .header-3col {
-    grid-template-columns: 1fr auto; /* left + right */
-    grid-template-areas:
-      "left  right"
-      "center center";
-    row-gap: 6px;
-  }
-  .hdr-left  { grid-area: left; }
-  .hdr-right { grid-area: right; }
-  .hdr-center{
-    grid-area: center; justify-content: center; gap: 12px;
-    overflow-x: auto; white-space: nowrap; padding-bottom: 2px;
-  }
-}
-
-/* Bump header link sizes a bit */
-.brand-mission { font-size:14px; margin-left:0; }
-.hdr-center a   { font-size:14px; }
-.hdr-right .user-box,
-.hdr-right .user-box a { font-size:14px; }
-
-/* Keep tap targets comfy without changing layout */
-.hdr-center a,
-.brand-mission,
-.hdr-right .user-box a { line-height: 1.2; padding: 2px 2px; }
-
-/* Mobile: nudge down slightly if needed */
-@media (max-width: 768px) {
-  .brand-mission,
-  .hdr-center a,
-  .hdr-right .user-box,
-  .hdr-right .user-box a { font-size:13px; }
-}

@@ -7,35 +7,11 @@
   --muted: #666;
 }
 
-.container,
-.header-inner {
+.container {
   max-width: var(--maxw);
   margin-left: auto;
   margin-right: auto;
   padding: 0 var(--gutter);
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-}
-
-.hdr-left,
-.hdr-center,
-.hdr-right {
-  flex: 1;
-}
-
-.hdr-center {
-  text-align: center;
-}
-
-.hdr-right {
-  text-align: right;
-}
-
-.mobile-submit {
-  display: none;
 }
 
 .layout,
@@ -52,7 +28,6 @@
   .layout,
   .grid { grid-template-columns: 1fr; }
   .sidebar { grid-column: 1; margin-top: var(--gutter); }
-  .mobile-submit { display: inline-block; }
 }
 
 .post-card {
