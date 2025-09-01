@@ -503,7 +503,7 @@ def submit_post(request):
         form = PostForm()
 
     context = {"form": form}
-    return render(request, "core/post_form.html", context)
+    return render(request, "core/submit_post.html", context)
 
 
 def community(request, slug):
@@ -572,7 +572,7 @@ def submit_post_community(request, slug):
         form = PostForm()
 
     context = {"form": form, "community": community}
-    return render(request, "core/post_form.html", context)
+    return render(request, "core/submit_post.html", context)
 
 
 def post_detail(request, community, pk, slug):
