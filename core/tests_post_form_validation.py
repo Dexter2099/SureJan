@@ -47,3 +47,36 @@ class PostFormValidationTests(TestCase):
             files={"media": image},
         )
         self.assertTrue(form.is_valid())
+
+    def test_link_only_allowed(self):
+        form = PostForm(
+            data={
+                "community": self.community.id,
+                "title": "T",
+                "link": "http://example.com",
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_image_urls_allowed(self):
+        urls = "\n".join(f"http://ex.com/{i}.jpg" for i in range(3))
+        form = PostForm(
+            data={
+                "community": self.community.id,
+                "title": "T",
+                "image_urls": urls,
+                "caption": "C",
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_image_urls_limit(self):
+        urls = "\n".join(f"http://ex.com/{i}.jpg" for i in range(6))
+        form = PostForm(
+            data={
+                "community": self.community.id,
+                "title": "T",
+                "image_urls": urls,
+            }
+        )
+        self.assertFalse(form.is_valid())
