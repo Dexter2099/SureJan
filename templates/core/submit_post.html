@@ -42,7 +42,7 @@
     {{ form.post_type.errors }}
   </div>
 
-  <div class="form-row type-block" id="type-text">
+  <div class="form-row mode-text">
     {{ form.body.label_tag }}
     <div class="editor-container prose">
       {% include "core/partials/editor_toolbar.html" %}
@@ -51,13 +51,13 @@
     {{ form.body.errors }}
   </div>
 
-  <div class="form-row type-block" id="type-link">
+  <div class="form-row mode-link">
     {{ form.content_url.label_tag }}
     {{ form.content_url }}
     {{ form.content_url.errors }}
   </div>
 
-  <div class="form-row type-block" id="type-image">
+  <div class="form-row mode-image">
     {{ form.image.label_tag }}
     {{ form.image }}
     {{ form.image.errors }}
@@ -65,37 +65,18 @@
 
   <div class="form-actions">
     <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
-    <button class="button secondary" type="button"
-            hx-post="{% url 'preview_post' %}"
-            hx-include="closest form"
-            hx-encoding="multipart/form-data"
-            hx-target="#preview-panel" hx-swap="innerHTML">Preview</button>
+    <button class="button secondary" type="button" id="preview-btn">Preview</button>
     <button class="button secondary" type="submit" name="save_as_draft" value="1">Save Draft</button>
   </div>
 </form>
 
 <div id="preview-panel"></div>
 
-<script>
-  (function() {
-    const blocks = {text: "#type-text", link: "#type-link", image: "#type-image"};
-    function show(v){
-      for (const k in blocks){
-        const el = document.querySelector(blocks[k]);
-        if (el) el.style.display = (k === v) ? "" : "none";
-      }
-    }
-    const inputs = document.querySelectorAll('input[name="{{ form.post_type.html_name }}"]');
-    inputs.forEach(inp => {
-      if (inp.checked) show(inp.value);
-      inp.addEventListener('change', e => show(e.target.value));
-    });
-  })();
-</script>
 {% endblock %}
 
 {% block scripts %}
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
+<script src="{% static 'js/submit.js' %}" defer></script>
 {% endblock %}
 
