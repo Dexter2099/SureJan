@@ -542,6 +542,32 @@ hr {
 .form-actions .button { padding:8px 12px; border:1px solid #ccc; background:#eee; cursor:pointer; }
 .form-actions a { margin-left:8px; color:#3366cc; }
 
+.page.submit .form-group { margin-bottom:12px; }
+.help { display:block; margin-top:4px; font-size:11px; color:var(--muted); }
+.error { display:block; margin-top:4px; font-size:11px; color:#c00; }
+
+.segmented { display:flex; border-bottom:1px solid var(--border); margin-bottom:12px; }
+.segmented input { display:none; }
+.segmented label {
+  padding:6px 12px;
+  margin-right:4px;
+  border:1px solid var(--border);
+  border-bottom:none;
+  background:var(--panel);
+  cursor:pointer;
+}
+.segmented input:checked + label {
+  background:var(--bg);
+  border-color:var(--border);
+  border-bottom:1px solid var(--bg);
+  font-weight:bold;
+}
+
+.mode { display:none; }
+.mode.active { display:block; }
+
+.preview-card { margin-top:12px; }
+
 .brand-mission { font-size:12px; margin-left:8px; color:#3366cc; }
 .brand-mission:hover { text-decoration:underline; }
 .mission h1 { font: normal 16px/1.2 Verdana, Arial, sans-serif; margin: 0 0 8px; }
