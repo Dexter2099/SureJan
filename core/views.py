@@ -460,8 +460,12 @@ def feed_list(request):
 
 @require_GET
 def home(request):
-    """Homepage uses the feed list with default parameters."""
-    return feed_list(request)
+    tab = request.GET.get("tab", "hot")
+    rng = request.GET.get("range", "24h")
+    qs = Post.objects.select_related("community", "author").order_by("-created_at")
+    # TODO: apply real tab/range logic later; this is a safe default
+    page = Paginator(qs, 25).get_page(request.GET.get("page") or 1)
+    return render(request, "core/home.html", {"page": page, "tab": tab, "range": rng})
 
 
 @ratelimit(key="user", rate="5/m", method=["POST"], block=False)

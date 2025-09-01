@@ -1,13 +1,32 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
 {% block content %}
-  <h1>SureJan</h1>
-  {% include "partials/sort_tabs.html" with active_sort=sort sort_tabs=sort_tabs %}
-  <div class="feed">
-    <div id="feed-list">
-      {% include "core/partials/post_list.html" with posts=posts %}
-    </div>
-  </div>
-  {% if next_page %}
-    {% include "core/partials/load_more.html" with next_url=request.path|add:'?page='|add:next_page|add:sort_query %}
-  {% endif %}
+  <section aria-labelledby="feed-heading">
+    <h1 id="feed-heading" class="sr-only">Feed</h1>
+
+    {% for post in page.object_list %}
+      <article class="card">
+        <div class="meta">
+          r/{{ post.community.slug }} · u/{{ post.author.username }} · {{ post.created_at|timesince }} ago
+        </div>
+        <h2 class="title">
+          <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.title }}</a>
+        </h2>
+        {% if post.body %}
+          <p class="preview">{{ post.body|truncatechars:220 }}</p>
+        {% endif %}
+        <div class="actions">
+          <a href="{% url 'post_detail' post.community.slug post.pk post.title|slugify %}">{{ post.comment_count }} comments</a>
+        </div>
+      </article>
+    {% empty %}
+      <div class="card empty">No posts yet. <a href="{% url 'post_submit' %}">Be the first to post</a>.</div>
+    {% endfor %}
+
+    {% if page.has_next %}
+      <p style="text-align:center;margin:16px 0;">
+        <a class="btn" href="?page={{ page.next_page_number }}&tab={{ tab }}&range={{ range }}">Load more</a>
+      </p>
+    {% endif %}
+  </section>
 {% endblock %}
+
