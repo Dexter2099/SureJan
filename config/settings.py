@@ -292,7 +292,11 @@ LOGOUT_REDIRECT_URL = "/"
 # -----------------------------------------------------------------------------
 # Astroturf detection constants
 # -----------------------------------------------------------------------------
-ASTROTURF_WATCH = True
+ASTROTURF_WATCH = os.environ.get("ASTROTURF_WATCH", "1") in (
+    "1",
+    "true",
+    "True",
+)
 ASTRO_WINDOW_S = 300
 ASTRO_BUCKET_S = 30
 ASTRO_BASELINE_LOOKBACK_D = 30
