@@ -213,7 +213,7 @@ a:focus {
 }
 
 /* Thing (post) card -------------------------------------------------- */
-.post-row {
+.post-card {
   display: flex;
   background: var(--panel);
   border: 1px solid var(--border);
