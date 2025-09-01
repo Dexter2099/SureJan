@@ -88,6 +88,17 @@ class Community(models.Model):
         return f"c/{self.slug}"
 
 
+class Embed(models.Model):
+    """Stores sanitized embed HTML for a given media URL."""
+
+    url = models.URLField()
+    html = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:  # pragma: no cover - simple representation
+        return self.url
+
+
 class Post(models.Model):
     community = models.ForeignKey(
         Community, on_delete=models.CASCADE, related_name="posts"
@@ -102,6 +113,9 @@ class Post(models.Model):
     body = models.TextField(blank=True)
     content_url = models.URLField(blank=True)
     embed_html = models.TextField(blank=True)
+    embed = models.ForeignKey(
+        "Embed", null=True, blank=True, on_delete=models.SET_NULL, related_name="posts"
+    )
     link_domain = models.CharField(max_length=120, blank=True)
     image = models.ImageField(
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
@@ -204,6 +218,18 @@ class Post(models.Model):
         self.save()
 
 
+class PostImageLink(models.Model):
+    """External image URLs associated with a post (max five)."""
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="image_links")
+    url = models.URLField()
+
+    def save(self, *args, **kwargs):
+        if not self.pk and self.post.image_links.count() >= 5:
+            raise ValidationError("Maximum of 5 images per post")
+        super().save(*args, **kwargs)
+
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -274,6 +300,18 @@ def get_points(user):
     return getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0
 
 
+class RateLimitCounter(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="rate_limits"
+    )
+    action = models.CharField(max_length=32)
+    count = models.PositiveIntegerField(default=0)
+    period_start = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ("user", "action")
+
+
 class Report(models.Model):
     reporter = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reports"
@@ -325,6 +363,24 @@ class CommunityBaseline(models.Model):
     p95_votes_15m = models.FloatField(default=0)
     p10_comments_per_100_upvotes = models.FloatField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class AstroScore(models.Model):
+    post = models.OneToOneField(
+        Post, on_delete=models.CASCADE, related_name="astro_score"
+    )
+    community = models.ForeignKey(
+        Community, on_delete=models.CASCADE, related_name="astro_scores"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="astro_scores"
+    )
+    rate5 = models.IntegerField(default=0)
+    rate15 = models.IntegerField(default=0)
+    early_new_share = models.FloatField(default=0)
+    discuss_ratio = models.FloatField(default=0)
+    severity = models.FloatField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 # -- Vote side effects ------------------------------------------------------
