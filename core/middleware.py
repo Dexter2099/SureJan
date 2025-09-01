@@ -1,5 +1,7 @@
 from django.conf import settings
-from django.http import HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden
+
+from .rate_limit import check_rate_limit
 
 
 def _client_ip(request):
@@ -32,4 +34,33 @@ class AdminIPAllowlistMiddleware:
             ip = _client_ip(request)
             if ip not in allowlist:
                 return HttpResponseForbidden("Forbidden")
+        return self.get_response(request)
+
+
+class ActionRateLimitMiddleware:
+    """Rate limit posts/day, comments/min, and votes/min."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.limits = getattr(settings, "RATE_LIMITS", {})
+
+    def __call__(self, request):
+        if request.method == "POST" and request.user.is_authenticated:
+            path = request.path
+            action = None
+            if path.startswith("/submit/"):
+                action = "post"
+            elif path.startswith("/comment") or path.startswith("/comments"):
+                action = "comment"
+            elif path.startswith("/vote") or path.startswith("/comments/vote"):
+                action = "vote"
+            if action and action in self.limits:
+                cfg = self.limits[action]
+                limited, retry_after = check_rate_limit(
+                    request.user, action, cfg.get("limit"), cfg.get("window")
+                )
+                if limited:
+                    resp = HttpResponse("Rate limit exceeded", status=429)
+                    resp.headers["Retry-After"] = str(retry_after)
+                    return resp
         return self.get_response(request)

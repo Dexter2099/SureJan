@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from urllib.parse import quote, urlparse
 
+from django.conf import settings
+
 import bleach
 import requests
 
@@ -22,9 +24,14 @@ def fetch_oembed(url: str) -> dict:
         "youtube.com": "https://www.youtube.com/oembed?format=json&url=",
         "youtu.be": "https://www.youtube.com/oembed?format=json&url=",
         "rumble.com": "https://rumble.com/api/oembed.json?url=",
-        "twitter.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
-        "x.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
     }
+    if settings.ENABLE_TWITTER_EMBEDS:
+        providers.update(
+            {
+                "twitter.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
+                "x.com": "https://publish.twitter.com/oembed?omit_script=1&url=",
+            }
+        )
 
     parsed = urlparse(url)
     domain = parsed.netloc
