@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F
+from django.db.models.functions import Lower
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
@@ -81,7 +82,9 @@ class Community(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["name"], name="uniq_community_name"),
+            models.UniqueConstraint(
+                Lower("name"), name="uniq_community_name_ci"
+            ),
         ]
 
     def __str__(self) -> str:

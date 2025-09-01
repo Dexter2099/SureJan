@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -7,6 +8,7 @@ from .models import Community
 
 class CommunityCreateTests(TestCase):
     def setUp(self):
+        cache.clear()
         user_model = get_user_model()
         self.staff = user_model.objects.create_user("staff", password="pwd", is_staff=True)
         self.user = user_model.objects.create_user("user", password="pwd")
@@ -55,3 +57,45 @@ class CommunityCreateTests(TestCase):
             self.url, {"slug": "c6", "name": "C6", "title": "t"}
         )
         self.assertEqual(resp.status_code, 429)
+
+    def test_e_name_case_insensitive(self):
+        Community.objects.create(
+            slug="brisbane", name="Brisbane", title="Brisbane", created_by=self.staff
+        )
+        self.client.login(username="staff", password="pwd")
+        resp = self.client.post(
+            self.url,
+            {
+                "slug": "brisbane2",
+                "name": "brisbane",
+                "title": "Brisbane 2",
+                "description": "",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertFormError(
+            resp.context["form"],
+            "name",
+            "Community with this name already exists.",
+        )
+
+    def test_f_name_whitespace_trimmed(self):
+        Community.objects.create(
+            slug="brisbane", name="Brisbane", title="Brisbane", created_by=self.staff
+        )
+        self.client.login(username="staff", password="pwd")
+        resp = self.client.post(
+            self.url,
+            {
+                "slug": "brisbane2",
+                "name": " Brisbane ",
+                "title": "Brisbane 2",
+                "description": "",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertFormError(
+            resp.context["form"],
+            "name",
+            "Community with this name already exists.",
+        )

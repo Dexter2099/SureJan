@@ -110,3 +110,13 @@ class CommunityCreateForm(forms.ModelForm):
         if Community.objects.filter(slug=slug).exists():
             raise forms.ValidationError("Community with this slug already exists.")
         return slug
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name")
+        if name is not None:
+            name = name.strip()
+            if Community.objects.filter(name__iexact=name).exists():
+                self.add_error("name", "Community with this name already exists.")
+            cleaned_data["name"] = name
+        return cleaned_data
