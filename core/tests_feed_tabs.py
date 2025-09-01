@@ -36,11 +36,11 @@ class FeedTabOrderTests(TestCase):
         self.new.refresh_from_db()
 
     def _first_post(self, tab):
-        resp = self.client.get(reverse("home") + f"?sort={tab}")
+        resp = self.client.get(reverse("home"), {"tab": tab, "range": "24h"}, HTTP_HX_REQUEST="true")
         return resp.context["posts"][0]
 
-    def test_best_order(self):
-        self.assertEqual(self._first_post("best").pk, self.old.pk)
+    def test_hot_order(self):
+        self.assertEqual(self._first_post("hot").pk, self.old.pk)
 
     def test_new_order(self):
         self.assertEqual(self._first_post("new").pk, self.new.pk)

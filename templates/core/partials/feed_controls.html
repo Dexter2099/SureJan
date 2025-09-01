@@ -1,14 +1,14 @@
-<nav id="feed-controls" class="feed-controls" hx-target="#feed-list">
+<nav id="feed-controls" class="feed-controls" hx-target="#feed-list" aria-label="Feed controls">
   <div class="tabs">
-    <a href="?tab=hot&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=hot&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'hot' %}active{% endif %}">HOT</a>
-    <a href="?tab=new&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=new&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'new' %}active{% endif %}">NEW</a>
-    <a href="?tab=rising&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=rising&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'rising' %}active{% endif %}">RISING</a>
-    <a href="?tab=controversial&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=controversial&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'controversial' %}active{% endif %}">CONTROVERSIAL</a>
-    <a href="?tab=top&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=top&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'top' %}active{% endif %}">TOP</a>
+    <a href="?tab=hot&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=hot&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'hot' %}active{% endif %}" aria-label="Show hot posts">HOT</a>
+    <a href="?tab=new&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=new&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'new' %}active{% endif %}" aria-label="Show new posts">NEW</a>
+    <a href="?tab=rising&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=rising&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'rising' %}active{% endif %}" aria-label="Show rising posts">RISING</a>
+    <a href="?tab=controversial&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=controversial&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'controversial' %}active{% endif %}" aria-label="Show controversial posts">CONTROVERSIAL</a>
+    <a href="?tab=top&range={{ range }}" hx-get="{% url 'feed_list' %}?tab=top&range={{ range }}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'top' %}active{% endif %}" aria-label="Show top posts">TOP</a>
   </div>
   <div class="sort">
     <label for="feed-range">Sort by</label>
-    <select id="feed-range" name="range" hx-get="{% url 'feed_list' %}?tab={{ tab }}" hx-target="#feed-list" hx-trigger="change" hx-push-url="true">
+    <select id="feed-range" name="range" hx-get="{% url 'feed_list' %}?tab={{ tab }}" hx-target="#feed-list" hx-trigger="change" hx-push-url="true" aria-label="Select time range">
       <option value="24h" {% if range == '24h' %}selected{% endif %}>24h</option>
       <option value="week" {% if range == 'week' %}selected{% endif %}>Week</option>
       <option value="month" {% if range == 'month' %}selected{% endif %}>Month</option>

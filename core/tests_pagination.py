@@ -22,15 +22,15 @@ class PaginationTests(TestCase):
             )
 
     def test_first_page_has_next(self):
-        resp = self.client.get(reverse("home"))
+        resp = self.client.get(reverse("feed_list"), HTTP_HX_REQUEST="true")
         self.assertEqual(len(resp.context["posts"]), PAGE_SIZE)
         self.assertEqual(resp.context["next_page"], 2)
 
     def test_load_more_htmx(self):
-        resp1 = self.client.get(reverse("home"))
+        resp1 = self.client.get(reverse("feed_list"), HTTP_HX_REQUEST="true")
         next_page = resp1.context["next_page"]
         resp2 = self.client.get(
-            reverse("home") + f"?page={next_page}", HTTP_HX_REQUEST="true"
+            reverse("feed_list") + f"?page={next_page}", HTTP_HX_REQUEST="true"
         )
         body = resp2.content.decode()
         self.assertNotIn("<html", body)
@@ -40,5 +40,5 @@ class PaginationTests(TestCase):
         self.assertNotIn("Post 25", body)
 
     def test_last_page_no_next(self):
-        resp = self.client.get(reverse("home") + "?page=3")
+        resp = self.client.get(reverse("feed_list") + "?page=3", HTTP_HX_REQUEST="true")
         self.assertIsNone(resp.context.get("next_page"))

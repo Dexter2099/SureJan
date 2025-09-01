@@ -7,7 +7,7 @@
   <h1>Submit Post</h1>
   <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false">
     {% csrf_token %}
-    {{ form.non_field_errors }}
+    <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">
       {{ form.community.label_tag }} {{ form.community }}
     </div>
@@ -38,23 +38,23 @@
       {{ form.link.label_tag }} {{ form.link }}
     </div>
     <div class="form-actions desktop-actions">
-      <button type="button" class="button secondary" id="preview-btn"
+      <button type="button" class="button secondary" id="preview-btn" aria-label="Preview post"
               hx-post="{% url 'preview_markdown' %}"
               hx-include="[name='body'], [name='caption']"
               hx-target="#preview" hx-swap="innerHTML">Preview</button>
-      <button type="submit" class="button primary" id="post-btn" disabled>Post</button>
-      <button type="submit" name="save_draft" value="1" class="button secondary">Save draft</button>
-      <a href="{% url 'home' %}" class="button secondary">Cancel</a>
+      <button type="submit" class="button primary" id="post-btn" disabled aria-label="Submit post">Post</button>
+      <button type="submit" name="save_draft" value="1" class="button secondary" aria-label="Save draft">Save draft</button>
+      <a href="{% url 'home' %}" class="button secondary" aria-label="Cancel and return">Cancel</a>
     </div>
   </form>
-  <div id="preview"></div>
+  <div id="preview" aria-live="polite"></div>
   <p><a href="{% url 'anti_astroturf' %}">Anti-Astroturf</a></p>
 </div>
 
 <div class="sticky-bar mobile-actions">
   <button type="button" class="button secondary" hx-post="{% url 'preview_markdown' %}"
-          hx-include="[name='body'], [name='caption']" hx-target="#preview" hx-swap="innerHTML">Preview</button>
-  <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled>Post</button>
+          hx-include="[name='body'], [name='caption']" hx-target="#preview" hx-swap="innerHTML" aria-label="Preview post">Preview</button>
+  <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled aria-label="Submit post">Post</button>
 </div>
 {% endblock %}
 
