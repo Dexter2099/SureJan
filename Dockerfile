@@ -5,13 +5,7 @@ ENV BUILD_REV=${BUILD_REV}
 
 # Prevent .pyc files and enable unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/usr/local/bin:$PATH"
-
-# System deps (lean)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      build-essential curl \
-    && rm -rf /var/lib/apt/lists/*
+    PYTHONUNBUFFERED=1
 
 # ---------- App setup ----------
 WORKDIR /app
