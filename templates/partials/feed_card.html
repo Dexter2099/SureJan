@@ -1,4 +1,4 @@
-{% load url_domain %}
+{% load url_domain astro %}
 <article class="card feed-card" id="post-{{ post.pk }}"{% if load_more_url %} hx-get="{{ load_more_url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-target="this" hx-push-url="true"{% endif %}>
   <div class="vote">
     <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
@@ -30,6 +30,15 @@
       <li><a href="#" class="copy-link" data-link="{% url 'post_detail' post.community.slug post.pk post.slug %}">share</a></li>
       <li><a href="#">save</a></li>
     </ul>
-    <span class="astro-chip"></span>
+    {% if post.astro_score %}
+    <details class="astro-why">
+      <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>
+      <ul>
+        <li>Vote rate 15m: {{ post.astro_score.rate15 }}</li>
+        <li>Early new-account share: {{ post.astro_score.early_new_share|floatformat:2 }}</li>
+        <li>Discuss ratio: {{ post.astro_score.discuss_ratio|floatformat:2 }}</li>
+      </ul>
+    </details>
+    {% endif %}
   </div>
 </article>

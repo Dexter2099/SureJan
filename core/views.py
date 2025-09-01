@@ -142,6 +142,10 @@ def transparency_methods(request):
         "ASTRO_EARLY_VOTES_N": settings.ASTRO_EARLY_VOTES_N,
         "ASTRO_MIN_EARLY_VOTES": settings.ASTRO_MIN_EARLY_VOTES,
         "ASTRO_EARLY_SHARE_RED_PCT": int(settings.ASTRO_EARLY_SHARE_RED * 100),
+        "ASTRO_BAND_AMBER": settings.ASTRO_BAND_AMBER,
+        "ASTRO_BAND_RED": settings.ASTRO_BAND_RED,
+        "ASTRO_SLOWMODE_THRESHOLD": settings.ASTRO_SLOWMODE_THRESHOLD,
+        "ASTRO_SLOWMODE_RATE": settings.ASTRO_SLOWMODE_RATE,
     }
     return render(request, "core/transparency_methods.html", ctx)
 
@@ -735,6 +739,11 @@ def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
+    post = get_object_or_404(Post, pk=post_id)
+    if getattr(post, 'astro_score', None) and post.astro_score.score >= settings.ASTRO_SLOWMODE_THRESHOLD:
+        if limit_or_429(request, f'astro_slow_{post.pk}', settings.ASTRO_SLOWMODE_RATE):
+            return render(request, '429.html', status=429)
+
 
     if is_new_user(request.user):
         if limit_or_429(request, "comment_new_user", "3/m"):
@@ -743,7 +752,6 @@ def comment_reply(request, post_id):
         if limit_or_429(request, "comment_established", "10/m"):
             return render(request, "429.html", status=429)
 
-    post = get_object_or_404(Post, pk=post_id)
 
     form = CommentForm(request.POST)
     if not form.is_valid():
@@ -851,18 +859,19 @@ def comment_create(request):
 
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-
+    post_id = request.POST.get("post")
+    if not post_id:
+        return HttpResponseBadRequest("Missing post")
+    post = get_object_or_404(Post, pk=post_id)
+    if getattr(post, 'astro_score', None) and post.astro_score.score >= settings.ASTRO_SLOWMODE_THRESHOLD:
+        if limit_or_429(request, f'astro_slow_{post.pk}', settings.ASTRO_SLOWMODE_RATE):
+            return render(request, '429.html', status=429)
     if is_new_user(request.user):
         if limit_or_429(request, "comment_new_user", "3/m"):
             return render(request, "429.html", status=429)
     else:
         if limit_or_429(request, "comment_established", "10/m"):
             return render(request, "429.html", status=429)
-
-    post_id = request.POST.get("post")
-    if not post_id:
-        return HttpResponseBadRequest("Missing post")
-    post = get_object_or_404(Post, pk=post_id)
 
     form = CommentForm(request.POST)
     if not form.is_valid():
