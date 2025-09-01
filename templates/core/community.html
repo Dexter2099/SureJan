@@ -3,7 +3,7 @@
 <h1>{{ community.title }}</h1>
 <p>{{ community.description }}</p>
 {% if request.user.is_authenticated %}
-  <p><a class="button" href="{% url 'submit_post' community.slug %}" hx-boost="false">Submit</a></p>
+  <p><a class="button" href="{% url 'post_submit' %}" hx-boost="false">Submit</a></p>
 {% endif %}
 {% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
 <div class="feed">

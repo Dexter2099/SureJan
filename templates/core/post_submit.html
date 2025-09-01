@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="submit-wrapper">
+  <a href="{% url 'home' %}">← Back to feed</a>
+  <h1>Submit Post</h1>
+  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-row">
+      {{ form.community.label_tag }} {{ form.community }}
+    </div>
+    <div class="form-row">
+      {{ form.title.label_tag }} {{ form.title }}
+    </div>
+    <div class="form-row">
+      {{ form.heading.label_tag }} {{ form.heading }}
+    </div>
+    <div class="form-row">
+      {{ form.body.label_tag }}
+      <div class="editor-container prose">
+        {% include "core/partials/editor_toolbar.html" %}
+        {{ form.body }}
+      </div>
+    </div>
+    <div class="form-row">
+      {{ form.media.label_tag }} {{ form.media }}
+    </div>
+    <div class="form-row">
+      {{ form.caption.label_tag }}
+      <div class="editor-container prose">
+        {% include "core/partials/editor_toolbar.html" %}
+        {{ form.caption }}
+      </div>
+    </div>
+    <div class="form-row">
+      {{ form.link.label_tag }} {{ form.link }}
+    </div>
+    <div class="form-actions desktop-actions">
+      <button type="button" class="button secondary" id="preview-btn"
+              hx-post="{% url 'preview_markdown' %}"
+              hx-include="[name='body'], [name='caption']"
+              hx-target="#preview" hx-swap="innerHTML">Preview</button>
+      <button type="submit" class="button primary" id="post-btn" disabled>Post</button>
+      <button type="submit" name="save_draft" value="1" class="button secondary">Save draft</button>
+      <a href="{% url 'home' %}" class="button secondary">Cancel</a>
+    </div>
+  </form>
+  <div id="preview"></div>
+  <p><a href="{% url 'anti_astroturf' %}">Anti-Astroturf</a></p>
+</div>
+
+<div class="sticky-bar mobile-actions">
+  <button type="button" class="button secondary" hx-post="{% url 'preview_markdown' %}"
+          hx-include="[name='body'], [name='caption']" hx-target="#preview" hx-swap="innerHTML">Preview</button>
+  <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled>Post</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/editor.js' %}" defer></script>
+<script>
+function validatePost(){
+  const title=document.getElementById('id_title').value.trim();
+  const body=document.getElementById('id_body').value.trim();
+  const media=document.getElementById('id_media').value;
+  const buttons=document.querySelectorAll('#post-btn,#post-btn-mobile');
+  const valid=title && (body || media);
+  buttons.forEach(btn=>btn.disabled=!valid);
+}
+document.addEventListener('input', validatePost);
+</script>
+{% endblock %}

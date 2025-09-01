@@ -9,8 +9,8 @@
                 <button type="button" class="tab tab-write active">Write</button>
                 <button type="button"
                         class="tab tab-preview"
-                        hx-post="{% url 'preview' %}"
-                        hx-vals="js:{text: this.closest('.editor-container').querySelector('textarea').value}"
+                        hx-post="{% url 'preview_markdown' %}"
+                        hx-vals="js:{body: this.closest('.editor-container').querySelector('textarea').value}"
                         hx-target="#preview-{{ parent.pk }}"
                         hx-swap="innerHTML">Preview</button>
             </div>
