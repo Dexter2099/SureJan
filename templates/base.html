@@ -16,7 +16,7 @@
   </head>
   <body>
     <header class="site-header">
-      <div class="header-inner header-3col">
+      <div class="header-inner">
 
         <!-- Left: Logo + Our Mission -->
         <div class="hdr-left">
@@ -24,16 +24,19 @@
           <a href="{% url 'mission' %}" class="brand-mission" hx-boost="false">Our Mission</a>
         </div>
 
-        <!-- Center: NEWS / BRISBANE -->
-        <nav class="hdr-center" aria-label="Communities">
-          <a href="{% url 'community' 'news' %}">NEWS</a>
-          <a href="{% url 'community' 'brisbane' %}">BRISBANE</a>
+        <!-- Center: Sort tabs -->
+        <nav class="hdr-center" aria-label="Sort options">
+          <a href="{{ request.path }}?sort=hot">Hot</a>
+          <a href="{{ request.path }}?sort=new">New</a>
+          <a href="{{ request.path }}?sort=top">Top</a>
         </nav>
 
         <!-- Right: Login/Register or username menu -->
         <div class="hdr-right">
           {% include "partials/user_box.html" %}
         </div>
+
+        <a href="{% url 'post_submit' %}" class="mobile-submit" aria-label="Submit Post">Submit Post</a>
 
       </div>
     </header>
