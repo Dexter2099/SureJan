@@ -1,0 +1,50 @@
+name: UI Contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify guard docs exist
+        run: |
+          for doc in docs/UI-contract.md docs/Design-Tokens.md; do
+            if [ ! -s "$doc" ]; then
+              echo "Missing contract doc: $doc"
+              exit 1
+            fi
+          done
+
+      - name: Verify design tokens are declared
+        run: |
+          tokens=(--maxw --feed --side --g --s1 --s2 --s3 --bg --panel --border --text --muted --link --link-visited --accent --accent-down --brand-font)
+          for token in "${tokens[@]}"; do
+            if ! grep -R "$token" static/css >/dev/null; then
+              echo "Design token $token not found"
+              exit 1
+            fi
+          done
+
+      - name: Check for stray stylesheet links
+        run: |
+          if grep -R "<link rel=\"stylesheet\"" -n --exclude=templates/core/base.html --exclude-dir=.venv --exclude-dir=node_modules templates; then
+            echo "Stray <link rel=\"stylesheet\"> tags detected outside core/base.html"
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -q
