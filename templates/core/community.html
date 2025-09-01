@@ -1,14 +1,24 @@
 {% extends "core/base.html" %}
 {% block content %}
-<h1>{{ community.title }}</h1>
-<p>{{ community.description }}</p>
-{% if request.user.is_authenticated %}
-  <p><a class="button" href="{% url 'post_submit' %}" hx-boost="false">Submit</a></p>
-{% endif %}
-{% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
-  <div class="feed">
-    <div id="feed-list">
-    {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
+<div class="shell">
+  <div class="layout-grid">
+    <main class="feed-col">
+      <h1>{{ community.title }}</h1>
+      <p>{{ community.description }}</p>
+      {% if request.user.is_authenticated %}
+        <p><a class="button" href="{% url 'post_submit' %}" hx-boost="false">Submit</a></p>
+      {% endif %}
+      {% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
+      <div class="feed">
+        <div id="feed-list">
+          {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
+        </div>
+      </div>
+    </main>
+    <div class="gutter" aria-hidden="true"></div>
+    <aside class="sidebar-col">
+      {% include "core/partials/sidebar_minimal.html" %}
+    </aside>
   </div>
 </div>
 {% endblock %}
