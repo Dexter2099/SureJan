@@ -1,37 +1,56 @@
-{% load static %}
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}SureJan{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    {% block head_extra %}{% endblock %}
-  </head>
-  <body>
-    {% include 'core/partials/header.html' %}
-    {% block subnav %}
-      {% include "core/partials/feed_controls.html" %}
-    {% endblock %}
-    <main id="feed-root">
-      <section class="main" id="content">
-        {% block content %}{% endblock %}
-      </section>
-      <aside id="right-gutter">
-        {% block sidebar %}
-          {% include 'core/partials/sidebar_minimal.html' %}
-        {% endblock %}
-      </aside>
-    </main>
-    <footer class="site-footer">
-      <div class="container" style="text-align:center;">
-        <a href="{% url 'terms' %}" aria-label="Terms">Terms</a>
-        &middot;
-        <a href="{% url 'privacy' %}" aria-label="Privacy">Privacy</a>
-        &middot;
-        <a href="{% url 'rules' %}" aria-label="Rules">Rules</a>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}SureJan{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <a class="skip" href="#feed-root">Skip to content</a>
+
+  {% include 'core/partials/header.html' %}
+
+  <div class="container">
+    <!-- Sub-nav row -->
+    <div class="subnav" role="navigation" aria-label="Feed controls">
+      <div class="subnav-left">
+        {% include 'core/partials/feed_controls.html' %}
       </div>
+      <div class="subnav-right">
+        <label for="feed-range" class="sr-only">Sort by</label>
+        <select id="feed-range" name="range"
+                hx-get="{% url 'feed_list' %}"
+                hx-include="#feed-range"
+                hx-vals='js:{tab: new URLSearchParams(location.search).get("tab") || "hot"}'
+                hx-target="#feed-root"
+                hx-push-url="true">
+          <option value="24h">Past 24h</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+          <option value="year">Year</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Two-column grid -->
+    <div class="grid">
+      <main id="feed-root" class="feed" role="main">
+        {% block content %}{% endblock %}
+      </main>
+
+      <aside id="right-gutter" class="sidebar" role="complementary" aria-label="Sidebar">
+        {% include 'core/partials/sidebar_minimal.html' %}
+      </aside>
+    </div>
+
+    <footer class="footer">
+      <a href="{% url 'terms' %}">Terms</a> ·
+      <a href="{% url 'privacy' %}">Privacy</a> ·
+      <a href="{% url 'rules' %}">Rules</a>
     </footer>
-    {% block scripts %}{% endblock %}
-  </body>
+  </div>
+</body>
 </html>
