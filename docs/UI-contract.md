@@ -64,8 +64,7 @@
 +
 +## Test selectors (must exist)
 +- Feed: each post card root has `data-testid="post-card"`
-+- Sidebar CTA: `data-testid="sidebar-submit"`
-+- Anti-Astro link: `data-testid="sidebar-astro"`
++- Sidebar CTA block: `data-testid="sidebar-cta"`
 +- Submit form: `data-testid="submit-form"`
 +
 +## Change control

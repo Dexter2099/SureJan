@@ -36,9 +36,8 @@ class Command(BaseCommand):
             self._resolve(self.SUBMIT_NAMES, "submit"), HTTP_HOST="localhost"
         ).content.decode()
 
-        for tid in ("sidebar-submit", "sidebar-astro"):
-            if not self._has(home_html, tid):
-                missing.append(f"✗ missing data-testid={tid} on Home")
+        if not self._has(home_html, "sidebar-cta"):
+            missing.append("✗ missing data-testid=sidebar-cta on Home")
         if not self._has(home_html, "post-card"):
             missing.append("✗ missing data-testid=post-card on Home")
         if not self._has(submit_html, "submit-form"):
