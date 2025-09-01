@@ -3,7 +3,9 @@
   {% if post.heading %}
   <h3 class="post-heading">{{ post.heading }}</h3>
   {% endif %}
-  {% if post.embed_html %}
+  {% if post.image %}
+  <div class="post-image"><img src="{{ post.image.url }}" loading="lazy" decoding="async" alt=""></div>
+  {% elif post.embed_html %}
   <div class="post-embed">{{ post.embed_html|safe }}</div>
   {% elif post.content_url %}
   <div class="link-card"><a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.link_domain }}</a></div>
