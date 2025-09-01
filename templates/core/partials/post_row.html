@@ -1,10 +1,5 @@
-{% load url_domain %}
-<article class="post-row" id="post-{{ post.pk }}" data-testid="post-card">
-  <div class="vote">
-    <button hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
-    <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
-    <button hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
-  </div>
+{% load url_domain astro_filters %}
+<article class="post-card" id="post-{{ post.pk }}" data-testid="post-card">
   {% if post.image_thumb or post.image %}
   <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="thumb">
     {% if post.image_thumb %}
@@ -14,26 +9,39 @@
     {% endif %}
   </a>
   {% endif %}
-  <div class="entry">
-    <div class="meta">
-      <a href="{% url 'community' post.community.slug %}">/r/{{ post.community.slug }}</a>
-      &middot;
-      <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
-      &middot;
-      <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} ago</time>
-    </div>
-    <h3 class="post-title"><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}">{{ post.title }}</a></h3>
-    {% if post.body %}
-    <p class="post-excerpt">{{ post.body|striptags|truncatechars:200 }}</p>
-    {% endif %}
-    {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
-    {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
-    <ul class="actions">
-      <li><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a></li>
-      <li><a href="#" class="copy-link" data-link="{% url 'post_detail' post.community.slug post.pk post.slug %}">share</a></li>
-      <li><a href="#">save</a></li>
-    </ul>
-    <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="read-more">Read more</a>
-    {% include "core/partials/mod_controls.html" with post=post %}
+  <div class="post-meta">
+    <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
+    •
+    <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
+    •
+    <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }}</time>
   </div>
+  <h2 class="post-title line-clamp"><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}">{{ post.title }}</a></h2>
+  {% if post.body %}
+  <p class="post-excerpt">{{ post.body|striptags|truncatechars:200 }}</p>
+  {% endif %}
+  {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
+  {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
+  <div class="post-actions">
+    <div class="vote">
+      <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
+      <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
+      <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+    </div>
+    <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a>
+    {% if post.astro_score %}
+    <details class="astro-why">
+      <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>
+      <ul>
+        <li>Vote rate 15m: {{ post.astro_score.rate15 }}</li>
+        <li>Early new-account share: {{ post.astro_score.early_new_share|floatformat:2 }}</li>
+        <li>Discuss ratio: {{ post.astro_score.discuss_ratio|floatformat:2 }}</li>
+      </ul>
+    </details>
+    {% endif %}
+  </div>
+  {% if post.body %}
+  <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="read-more">Read more</a>
+  {% endif %}
+  {% include "core/partials/mod_controls.html" with post=post %}
 </article>

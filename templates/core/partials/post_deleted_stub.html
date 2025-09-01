@@ -1,9 +1,9 @@
 <!-- stub for deleted posts -->
-<article id="post-{{ post.pk }}" class="post-row">
+<article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   <div class="vote"></div>
   <div class="post-body">
     <h2><em>[deleted]</em></h2>
-    <div class="meta">in r/{{ post.community.slug }}</div>
+    <div class="post-meta">in r/{{ post.community.slug }}</div>
   </div>
 </article>
 
