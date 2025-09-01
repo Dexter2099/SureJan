@@ -10,9 +10,9 @@ monitor at this path.
 
 ### Feature flags
 
-`ASTROTURF_WATCH` controls all astroturf-detection features. Set it to
-`False` to hide engagement chips and block transparency pages; related
-endpoints will return 404.
+The `ASTROTURF_WATCH` environment variable (default `1`) controls all
+astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
+chips and block transparency pages; related endpoints will return 404.
 
 ```bash
 git add -A

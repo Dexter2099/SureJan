@@ -44,6 +44,12 @@ python manage.py runserver
 
 Visit `http://127.0.0.1:8000` to access the dev server.
 
+### Feature flags
+
+Set the `ASTROTURF_WATCH` environment variable to control astroturf-detection
+features. It defaults to `1`; set `ASTROTURF_WATCH=0` to hide engagement chips
+and transparency pages.
+
 ## Status
 
 SureJan is an early-stage MVP. Contributions, bug reports, and feedback are welcome.

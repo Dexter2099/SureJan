@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta, timezone as dt_timezone
+import importlib
+import os
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
@@ -192,3 +195,23 @@ class AstroFeatureFlagViewTests(TestCase):
         with override_settings(ASTROTURF_WATCH=False):
             self.assertNotContains(self.client.get(detail_url), chips_url)
             self.assertNotContains(self.client.get(reverse("home")), chips_url)
+
+
+class AstroEnvVarToggleTests(SimpleTestCase):
+    def test_astroturf_watch_env_var_controls_flag(self):
+        import config.settings as config_settings
+        old = os.environ.get("ASTROTURF_WATCH")
+        try:
+            with mock.patch.dict(os.environ, {"ASTROTURF_WATCH": "0"}):
+                importlib.reload(config_settings)
+                self.assertFalse(config_settings.ASTROTURF_WATCH)
+            with mock.patch.dict(os.environ, {"ASTROTURF_WATCH": "1"}):
+                importlib.reload(config_settings)
+                self.assertTrue(config_settings.ASTROTURF_WATCH)
+        finally:
+            if old is None:
+                os.environ.pop("ASTROTURF_WATCH", None)
+            else:
+                os.environ["ASTROTURF_WATCH"] = old
+            importlib.reload(config_settings)
+
