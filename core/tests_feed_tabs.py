@@ -36,7 +36,9 @@ class FeedTabOrderTests(TestCase):
         self.new.refresh_from_db()
 
     def _first_post(self, tab):
-        resp = self.client.get(reverse("home"), {"tab": tab, "range": "24h"}, HTTP_HX_REQUEST="true")
+        resp = self.client.get(
+            reverse("feed_list"), {"tab": tab, "range": "24h"}, HTTP_HX_REQUEST="true"
+        )
         return resp.context["posts"][0]
 
     def test_hot_order(self):

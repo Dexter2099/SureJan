@@ -6,7 +6,12 @@ class Command(BaseCommand):
     help = "Seed initial communities"
 
     def handle(self, *args, **kwargs):
-        seeds = [("news", "News"), ("brisbane", "Brisbane")]
+        seeds = [
+            ("news", "News"),
+            ("brisbane", "Brisbane"),
+            ("tech", "Technology"),
+            ("fun", "Fun"),
+        ]
         U = get_user_model()
         user, _ = U.objects.get_or_create(username="admin")
         for slug, title in seeds:

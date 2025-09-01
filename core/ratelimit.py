@@ -3,11 +3,10 @@
 from functools import wraps
 from datetime import timedelta
 
-from django.core.cache import cache
 from django.shortcuts import render
 from django.utils import timezone
 
-from .models import get_points
+from .models import get_points, RateLimitCounter
 
 
 def _is_new_user(user):
@@ -44,9 +43,17 @@ def ratelimit(*, key="user", action: str, limit, window: int = 60):
                 new_limit, old_limit = limit
                 limit_value = new_limit if _is_new_user(request.user) else old_limit
 
-            cache_key = f"rl:{action}:{request.user.pk}"
-            count = cache.get(cache_key, 0)
-            if count >= limit_value:
+            now = timezone.now()
+            counter, _ = RateLimitCounter.objects.get_or_create(
+                user=request.user,
+                action=action,
+                defaults={"period_start": now},
+            )
+            if now - counter.period_start >= timedelta(seconds=window):
+                counter.count = 0
+                counter.period_start = now
+
+            if counter.count >= limit_value:
                 context = {"action": action, "retry_after": window}
                 if request.headers.get("HX-Request") == "true":
                     resp = render(
@@ -57,10 +64,8 @@ def ratelimit(*, key="user", action: str, limit, window: int = 60):
                 resp.headers["Retry-After"] = str(window)
                 return resp
 
-            if count == 0:
-                cache.add(cache_key, 1, window)
-            else:
-                cache.incr(cache_key)
+            counter.count += 1
+            counter.save(update_fields=["count", "period_start"])
 
             return view_func(request, *args, **kwargs)
 
