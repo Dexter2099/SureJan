@@ -124,6 +124,12 @@ def anti_astroturf(request):
     return render(request, "pages/anti_astroturf.html")
 
 
+def mod_astro(request):
+    """Moderator information about astroturf detection."""
+
+    return render(request, "core/mod_astro.html")
+
+
 def transparency_methods(request):
     if not settings.ASTROTURF_WATCH:
         raise Http404
@@ -460,12 +466,22 @@ def feed_list(request):
 
 @require_GET
 def home(request):
+    """Render the front page with optional sorting and time filters."""
+
     tab = request.GET.get("tab", "hot")
+    if tab not in TAB_ORDER:
+        tab = "hot"
+
     rng = request.GET.get("range", "24h")
-    qs = Post.objects.select_related("community", "author").order_by("-created_at")
-    # TODO: apply real tab/range logic later; this is a safe default
-    page = Paginator(qs, 25).get_page(request.GET.get("page") or 1)
-    return render(request, "core/home.html", {"page": page, "tab": tab, "range": rng})
+    if rng not in RANGE_MAP and rng != "all":
+        rng = "24h"
+
+    page_number = request.GET.get("page") or 1
+    qs = feed_queryset(tab, rng)
+    page = Paginator(qs, PAGE_SIZE).get_page(page_number)
+
+    ctx = {"page": page, "tab": tab, "range": rng}
+    return render(request, "core/home.html", ctx)
 
 
 @ratelimit(key="user", rate="5/m", method=["POST"], block=False)
@@ -523,16 +539,32 @@ def community(request, slug):
     sort = request.GET.get("sort", "best")
     if sort not in FEED_ORDER:
         sort = "best"
+
+    rng = request.GET.get("range", "24h")
+    if rng not in RANGE_MAP and rng != "all":
+        rng = "24h"
+
     order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
     qs = community.posts.select_related("author").order_by(*order)
+    if rng != "all":
+        delta = RANGE_MAP.get(rng)
+        if delta:
+            since = timezone.now() - delta
+            qs = qs.filter(created_at__gte=since)
+
     offset = (page - 1) * PAGE_SIZE
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
 
-    sort_query = f"&sort={sort}" if sort and sort != "best" else ""
+    sort_query = ""
+    if sort and sort != "best":
+        sort_query += f"&sort={sort}"
+    if rng and rng != "24h":
+        sort_query += f"&range={rng}"
+
     context = {
         "community": community,
         "community_slug": community.slug,
@@ -540,6 +572,7 @@ def community(request, slug):
         "next_page": next_page,
         "sort_query": sort_query,
         "sort": sort,
+        "range": rng,
         "sort_tabs": SORT_TABS,
     }
     if request.headers.get("HX-Request") == "true":
@@ -553,6 +586,16 @@ def post_detail(request, community, pk, slug):
     """Display a single post and its comments."""
 
     post = get_object_or_404(Post, pk=pk, community__slug=community)
+    comments = post.comments.select_related("author").order_by("path")
+    form = CommentForm()
+    context = {"post": post, "comments": comments, "form": form}
+    return render(request, "core/post_detail.html", context)
+
+
+def post_detail_id(request, pk):
+    """Simpler post detail view addressed by ID only."""
+
+    post = get_object_or_404(Post, pk=pk)
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
     context = {"post": post, "comments": comments, "form": form}
