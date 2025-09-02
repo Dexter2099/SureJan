@@ -1,4 +1,6 @@
 import pytest
+from django.contrib.auth import get_user_model
+from core.models import Community
 
 @pytest.mark.django_db
 def test_home_route_renders(client):
@@ -25,6 +27,22 @@ def test_required_selectors_on_home(client):
     html = client.get("/").content.decode()
     assert 'data-testid="header-bar"' in html
     assert ('data-testid="post-card"' in html) or ('data-testid="empty-state"' in html)
+
+
+@pytest.mark.django_db
+def test_sidebar_links_home(client):
+    html = client.get("/").content.decode()
+    assert 'data-testid="sidebar-submit"' in html
+    assert 'data-testid="sidebar-astro"' in html
+
+
+@pytest.mark.django_db
+def test_sidebar_links_community(client):
+    user = get_user_model().objects.create_user(username="u", password="pw")
+    Community.objects.create(slug="test", name="Test", title="Test", created_by=user)
+    html = client.get("/r/test").content.decode()
+    assert 'data-testid="sidebar-submit"' in html
+    assert 'data-testid="sidebar-astro"' in html
 
 
 @pytest.mark.django_db
