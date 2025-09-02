@@ -76,9 +76,10 @@ header.header-bar{
   .sidebar-col{ flex:0 0 var(--sidebar-width); }
 }
 
-codex/make-logo-2x-bigger-vuy1kx
-.site-logo{height:128px;width:128px;display:block}
-
-.site-logo{height:64px;width:auto;display:block}
-main
 .header-logo{display:flex;align-items:center}
+
+/* kill any previous logo clamps */
+.header-logo img { max-height: none !important; height: auto !important; }
+
+/* final size */
+.site-logo { height: 128px !important; width: auto; display: block; }
