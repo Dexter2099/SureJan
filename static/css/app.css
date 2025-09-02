@@ -1,4 +1,3 @@
-/* app.css */
 @import "tokens.css";
 
 html,body{background:var(--color-bg); color:var(--color-text); font-family:var(--font-sans);}
@@ -11,12 +10,16 @@ header.header-bar{
   padding: var(--space-3) var(--space-6);
 }
 
-.header-logo img,
-.site-logo{ display:block; max-height:28px; width:auto; }
+.site-logo{max-height:28px;width:auto;display:block}
 
 .nav-links a{ padding:4px 8px; border-radius:6px; text-decoration:none; }
 .nav-links a[aria-current="page"]{ background:rgba(255,255,255,.06); }
 
 .sidebar-cta{ background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); }
-.post-card{ background:var(--color-surface); padding:var(--space-5); border-radius:var(--radius-lg); margin-bottom:var(--space-5); }
+.post-card{
+  background:var(--color-surface);
+  padding:var(--space-5);
+  border-radius:var(--radius-lg);
+  margin-bottom:var(--space-5);
+}
 .empty-state{ color:#a7a7b3; padding:var(--space-6) 0; text-align:center; }

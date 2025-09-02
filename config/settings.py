@@ -218,6 +218,7 @@ LANGUAGE_CODE = "en-au"
 TIME_ZONE = "Australia/Brisbane"
 USE_I18N = True
 USE_TZ = True
+APPEND_SLASH = False
 
 # -----------------------------------------------------------------------------
 # Static / Media

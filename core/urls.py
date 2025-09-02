@@ -5,17 +5,17 @@ from core import views as core_views
 urlpatterns = [
     # Home / front page
     path("", core_views.home, name="home"),
-    path("p/<int:pk>/", core_views.post_detail_id, name="post_detail_id"),
-    path("feed/", core_views.feed_list, name="feed_list"),
-    path("mission/", core_views.mission, name="mission"),
-    path("anti-astroturf/", core_views.anti_astroturf, name="anti_astroturf"),
-    path("mod/astro/", core_views.mod_astro, name="mod_astro"),
-    path("methods/", core_views.transparency_methods, name="transparency_methods"),
+    path("p/<int:pk>", core_views.post_detail_id, name="post_detail_id"),
+    path("feed", core_views.feed_list, name="feed_list"),
+    path("mission", core_views.mission, name="mission"),
+    path("anti-astroturf", core_views.anti_astroturf, name="anti_astroturf"),
+    path("mod/astro", core_views.mod_astro, name="mod_astro"),
+    path("methods", core_views.transparency_methods, name="transparency_methods"),
     path("transparency/posts", core_views.transparency_posts, name="transparency_posts"),
     # Markdown preview endpoint
-    path("preview/", core_views.preview_markdown, name="preview_markdown"),
-    path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
-    path("submit/", core_views.post_submit, name="post_submit"),
+    path("preview", core_views.preview_markdown, name="preview_markdown"),
+    path("oembed/preview", core_views.oembed_preview, name="oembed_preview"),
+    path("submit", core_views.post_submit, name="post_submit"),
 
     # Post signals
     path("posts/<int:pk>/signals.json", core_views.post_signals_json, name="post_signals_json"),
@@ -38,12 +38,12 @@ urlpatterns = [
     path("c/new/", core_views.create_community, name="community_create"),
 
     # Community pages (slug-based, /r/<slug>/…)
-    path("r/<slug:slug>/", core_views.community, name="community"),
-    path("r/<slug:slug>/wiki/", core_views.community_wiki, name="community_wiki"),
+    path("r/<slug:slug>", core_views.community, name="community"),
+    path("r/<slug:slug>/wiki", core_views.community_wiki, name="community_wiki"),
 
     # Post detail (nested under community, with id + slug)
     path(
-        "r/<slug:community>/comments/<int:pk>/<slug:slug>/",
+        "r/<slug:community>/comments/<int:pk>/<slug:slug>",
         core_views.post_detail,
         name="post_detail",
     ),

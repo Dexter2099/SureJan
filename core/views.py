@@ -638,7 +638,10 @@ def post_submit(request):
 
 def community(request, slug):
     """Display posts for a specific community."""
-    community = get_object_or_404(Community, slug=slug)
+    try:
+        community = Community.objects.get(slug=slug)
+    except Community.DoesNotExist:
+        return redirect("/")
     sort = request.GET.get("sort", "best")
     if sort not in FEED_ORDER:
         sort = "best"
