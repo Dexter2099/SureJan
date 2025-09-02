@@ -15,7 +15,7 @@ class PostDetailMediaTests(TestCase):
             slug="test", name="Test", title="Test", created_by=self.user
         )
 
-    @patch("core.views.fetch_oembed")
+    @patch("core.utils.embeds.fetch_oembed")
     def test_youtube_embed_has_placeholder(self, mock_oembed):
         mock_oembed.return_value = {
             "type": "embed",
@@ -35,7 +35,7 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'data-src="https://www.youtube-nocookie.com/embed/abc"')
         self.assertContains(resp, 'href="https://www.youtube.com/watch?v=abc"')
 
-    @patch("core.views.fetch_oembed")
+    @patch("core.utils.embeds.fetch_oembed")
     def test_rumble_embed_has_placeholder(self, mock_oembed):
         mock_oembed.return_value = {
             "type": "embed",

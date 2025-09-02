@@ -50,6 +50,7 @@ from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from .oembed import fetch_oembed
+from .utils.embeds import build_embed_html
 
 
 def _is_banned(user):
@@ -726,13 +727,13 @@ def post_detail(request, community, pk, slug):
     )
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    embed, _ = _build_embed(post.content_url)
+    embed_html = build_embed_html(post.content_url)
     images = list(post.image_links.all())
     context = {
         "post": post,
         "comments": comments,
         "form": form,
-        "embed": embed,
+        "embed_html": embed_html,
         "images": images,
     }
     return render(request, "core/post_detail.html", context)
@@ -744,13 +745,13 @@ def post_detail_id(request, pk):
     post = get_object_or_404(Post.objects.prefetch_related("image_links"), pk=pk)
     comments = post.comments.select_related("author").order_by("path")
     form = CommentForm()
-    embed, _ = _build_embed(post.content_url)
+    embed_html = build_embed_html(post.content_url)
     images = list(post.image_links.all())
     context = {
         "post": post,
         "comments": comments,
         "form": form,
-        "embed": embed,
+        "embed_html": embed_html,
         "images": images,
     }
     return render(request, "core/post_detail.html", context)
