@@ -236,6 +236,9 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Detect build phase for collectstatic
+IS_BUILD = os.getenv("DJANGO_COLLECTSTATIC") == "1"
+
 if os.getenv("DJANGO_TESTS", "1") in ("1", "true", "True"):
     STORAGES = {
         "staticfiles": {
@@ -255,20 +258,36 @@ STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 # REMOVE once favicon/static references are correct and collectstatic is clean.
 WHITENOISE_MANIFEST_STRICT = False
 
-MEDIA_URL = os.environ["MEDIA_URL"]
-
-AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
-AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-AWS_S3_ENDPOINT_URL = os.environ["AWS_S3_ENDPOINT_URL"]  # e.g. https://fly.storage.tigris.dev
+# required envs for S3 in runtime
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")  # e.g. https://fly.storage.tigris.dev
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+if IS_BUILD:
+    # allow settings to import during collectstatic
+    MEDIA_URL = os.getenv("MEDIA_URL", "https://example.invalid/")
+else:
+    # enforce cloud-only at runtime
+    required = [
+        AWS_STORAGE_BUCKET_NAME,
+        AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY,
+        AWS_S3_ENDPOINT_URL,
+    ]
+    if not all(required):
+        raise RuntimeError("S3 media env not configured")
+    MEDIA_URL = os.environ["MEDIA_URL"]  # must be set in runtime env
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 AWS_DEFAULT_ACL = "public-read"
 AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}
 
 # -----------------------------------------------------------------------------
