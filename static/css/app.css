@@ -77,9 +77,20 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   .sidebar-col{ flex:0 0 var(--sidebar-width); }
 }
 
-
-.site-logo{height:48px;width:auto;display:block}
 .header-logo{display:flex;align-items:center}
+
+/* Logo */
+.site-logo{
+  max-height:48px;
+  height:auto;
+  width:auto;
+  object-fit:contain;
+}
+
+@media (max-width:768px){
+  .site-logo{max-height:24px;}
+}
+
 /* neutralize old caps if they exist */
 .header-logo img{max-height:none;height:auto}
 
@@ -91,9 +102,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   gap:12px;
 }
 
-/* Left: logo (48px) */
-.site-logo{ height:48px; width:auto; display:block; }
-.header-logo img{ max-height:none; height:auto; } /* neutralize any old clamps */
+/* Left: logo */
 .header-left{ display:flex; align-items:center; gap:12px; }
 
 /* Center: tabs truly centered */
@@ -104,8 +113,3 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 /* Right area stays aligned to end */
 .header-right{ justify-self:end; display:flex; align-items:center; gap:12px; }
 
-/* Logo size authority (wins last) */
-.header-logo img{max-height:none !important;height:auto !important;opacity:1 !important;visibility:visible !important;filter:none !important}
-.site-logo{height:48px !important;width:auto;display:block}
-/* remove after you confirm */
-.site-logo{filter: brightness(1.2) contrast(1.05)}
