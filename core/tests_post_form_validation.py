@@ -23,28 +23,32 @@ class PostFormValidationTests(TestCase):
         )
 
     def test_title_only_rejected(self):
-        form = PostForm(data={"community": self.community.id, "title": "T"})
+        form = PostForm(
+            data={"community": self.community.id, "title": "T", "post_type": "text"}
+        )
         self.assertFalse(form.is_valid())
 
-    def test_body_only_allowed(self):
+    def test_text_post_valid(self):
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
                 "body": "B",
+                "post_type": "text",
             }
         )
         self.assertTrue(form.is_valid())
 
-    def test_media_with_caption_allowed(self):
+    def test_images_with_caption_allowed(self):
         image = make_image()
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
-                "caption": "C",
+                "body": "C",
+                "post_type": "images",
             },
-            files={"media": image},
+            files={"images": [image]},
         )
         self.assertTrue(form.is_valid())
 
@@ -54,29 +58,31 @@ class PostFormValidationTests(TestCase):
                 "community": self.community.id,
                 "title": "T",
                 "link": "http://example.com",
+                "post_type": "link",
             }
         )
         self.assertTrue(form.is_valid())
 
-    def test_image_urls_allowed(self):
-        urls = "\n".join(f"http://ex.com/{i}.jpg" for i in range(3))
+    def test_image_limit(self):
+        files = [make_image() for _ in range(6)]
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
-                "image_urls": urls,
-                "caption": "C",
-            }
+                "post_type": "images",
+            },
+            files={"images": files},
         )
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
 
-    def test_image_urls_limit(self):
-        urls = "\n".join(f"http://ex.com/{i}.jpg" for i in range(6))
+    def test_size_limit(self):
+        big = SimpleUploadedFile("big.jpg", b"0" * (4 * 1024 * 1024 + 1), content_type="image/jpeg")
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
-                "image_urls": urls,
-            }
+                "post_type": "images",
+            },
+            files={"images": [big]},
         )
         self.assertFalse(form.is_valid())

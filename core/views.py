@@ -33,6 +33,7 @@ from django.utils import timezone
 from django.db.models import F
 from django import forms
 from django.core.paginator import Paginator
+from django.core.files.storage import default_storage
 
 from django.core.cache import cache
 from django.utils.cache import patch_cache_control
@@ -579,57 +580,43 @@ def post_submit(request):
 
     initial = request.session.pop("post_data", None)
     if request.method == "POST":
-        limit = 3 if is_new_user(request.user) else 10
-        window = 60
-        rate = f"{limit}/{window}s"
-        limited = is_ratelimited(
-            request,
-            group="post_submit",
-            key="user",
-            rate=rate,
-            method=["POST"],
-            increment=True,
-        )
         form = PostForm(request.POST, request.FILES)
+        if is_new_user(request.user):
+            limited = limit_or_429(request, "post_new_user", "3/m")
+        else:
+            limited = limit_or_429(request, "post_established", "10/m")
         if limited:
             form.add_error(
                 None, "You're posting too fast. Please wait before trying again."
             )
-            resp = render(request, "core/post_submit.html", {"form": form}, status=429)
-            resp.headers["Retry-After"] = str(window)
-            return resp
+            return render(request, "core/submit.html", {"form": form}, status=429)
         if form.is_valid():
+            post_type = form.cleaned_data["post_type"]
             link = form.cleaned_data.get("link", "")
-            image_urls = form.cleaned_data.get("image_urls", [])
-            media = form.cleaned_data.get("media")
-            body = form.cleaned_data.get("body") or form.cleaned_data.get("caption", "")
-
-            if link:
-                post_type = "link"
-            elif media or image_urls:
-                post_type = "image"
-            else:
-                post_type = "text"
+            images = form.cleaned_data.get("images", [])
+            body = form.cleaned_data.get("body", "")
 
             post = Post(
                 community=form.cleaned_data["community"],
                 author=request.user,
-                post_type=post_type,
+                post_type="image" if post_type == "images" else post_type,
                 title=form.cleaned_data["title"],
-                heading=form.cleaned_data.get("heading", ""),
                 body=body,
-                content_url=link,
+                content_url=link if post_type == "link" else "",
             )
-            if media:
-                post.image = media
+            if post_type == "images" and images:
+                post.image = images[0]
             if request.POST.get("save_draft"):
                 post.is_draft = True
                 post.save()
                 messages.success(request, "Draft saved")
                 return redirect("post_submit")
             post.save()
-            for url in image_urls:
-                PostImageLink.objects.create(post=post, url=url)
+            if post_type == "images" and images:
+                for extra in images[1:]:
+                    filename = default_storage.save(f"posts/{extra.name}", extra)
+                    url = default_storage.url(filename)
+                    PostImageLink.objects.create(post=post, url=url)
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
@@ -642,7 +629,7 @@ def post_submit(request):
     else:
         form = PostForm(initial=initial)
 
-    return render(request, "core/post_submit.html", {"form": form})
+    return render(request, "core/submit.html", {"form": form})
 
 
 @require_GET
