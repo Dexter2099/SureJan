@@ -10,11 +10,11 @@
 </head>
 <body>
   <header class="header-bar">
-    <div class="brand">
-      <a class="header-logo" href="{% url 'home' %}">
+    <div class="communities-dropdown">
+      <button class="communities-toggle header-logo" type="button" aria-haspopup="true" aria-expanded="false">
         <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-      </a>
-      <ul class="brand-menu" aria-label="Communities">
+      </button>
+      <ul class="dropdown-menu" aria-label="Communities">
         <li><a href="/r/news/">NEWS</a></li>
         <li><a href="/r/brisbane/">BRISBANE</a></li>
         <li><a href="/r/politics/">POLITICS</a></li>
