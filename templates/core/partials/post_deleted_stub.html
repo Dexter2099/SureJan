@@ -2,7 +2,15 @@
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   <div class="vote"></div>
   <div class="post-body">
-    <h2><em>[deleted]</em></h2>
+    <h2>
+      <em>
+        {% if post.deleted_by and post.deleted_by.is_staff %}
+          Removed by moderators.
+        {% else %}
+          [deleted] by author.
+        {% endif %}
+      </em>
+    </h2>
     <div class="post-meta">in r/{{ post.community.slug }}</div>
   </div>
 </article>

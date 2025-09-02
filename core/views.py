@@ -51,6 +51,7 @@ from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from .oembed import fetch_oembed
 from .utils.embeds import build_embed_html
+from . import mod
 
 
 def _is_banned(user):
@@ -681,15 +682,10 @@ def community(request, slug):
     if sort == "top" and t is None:
         t = "all"
 
-    order = TAB_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
-    qs = community.posts.select_related("author").order_by(*order)
-    if sort == "top" and t and t != "all":
-        delta = RANGE_MAP.get(t)
-        if delta:
-            since = timezone.now() - delta
-            qs = qs.filter(created_at__gte=since)
+    base_qs = community.posts.select_related("author")
+    qs = feed_queryset(sort, t, base_qs=base_qs)
 
     offset = (page - 1) * PAGE_SIZE
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
@@ -1126,7 +1122,7 @@ def post_remove(request, pk):
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
     post = get_object_or_404(Post, pk=pk)
-    post.soft_delete(request.user)
+    mod.remove_post(post, request.user)
     if request.headers.get("HX-Request") == "true":
         html = render_to_string("core/partials/post_deleted_stub.html", {"post": post})
         return HttpResponse(html)
@@ -1147,8 +1143,7 @@ def post_lock(request, pk):
         return HttpResponseForbidden("Forbidden")
     post = get_object_or_404(Post, pk=pk)
     state = request.POST.get("state")
-    post.is_locked = state == "1"
-    post.save(update_fields=["is_locked"])
+    mod.lock_post(post, state == "1")
     html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
     return HttpResponse(html)
 
@@ -1184,8 +1179,8 @@ def post_domain_throttle(request, pk):
     state = request.POST.get("state")
     if state not in {"0", "1"}:
         return HttpResponseBadRequest("Invalid value")
-    post.domain_weight = 0.5 if state == "1" else 1.0
-    post.save(update_fields=["domain_weight"])
+    mod.set_domain_throttle(post.link_domain, state == "1")
+    post.refresh_from_db()
     html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
     return HttpResponse(html)
 

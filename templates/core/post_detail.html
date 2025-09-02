@@ -32,7 +32,7 @@
       {% endif %}
       <div class="post-content">
         {% if post.is_deleted %}
-          <p><em>[deleted by author]</em></p>
+          <p><em>{% if post.deleted_by and post.deleted_by.is_staff %}Removed by moderators.{% else %}[deleted] by author.{% endif %}</em></p>
         {% else %}
           {% if post.heading %}
             <h2 class="post-heading">{{ post.heading }}</h2>
@@ -69,6 +69,9 @@
               {% csrf_token %}
               <button type="submit" class="linklike">delete</button>
             </form>
+          {% endif %}
+          {% if request.user == post.author and post|can_author_delete:request.user %}
+            <span class="delete-window">Delete within 15 minutes…</span>
           {% endif %}
         {% endif %}
         {% if user.is_authenticated %}

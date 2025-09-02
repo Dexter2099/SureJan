@@ -14,6 +14,12 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
+### Moderation
+
+Staff can remove posts without deleting them, lock conversations, or
+throttle a link's domain. Throttling cuts ranking weight in half for seven
+days and is useful for spammy sources.
+
 ```bash
 git add -A
 git commit -m "alpha: public signup + header auth + submit CTA + seeds"
@@ -33,6 +39,7 @@ flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collect
 * `/secret-admin/` → admin login loads (only from allowlisted IPs if set).
 
 ### AstroShield scheduler (minimal)
-Run hourly (cron or CI runner):
+Run hourly (cron or CI runner) to refresh `astro_score:*` and
+`astro_band:*` cache keys:
 flyctl ssh console -a surejan -C "python manage.py astro_recompute"
 
