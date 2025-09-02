@@ -14,7 +14,15 @@
       <a class="header-logo" href="{% url 'home' %}">
         <img class="site-logo" src="{% static 'img/Surejanlogo.png' %}" alt="SureJan">
       </a>
-      <a class="communities-link" href="{% url 'communities_index' %}">Communities ▾</a>
+      <div class="communities-dropdown">
+        <button class="communities-toggle" type="button" aria-haspopup="true" aria-expanded="false">Communities ▾</button>
+        <div class="dropdown-menu" role="menu">
+          <a href="/r/news">News</a>
+          <a href="/r/brisbane">Brisbane</a>
+          <a href="/r/politics">Politics</a>
+          <a href="/r/social">Social</a>
+        </div>
+      </div>
     </div>
     <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
       <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
@@ -39,6 +47,7 @@
     <a href="{% url 'privacy' %}">Privacy</a> ·
     <a href="{% url 'rules' %}">Rules</a>
   </footer>
+  <script src="{% static 'js/dropdown.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
