@@ -503,49 +503,50 @@ def _render_posts(request, posts, next_page, show_community=False, sort_query=""
 @require_GET
 def feed_list(request):
     """Render the feed list or the full feed page."""
-    tab = request.GET.get("tab", "hot")
-    if tab not in TAB_ORDER:
-        tab = "hot"
+    sort = request.GET.get("sort", "hot")
+    if sort not in TAB_ORDER:
+        sort = "hot"
 
-    t = request.GET.get("t", "all") if tab == "top" else "all"
-    if t not in RANGE_MAP and t != "all":
-        t = "all"
+    t = request.GET.get("t")
+    allowed = {"24h", "7d", "all"}
+    if sort != "top" or t not in allowed:
+        t = None
 
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
-        qs = feed_queryset(tab, t)
+        qs = feed_queryset(sort, t)
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         ctx = {
             "posts": list(page_obj.object_list),
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
-            "tab": tab,
+            "tab": sort,
             "t": t,
         }
         return render(request, "core/partials/feed_list.html", ctx)
 
-    ctx = {"tab": tab, "t": t}
+    ctx = {"tab": sort, "t": t}
     return render(request, "core/feed.html", ctx)
 
 
 @require_GET
 def home(request):
     """Render the front page with optional sorting and time filters."""
+    sort = request.GET.get("sort", "hot")
+    if sort not in TAB_ORDER:
+        sort = "hot"
 
-    tab = request.GET.get("tab", "hot")
-    if tab not in TAB_ORDER:
-        tab = "hot"
-
-    t = request.GET.get("t", "all") if tab == "top" else "all"
-    if t not in RANGE_MAP and t != "all":
-        t = "all"
+    t = request.GET.get("t")
+    allowed = {"24h", "7d", "all"}
+    if sort != "top" or t not in allowed:
+        t = None
 
     page_number = request.GET.get("page") or 1
-    qs = feed_queryset(tab, t)
+    qs = feed_queryset(sort, t)
     page = Paginator(qs, PAGE_SIZE).get_page(page_number)
 
-    ctx = {"page": page, "tab": tab, "t": t}
+    ctx = {"page": page, "tab": sort, "t": t}
     return render(request, "core/home.html", ctx)
 
 
@@ -640,9 +641,10 @@ def community(request, slug):
     if sort not in FEED_ORDER:
         sort = "hot"
 
-    t = request.GET.get("t", "all") if sort == "top" else "all"
-    if t not in RANGE_MAP and t != "all":
-        t = "all"
+    t = request.GET.get("t")
+    allowed = {"24h", "7d", "all"}
+    if sort != "top" or t not in allowed:
+        t = None
 
     order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
@@ -662,7 +664,7 @@ def community(request, slug):
     sort_query = ""
     if sort and sort != "hot":
         sort_query += f"&sort={sort}"
-    if sort == "top" and t and t != "all":
+    if sort == "top" and t:
         sort_query += f"&t={t}"
 
     context = {
