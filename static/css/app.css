@@ -76,5 +76,5 @@ header.header-bar{
   .sidebar-col{ flex:0 0 var(--sidebar-width); }
 }
 
-.site-logo{height:32px;width:auto;display:block}
+.site-logo{height:64px;width:auto;display:block}
 .header-logo{display:flex;align-items:center}
