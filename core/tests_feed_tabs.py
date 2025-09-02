@@ -37,7 +37,7 @@ class FeedTabOrderTests(TestCase):
 
     def _first_post(self, tab):
         resp = self.client.get(
-            reverse("feed_list"), {"tab": tab, "range": "day"}, HTTP_HX_REQUEST="true"
+            reverse("feed_list"), {"tab": tab}, HTTP_HX_REQUEST="true"
         )
         return resp.context["posts"][0]
 

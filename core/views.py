@@ -513,25 +513,25 @@ def feed_list(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    range_ = request.GET.get("range", "day")
-    if range_ not in RANGE_MAP and range_ != "all":
-        range_ = "day"
+    t = request.GET.get("t", "all")
+    if t not in RANGE_MAP and t != "all":
+        t = "all"
 
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
-        qs = feed_queryset(tab, range_)
+        qs = feed_queryset(tab, t)
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         ctx = {
             "posts": list(page_obj.object_list),
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
             "tab": tab,
-            "range": range_,
+            "t": t,
         }
         return render(request, "core/partials/feed_list.html", ctx)
 
-    ctx = {"tab": tab, "range": range_}
+    ctx = {"tab": tab, "t": t}
     return render(request, "core/feed.html", ctx)
 
 
@@ -543,15 +543,15 @@ def home(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    rng = request.GET.get("range", "day")
-    if rng not in RANGE_MAP and rng != "all":
-        rng = "day"
+    t = request.GET.get("t", "all")
+    if t not in RANGE_MAP and t != "all":
+        t = "all"
 
     page_number = request.GET.get("page") or 1
-    qs = feed_queryset(tab, rng)
+    qs = feed_queryset(tab, t)
     page = Paginator(qs, PAGE_SIZE).get_page(page_number)
 
-    ctx = {"page": page, "tab": tab, "range": rng}
+    ctx = {"page": page, "tab": tab, "t": t}
     return render(request, "core/home.html", ctx)
 
 
@@ -646,16 +646,16 @@ def community(request, slug):
     if sort not in FEED_ORDER:
         sort = "best"
 
-    rng = request.GET.get("range", "day")
-    if rng not in RANGE_MAP and rng != "all":
-        rng = "day"
+    t = request.GET.get("t", "all")
+    if t not in RANGE_MAP and t != "all":
+        t = "all"
 
     order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
     qs = community.posts.select_related("author").order_by(*order)
-    if rng != "all":
-        delta = RANGE_MAP.get(rng)
+    if t and t != "all":
+        delta = RANGE_MAP.get(t)
         if delta:
             since = timezone.now() - delta
             qs = qs.filter(created_at__gte=since)
@@ -668,8 +668,8 @@ def community(request, slug):
     sort_query = ""
     if sort and sort != "best":
         sort_query += f"&sort={sort}"
-    if rng and rng != "day":
-        sort_query += f"&range={rng}"
+    if t and t != "all":
+        sort_query += f"&t={t}"
 
     context = {
         "community": community,
@@ -678,7 +678,7 @@ def community(request, slug):
         "next_page": next_page,
         "sort_query": sort_query,
         "sort": sort,
-        "range": rng,
+        "t": t,
         "sort_tabs": SORT_TABS,
     }
     if request.headers.get("HX-Request") == "true":

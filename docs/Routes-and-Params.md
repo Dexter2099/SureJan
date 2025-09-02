@@ -2,8 +2,9 @@ Change control: If templates affecting this surface change, update this file in 
 
 Route | Params | Defaults | Notes
 ---|---|---|---
-/ | sort, t | sort=hot, t=24h | Front page feed
-/r/<slug> | sort=hot|new|top, t=24h|7d|30d|all | sort=hot, t=24h | Community feed
-/p/<id> | — | — | 404 allowed if not found
-/submit | — | — | GET form, POST create
-/methods | — | — | Static info
+/ | sort, t | sort=hot, t unset | Home feed
+/r/<slug> | sort=hot|new|top, t=24h|7d|all | Time filter only when requested
+/p/<id> | — | — | Post detail; 404 allowed if missing
+/submit | — | — | Submit post
+/mod/astro | — | — | Minimal mod list (reports/high-score)
+/methods | — | — | AstroShield v1 + safety write-up
