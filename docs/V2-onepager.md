@@ -88,19 +88,11 @@ Fly: `release_command: python manage.py migrate --noinput`. Static via WhiteNois
 - AstroShield chips + slowmode thresholds work; `/methods` published.
 - Mod tools (Remove/Lock/Slowmode/Domain-throttle) function.
 - CSP enforced; consent gating; rate limits enforced.
-- Staging + Prod live; smoke tests pass; deps pinned.
+- Staging + Prod live; acceptance checks are manual (no UI smoke tests); deps pinned.
 - **500 registered users** milestone.
 
-## 15) Acceptance & Smoke Tests (minimum)
-1. Signup → header shows username.  
-2. Submit Text, Link (YouTube nocookie), Images(3) → appear in feed.  
-3. Sort tabs render; `/?sort=top` (no `t`) works; `t=24h|7d|all` all work.  
-4. Rate-limit thresholds return **429** with friendly copy.  
-5. AstroShield fixture score=75 → red chip + 60s slowmode; ≥85 → 120s + listed in `/mod/astro`.  
-6. Mod actions visibly affect UI/ranking.  
-7. CSP: no third-party JS before consent.  
-8. `/secret-admin/` reachable (allowed IPs).  
-9. HTMX pagination: `/?page=2` valid; no duplicate IDs.
+## 15) Acceptance
+Acceptance checks are manual (no UI smoke tests). Targeted unit/integration tests only as needed.
 
 ## 16) Milestones (merge order)
 1) Models/migrations + seed 4 communities · 2) Routes/base views · 3) Feed cards  
