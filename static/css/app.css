@@ -79,20 +79,6 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 
 .header-logo{display:flex;align-items:center}
 
-/* Logo */
-.site-logo{
-  max-height:48px;
-  height:auto;
-  width:auto;
-  object-fit:contain;
-}
-
-@media (max-width:768px){
-  .site-logo{max-height:24px;}
-}
-
-/* neutralize old caps if they exist */
-.header-logo img{max-height:none;height:auto}
 
 /* Header grid: left | center | right */
 .header-bar{
@@ -112,4 +98,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 
 /* Right area stays aligned to end */
 .header-right{ justify-self:end; display:flex; align-items:center; gap:12px; }
+
+/* final authority for header logo size */
+.site-logo { max-height: 48px; height: auto; width: auto; object-fit: contain; display: block; }
 
