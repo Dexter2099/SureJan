@@ -538,11 +538,29 @@ def home(request):
     if sort == "top" and t is None:
         t = "all"
 
-    page_number = request.GET.get("page") or 1
+    page = int(request.GET.get("page", "1") or 1)
     qs = feed_queryset(sort, t)
-    page = Paginator(qs, PAGE_SIZE).get_page(page_number)
+    offset = (page - 1) * PAGE_SIZE
+    posts = list(qs[offset : offset + PAGE_SIZE + 1])
+    next_page = page + 1 if len(posts) > PAGE_SIZE else None
+    posts = posts[:PAGE_SIZE]
 
-    ctx = {"page": page, "tab": sort, "t": t}
+    sort_query = ""
+    if sort and sort != "hot":
+        sort_query += f"&sort={sort}"
+    if sort == "top" and t:
+        sort_query += f"&t={t}"
+
+    ctx = {
+        "posts": posts,
+        "next_page": next_page,
+        "sort_query": sort_query,
+        "sort": sort,
+        "t": t,
+        "sort_tabs": SORT_TABS,
+    }
+    if request.headers.get("HX-Request") == "true":
+        return _render_posts(request, posts, next_page, show_community=True, sort_query=sort_query)
     return render(request, "core/home.html", ctx)
 
 

@@ -1,9 +1,5 @@
 {% for post in posts %}
-  {% if forloop.last and next_page %}
-    {% include "partials/feed_card.html" with post=post load_more_url=request.path|add:'?page='|add:next_page|add:sort_query %}
-  {% else %}
-    {% include "partials/feed_card.html" with post=post %}
-  {% endif %}
-  {% empty %}
-    <div class="empty-state" data-testid="empty-state">No posts yet.</div>
-  {% endfor %}
+  {% include "core/partials/post_row.html" with post=post %}
+{% empty %}
+  <div class="empty-state" data-testid="empty-state">No posts yet.</div>
+{% endfor %}

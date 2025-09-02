@@ -6,28 +6,7 @@
       <section aria-labelledby="feed-heading">
         <h1 id="feed-heading" class="sr-only">Feed</h1>
 
-        <form method="get" class="range-selector" style="margin-bottom:1rem;">
-          <input type="hidden" name="tab" value="{{ tab }}">
-          <label for="t">Time range:</label>
-          <select name="t" id="t">
-            <option value="24h" {% if t == '24h' %}selected{% endif %}>Last 24 Hours</option>
-            <option value="7d" {% if t == '7d' %}selected{% endif %}>Last 7 Days</option>
-            <option value="all" {% if t == 'all' %}selected{% endif %}>All Time</option>
-          </select>
-          <button type="submit" class="btn">Apply</button>
-        </form>
-
-          {% for post in page.object_list %}
-            {% include "partials/feed_card.html" with post=post %}
-          {% empty %}
-            <div class="empty-state" data-testid="empty-state">No posts yet.</div>
-          {% endfor %}
-
-        {% if page.has_next %}
-          <p style="text-align:center;margin:16px 0;">
-            <a class="btn" href="?page={{ page.next_page_number }}&tab={{ tab }}{% if t and t != 'all' %}&t={{ t }}{% endif %}">Load more</a>
-          </p>
-        {% endif %}
+        {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
       </section>
     </main>
     <aside class="sidebar-col">
