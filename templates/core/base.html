@@ -10,9 +10,17 @@
 </head>
 <body>
   <header class="header-bar">
-    <a class="header-logo" href="{% url 'home' %}">
-      <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-    </a>
+    <div class="brand">
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
+      </a>
+      <ul class="brand-menu" aria-label="Communities">
+        <li><a href="/r/news/">NEWS</a></li>
+        <li><a href="/r/brisbane/">BRISBANE</a></li>
+        <li><a href="/r/politics/">POLITICS</a></li>
+        <li><a href="/r/social/">SOCIAL</a></li>
+      </ul>
+    </div>
     {% block header_center %}{% endblock %}
     {% block header_right %}{% endblock %}
   </header>
