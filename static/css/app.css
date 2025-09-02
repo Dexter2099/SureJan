@@ -103,3 +103,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 
 /* Right area stays aligned to end */
 .header-right{ justify-self:end; display:flex; align-items:center; gap:12px; }
+
+/* Logo size authority (wins last) */
+.header-logo img{ max-height:none !important; height:auto !important; }
+.site-logo{ height:48px !important; width:auto; display:block; }
