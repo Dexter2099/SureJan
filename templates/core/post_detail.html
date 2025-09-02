@@ -37,22 +37,14 @@
           {% if post.heading %}
             <h2 class="post-heading">{{ post.heading }}</h2>
           {% endif %}
-          {% if embed %}
-            <div class="post-embed" data-src="{{ embed.src }}" style="position:relative;padding-top:56.25%;overflow:hidden;">
-              <a href="{{ embed.url }}" rel="noopener nofollow" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">
-                <img src="{{ embed.thumb }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">
-              </a>
-            </div>
-          {% elif post.image %}
-            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          {% if post.content_url %}
+            {{ embed_html|safe }}
           {% elif images %}
             {% include "partials/post_images.html" with images=images %}
+          {% elif post.image %}
+            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
           {% elif post.embed_html %}
             <div class="post-embed">{{ post.embed_html|safe }}</div>
-          {% elif post.content_url %}
-            <div class="link-card">
-              <a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.link_domain }}</a>
-            </div>
           {% endif %}
           {% if post.body %}
             <div class="post-caption prose">
@@ -104,6 +96,7 @@
 
 {% block scripts %}
 {{ block.super }}
+<script src="{% static 'js/embeds.js' %}" defer></script>
 <script src="{% static 'js/editor.js' %}" defer></script>
 <script src="{% static 'js/comments.js' %}" defer></script>
 {% endblock %}
