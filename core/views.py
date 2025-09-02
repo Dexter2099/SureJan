@@ -468,14 +468,6 @@ def regenerate_recovery_codes(request):
     return redirect("recovery_codes")
 
 
-# Mapping of feed tabs to their ordering in the database.  Each ordering
-# includes ``-id`` as the final column to guarantee deterministic results.
-FEED_ORDER = {
-    "hot": ["-hot_rank", "-created_at", "-id"],
-    "new": ["-created_at", "-id"],
-    "top": ["-score", "-created_at", "-id"],
-}
-
 SORT_TABS = [
     ("hot", "HOT"),
     ("new", "NEW"),
@@ -635,14 +627,11 @@ def post_submit(request):
     return render(request, "core/post_submit.html", {"form": form})
 
 
-def community(request, slug):
-    """Display posts for a specific community."""
-    try:
-        community = Community.objects.get(slug=slug)
-    except Community.DoesNotExist:
-        return redirect("/")
+@require_GET
+def communities_index(request):
+    """List available communities."""
     sort = request.GET.get("sort", "hot")
-    if sort not in FEED_ORDER:
+    if sort not in TAB_ORDER:
         sort = "hot"
 
     t = request.GET.get("t")
@@ -652,7 +641,41 @@ def community(request, slug):
     if sort == "top" and t is None:
         t = "all"
 
-    order = FEED_ORDER[sort]
+    communities = [
+        {"slug": "news", "name": "News"},
+        {"slug": "brisbane", "name": "Brisbane"},
+        {"slug": "politics", "name": "Politics"},
+        {"slug": "social", "name": "Social"},
+    ]
+
+    qs = ""
+    if sort != "hot":
+        qs = f"?sort={sort}"
+        if sort == "top" and t and t != "all":
+            qs += f"&t={t}"
+
+    ctx = {"communities": communities, "qs": qs, "sort": sort, "t": t}
+    return render(request, "core/communities_index.html", ctx)
+
+
+def community(request, slug):
+    """Display posts for a specific community."""
+    try:
+        community = Community.objects.get(slug=slug)
+    except Community.DoesNotExist:
+        return redirect("/")
+    sort = request.GET.get("sort", "hot")
+    if sort not in TAB_ORDER:
+        sort = "hot"
+
+    t = request.GET.get("t")
+    allowed = {"24h", "7d", "all"}
+    if sort != "top" or t not in allowed:
+        t = None
+    if sort == "top" and t is None:
+        t = "all"
+
+    order = TAB_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
 
     qs = community.posts.select_related("author").order_by(*order)

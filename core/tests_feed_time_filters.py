@@ -66,7 +66,7 @@ class FeedRangeMixin:
 
 class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
     def _ids(self, t):
-        params = {"tab": "top"}
+        params = {"sort": "top"}
         if t is not None:
             params["t"] = t
         resp = self.client.get(reverse("feed_list"), params, HTTP_HX_REQUEST="true")
@@ -110,11 +110,42 @@ class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
 
 class FeedRangeFilterHomeTests(FeedRangeMixin, TestCase):
     def _ids(self, t):
-        params = {"tab": "top"}
+        params = {"sort": "top"}
         if t is not None:
             params["t"] = t
         resp = self.client.get(reverse("home"), params)
         return [p.pk for p in resp.context["page"].object_list]
+
+    def test_24h_filter(self):
+        ids = self._ids("24h")
+        self.assertEqual(ids, [self.day_post.pk])
+        self.assertNotIn(self.week_post.pk, ids)
+
+    def test_7d_filter(self):
+        ids = self._ids("7d")
+        self.assertSetEqual(set(ids), {self.day_post.pk, self.week_post.pk})
+
+    def test_all_filter(self):
+        ids = self._ids("all")
+        self.assertSetEqual(
+            set(ids),
+            {
+                self.day_post.pk,
+                self.week_post.pk,
+                self.month_post.pk,
+                self.year_post.pk,
+                self.old_post.pk,
+            },
+        )
+
+
+class CommunityRangeFilterTests(FeedRangeMixin, TestCase):
+    def _ids(self, t):
+        params = {"sort": "top"}
+        if t is not None:
+            params["t"] = t
+        resp = self.client.get(reverse("community", args=[self.community.slug]), params)
+        return [p.pk for p in resp.context["posts"]]
 
     def test_24h_filter(self):
         ids = self._ids("24h")
