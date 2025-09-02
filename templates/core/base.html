@@ -10,17 +10,17 @@
 </head>
 <body>
   <header class="header-bar">
-    <div class="communities-dropdown">
-      <button class="communities-toggle header-logo" type="button" aria-haspopup="true" aria-expanded="false">
+    <details class="communities-dropdown">
+      <summary class="communities-toggle header-logo" aria-haspopup="true">
         <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-      </button>
+      </summary>
       <ul class="dropdown-menu" aria-label="Communities">
         <li><a href="/r/news/">NEWS</a></li>
         <li><a href="/r/brisbane/">BRISBANE</a></li>
         <li><a href="/r/politics/">POLITICS</a></li>
         <li><a href="/r/social/">SOCIAL</a></li>
       </ul>
-    </div>
+    </details>
     {% block header_center %}{% endblock %}
     {% block header_right %}{% endblock %}
   </header>
@@ -30,7 +30,6 @@
     <a href="{% url 'privacy' %}">Privacy</a> ·
     <a href="{% url 'rules' %}">Rules</a>
   </footer>
-  <script src="{% static 'js/dropdown.js' %}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
