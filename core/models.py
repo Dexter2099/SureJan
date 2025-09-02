@@ -22,12 +22,12 @@ import os
 from .ranking import recompute_post_ranks
 
 
-MAX_BYTES = 5 * 1024 * 1024
+MAX_BYTES = 4 * 1024 * 1024
 
 
 def validate_image_file(f):
     if f.size > MAX_BYTES:
-        raise forms.ValidationError("Image too large (max 5MB).")
+        raise forms.ValidationError("Image too large (max 4MB).")
     try:
         Image.open(f).verify()
     except Exception:
@@ -170,6 +170,13 @@ class Post(models.Model):
 
         if self.content_url:
             self.link_domain = urlparse(self.content_url).netloc
+
+        # Apply domain throttling weight on every save
+        from .mod import domain_weight  # avoid circular import at module load
+        if self.link_domain:
+            self.domain_weight = domain_weight(self.link_domain)
+        else:
+            self.domain_weight = 1.0
 
         if self.image:
             resized = _resize_img(self.image)
