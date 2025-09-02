@@ -13,10 +13,10 @@
     <a class="header-logo" href="{% url 'home' %}">
       <img class="site-logo" src="{% static 'img/logo.svg' %}" alt="SureJan">
     </a>
-    <nav class="nav-links" aria-label="Sort options">
-      <a href="{{ request.path }}?sort=hot"{% if request.GET.sort == 'hot' %} aria-current="page"{% endif %}>Hot</a>
-      <a href="{{ request.path }}?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
-      <a href="{{ request.path }}?sort=top"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
+    <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
+      <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
+      <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
+      <a href="?sort=top{% if request.GET.t %}&t={{ request.GET.t }}{% endif %}"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
     </nav>
     <div class="nav-user">
       {% block header_right %}
