@@ -10,36 +10,11 @@
 </head>
 <body>
   <header class="header-bar" data-testid="header-bar">
-    <div class="nav-left">
-      <a class="header-logo" href="{% url 'home' %}">
-        <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-      </a>
-      <div class="communities-dropdown">
-        <button class="communities-toggle" type="button" aria-haspopup="true" aria-expanded="false">Communities ▾</button>
-        <div class="dropdown-menu" role="menu">
-          <a href="/r/news">News</a>
-          <a href="/r/brisbane">Brisbane</a>
-          <a href="/r/politics">Politics</a>
-          <a href="/r/social">Social</a>
-        </div>
-      </div>
-    </div>
-    <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
-      <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
-      <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
-      <a href="?sort=top{% if request.GET.t %}&t={{ request.GET.t }}{% endif %}"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
-    </nav>
-    <div class="nav-user">
-      {% block header_right %}
-      {% if request.user.is_authenticated %}
-        <a href="{% url 'user_overview' request.user.username %}" aria-label="Account">{{ request.user.username }}</a>
-      {% else %}
-        <a href="{% url 'login' %}" aria-label="Login">Login</a>
-        <span>/</span>
-        <a href="{% url 'signup' %}" aria-label="Sign up">Sign up</a>
-      {% endif %}
-      {% endblock %}
-    </div>
+    <a class="header-logo" href="{% url 'home' %}">
+      <img class="site-logo" src="{% static 'logo.png' %}" alt="SureJan">
+    </a>
+    {% block header_center %}{% endblock %}
+    {% block header_right %}{% endblock %}
   </header>
   {% block content %}{% endblock %}
   <footer class="footer">

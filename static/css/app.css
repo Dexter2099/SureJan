@@ -20,9 +20,6 @@ header.header-bar{
   padding: var(--space-3) var(--space-6);
 }
 
-.site-logo{height:32px;width:auto;display:block}
-.header-logo{display:flex;align-items:center}
-
 .nav-links a{ padding:4px 8px; border-radius:6px; text-decoration:none; }
 .nav-links a[aria-current="page"]{ background:rgba(0,0,0,.06); }
 
@@ -78,3 +75,6 @@ header.header-bar{
   .feed-col{ flex:0 0 var(--feed-width); }
   .sidebar-col{ flex:0 0 var(--sidebar-width); }
 }
+
+.site-logo{height:32px;width:auto;display:block}
+.header-logo{display:flex;align-items:center}

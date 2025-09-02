@@ -1,4 +1,11 @@
 {% extends "core/base.html" %}
+{% block header_center %}
+<nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
+  <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
+  <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
+  <a href="?sort=top{% if request.GET.t %}&t={{ request.GET.t }}{% endif %}"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
+</nav>
+{% endblock %}
 {% block content %}
 <div class="shell">
   <div class="layout-grid">
