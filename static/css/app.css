@@ -76,10 +76,8 @@ header.header-bar{
   .sidebar-col{ flex:0 0 var(--sidebar-width); }
 }
 
+
+.site-logo{height:48px;width:auto;display:block}
 .header-logo{display:flex;align-items:center}
-
-/* kill any previous logo clamps */
-.header-logo img { max-height: none !important; height: auto !important; }
-
-/* final size */
-.site-logo { height: 128px !important; width: auto; display: block; }
+/* neutralize old caps if they exist */
+.header-logo img{max-height:none;height:auto}
