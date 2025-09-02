@@ -1,110 +1,109 @@
+Change control: If this spec changes, update this file in the same PR.
+
 # SureJan V2 — One-Pager (Authoritative Spec)
 
-> **This document is the single source of truth for V2.**  
-> If it’s not here, it’s out of scope. Any change requires updating this file in the same PR.
-
 ## 1) Purpose
-Ship a small, fast, safe, **local forum** for 4 starter communities with simple posting, comments, basic voting, and first-pass anti-astroturf. V2 optimizes for reliability and clarity over features.
+Ship a small, fast, safe **local forum** for **4 communities** with simple posting, comments, basic voting, and first-pass anti-astroturf (**AstroShield v1**). Target: **first 500 users**.
 
-## 2) Scope (In / Out)
-**In:**  
-- 4 communities (seeded).  
-- Post types: **Text**, **Link** (YouTube/Rumble/X with *click-to-play*), **Image slideshow** (≤5 images via URLs).  
-- Comments, basic up/down vote.  
-- Roles: Guest, Authenticated User, Mod, Admin.  
-- Moderation actions: **Remove (soft)**, **Lock**, **Slowmode** (0/30/60/120s), **Domain-throttle** (ranking weight −50%).  
-- Anti-astroturf **AstroShield v1**: account/post activity → score **1–100**; chip bands; slowmode auto at ≥70; `/methods` page documents signals.  
-- Safety: strict **CSP allowlist**, **no third-party JS until consent**, **click-to-play** for embeds, **rate limits** (posts/day, comments/min, votes/min).  
-- Server-rendered pages (works without JS).  
-- Deploy on Fly.io with **Postgres (Neon OK)**, WhiteNoise static.
-
-**Out:**  
-- OAuth/Social login, rich editors, full text search, DM/notifications, appeal workflow, theming, i18n, mobile app, analytics dashboards.  
-- Any embed providers beyond YouTube-nocookie/Rumble/X (behind consent).
+## 2) Scope
+**In:** 4 communities (seeded) · Posts (Text/Link/Images ≤5) · Comments · Up/Down vote · Roles (Guest/User/Mod/Admin) · Mod actions (Remove/Lock/Slowmode/Domain-throttle) · AstroShield v1 · Strict CSP, consent-gated embeds · Server-rendered pages · Fly.io + Postgres · Light theme.
+**Out:** OAuth/Social login, rich editors, DMs/notifications, appeals, pins/manual boosts, full-text search, theming/i18n, analytics, mobile app.
 
 ## 3) URLs & Navigation
-- `/` — Home feed (all communities).  
-- `/r/<slug>` — Community feed.  
-- `/p/<id>` — Post detail + comments.  
-- `/submit` — Submit post.  
-- `/mod/astro` — Minimal mod list (reports/notes + high-score posts).  
-- `/methods` — Public write-up of AstroShield v1 and safety measures.  
-**Sort:** Hot (default), New, Top.
-**Time filter (Top only):** none by default; apply when requested (`?t=24h|7d|all`).
+`/` Home feed · `/r/<slug>` Community feed · `/p/<id>` Post detail · `/submit` Submit · `/mod/astro` Mod list · `/methods` Safety & methods.
+**Header:** Left **Logo + “Communities ▾”**; Center **Hot · New · Top**; Right Auth.  
+**Community switching:** behind “Communities ▾” (no permanent header tabs).
 
 ## 4) UX & Layout (baseline)
-- **Centered feed** (≈700px) with **right gutter** sidebar (300–320px) containing only: **Submit Post** (primary CTA) and **Anti-Astroturf** link.  
-- Mobile: single column; submit CTA in header.  
-- Post card: meta (community • author • age), clamped title, optional thumb, votes, comments, **Astro chip**.  
-- Detail: safe embed card (click-to-play sandboxed iframe), image carousel (≤5), comments list + composer.
+Centered feed ≈**700px** + right sidebar **300–320px**. Mobile: single column.  
+Sidebar (desktop): **Submit Post** (primary) + **Anti-Astroturf → /methods**.
 
 ## 5) Data & Rules (light sketch)
-- `Community(slug,name)`; `Post(author, community, title, body?, link_url?, images[≤5])`  
-  Flags: `is_deleted(False)`, `is_removed(False)`, `is_locked(False)`, `slowmode_seconds(0)`, `domain_weight(0|−50)`  
-- `Comment(author, post, body, is_removed=False)`  
-- `Vote(user, {post|comment}, value∈{−1, +1})`  
-- `AstroScore(object_type, object_id, score:int, band:str, signals:json, created_at)` (latest only used).  
-**Visibility:** `visible = not is_deleted and not is_removed`.  
-**Default feed:** no implicit time filter; order by Hot score; fall back to New.
+`Community(slug,name,…)` · `Post(author, community, title, body?, url?, images[≤5])` · `Comment(author,post,body)` · `Vote(user,{post|comment}, value∈{-1,+1})` · `AstroScore(object_id,score:int,band:str,signals:json)`.  
+Flags: `is_deleted`, `is_removed`, `is_locked`, `slowmode_seconds(0)`, `domain_weight(0|-50)`.  
+Visibility: `visible = not is_deleted and not is_removed`.
 
-## 6) AstroShield v1 (signals → score 1–100)
-Compute on post/comment activity (≤1/120s) using:  
-- **Account age** vs activity rate (posting/voting bursts).  
-- **Vote rate spikes** vs P95 of site (e.g., >5/15min early life).  
-- **Discuss ratio** (comments:upvotes) abnormally low.  
-Map to **bands** (0–39 green, 40–69 amber, 70–100 red).  
-**Actions:** show chip; apply **slowmode** automatically at ≥70; list in `/mod/astro`.  
-Expose constants + rationale on `/methods`.
+## 6) Post Types & Media
+**Text** (markdown like Reddit) · **Link** (YouTube-nocookie/Rumble/X behind consent) · **Images** (**≤5 uploads**, each **≤4MB**).  
+**Title ≤300 chars**; body markdown; sanitize output.
 
-## 7) Moderation
-- Inline: **Remove (soft)**, **Lock**, **Slowmode** (0/30/60/120), **Domain-throttle**.  
-- **Report** creates ModNote (minimal).  
-- Staff can always act; authors can delete their own post ≤15m (hard-delete if no comments; else soft).
+## 7) Sorting & Time Filter
+Default `sort=hot`. Tabs: **Hot**, **New**, **Top**.  
+**Top only** accepts `t ∈ {24h, 7d, all}`; if `sort=top` and `t` unset → **t=all**. No `t` elsewhere.
 
-## 8) Safety & Privacy
-- **CSP allowlist** for embeds; if consent not given, show link-card only.  
-- **Click-to-play** iframes with sandbox, referrerpolicy, and `youtube-nocookie`.  
-- **Rate limits**: defaults (env-tunable) posts/day/user, comments/min/user, votes/min/user.  
-- **No third-party JS until consent**; store consent in a first-party cookie.
+## 8) AstroShield v1
+Score **1–100**. Bands: **0–39 green**, **40–69 amber**, **70–100 red**.  
+Signals (cap at 100, last 24h unless stated):
+- Account age <3 days → +25
+- Vote velocity: >20/min (last hr) → +25; >40/min → +40 (use max)
+- Posts/day >10 → +20
+- Discuss ratio (comments:upvotes on user’s posts) <0.2 → +10
+- Domain repetition >70% of user’s link posts to same domain → +10
+Actions:
+- Green: none.
+- Amber (40–69): chip **“Watch”**.
+- Red (≥70): chip **“High risk”**, **slowmode 60s**.
+- Severe (≥85): **slowmode 120s**, list in `/mod/astro`.
+Decay: recompute hourly; score drops as activity normalizes.
+Chip styles (light theme):  
+Green “Normal”; Amber “Watch” (text #92400e / bg #fef3c7); Red “High risk” (text #991b1b / bg #fee2e2).
 
-## 9) Ops & Environments
-- **Prod/Staging** are separate Fly apps and DBs.  
-- **Prod must not fall back to SQLite.** `DATABASE_URL` required; abort startup if missing.  
-- `release_command: python manage.py migrate --noinput`.  
-- Static via WhiteNoise; `collectstatic` at build time.  
-- Seed command `seed_basics` for 4 communities + 3 demo posts (for staging only).
+## 9) Moderation
+**Domain-throttle:** −50% ranking weight; set by **Mods/Admins**; auto-expires after **7 days**.  
+**Remove = soft** (placeholder remains).  
+**Author self-delete ≤15m:** no comments → hard-delete; else replace with **“[deleted]”**.  
+Locked copy:
+- “**Removed by moderators**.”
+- “**[deleted]** by author.”
+- “You can delete your post within **15 minutes** of publishing.”
 
-### Required env vars
-`SECRET_KEY`, `DATABASE_URL`, `ALLOWED_HOSTS`, `CSP_EMBED_ALLOWLIST` (comma-sep), `RATE_POSTS_PER_DAY`, `RATE_COMMENTS_PER_MIN`, `RATE_VOTES_PER_MIN`, optional `SENTRY_DSN`.
+## 10) Safety & Privacy
+Strict **CSP allowlist**; **no third-party JS until consent**; click-to-play embeds (sandbox, referrerpolicy, youtube-nocookie). Rate limits (below).
 
-## 10) Definition of Done (V2)
-- Feeds render server-side with visible posts; sort & time filters behave as specified.  
-- Submit supports Text/Link/Images(≤5) with friendly validation; rate limits enforced.  
-- Detail page renders safe embeds/images; comments + votes work.  
-- AstroShield v1 chip shows; slowmode auto at ≥70; `/methods` published.  
-- Moderation actions function; Report → ModNote; author self-delete ≤15m.  
-- CSP enforced; no third-party JS until consent; click-to-play embeds.  
-- Staging + Prod live; migrations through `release_command`; smoke test passes; deps pinned.
+## 11) Rate Limits (defaults; env-tunable)
+**New users (<24h):** Posts **5/day**, Comments **6/min** (sliding), Votes **10/min**.  
+**Authenticated (≥24h):** Posts **10/day**, Comments **1/min**, Votes **2/min**.  
+Friendly 429 UI: “You’re going too fast. Please slow down and try again.”  
+ENV (fallbacks above):  
+`RATE_POSTS_PER_DAY_NEW=5` `RATE_COMMENTS_PER_MIN_NEW=6` `RATE_VOTES_PER_MIN_NEW=10`  
+`RATE_POSTS_PER_DAY_AUTH=10` `RATE_COMMENTS_PER_MIN_AUTH=1` `RATE_VOTES_PER_MIN_AUTH=2`
 
-## 11) Acceptance & Smoke Tests (minimal)
-1. Seed staging; home `/` shows ≥1 post; invalid `?page` falls back to page 1.  
-2. Submit: (a) Text-only, (b) Link (YouTube) with consent gate, (c) 3-image slideshow; all appear in feed.  
-3. Rate limits: exceeding comment/vote thresholds yields friendly 429 UI.  
-4. AstroShield: set a user to high-risk (fixture) → chip shows, slowmode applied.  
-5. Moderation: remove/lock/slowmode/domain-throttle visibly affect feed/detail.  
-6. CSP report-only check passes; no third-party JS loaded before consent.
+## 12) Accessibility & UX
+Contrast: **WCAG AA** (≥4.5:1 text, ≥3:1 large).  
+Focus: visible 2px outline (accent color), never removed.  
+Keyboard: tabs use L/R + Enter/Space, `aria-current`; “Communities ▾” uses `aria-haspopup="menu"`, `aria-expanded`, ESC closes; full keyboard nav.  
+Locked strings:  
+Feed empty “**No posts yet.**” · Community empty “**Nothing here yet.**” · Error “**Something went wrong.**” · Permission “**You need to sign in.**”
 
-## 12) Milestones (must merge in order)
-1) Data model & migration set; seed 4 communities.  
-2) Routes + base views (`/`, `/r/*`, `/p/*`, `/submit`, `/mod/astro`, `/methods`).  
-3) Feed card UI.  
-4) Post detail UI (safe embeds + images).  
-5) Submit flow with validations + preview.  
-6) AstroShield v1 (signals, scoring, chip, slowmode).  
-7) Moderation tools.  
-8) Safety hardening (CSP, consent, rate limits).  
-9) Deploy V2 (staging → prod) with smoke tests.
+## 13) Ops & Environments
+Staging: `surejan-staging.fly.dev` (**seed allowed**). Prod: `surejan.fly.dev` (**no seed**).  
+ENV flags:  
+`ALLOW_SEED=true|false` (staging true, prod false) · `CSP_REPORT_ONLY=true|false` (staging true) · `CSP_REPORT_URI=<url>` (optional) · `SENTRY_DSN` (prod required).  
+Fly: `release_command: python manage.py migrate --noinput`. Static via WhiteNoise.
 
-## 13) Change Control
-No scope changes without editing this file in the same PR. Any deviation is a defect.
+## 14) Definition of Done (V2)
+- Hot/New/Top behave as above; Top defaults `t=all`.
+- Submit supports Text/Link/Images(≤5 uploads) with validation.
+- Detail renders safe embeds/images; comments + votes work.
+- AstroShield chips + slowmode thresholds work; `/methods` published.
+- Mod tools (Remove/Lock/Slowmode/Domain-throttle) function.
+- CSP enforced; consent gating; rate limits enforced.
+- Staging + Prod live; smoke tests pass; deps pinned.
+- **500 registered users** milestone.
+
+## 15) Acceptance & Smoke Tests (minimum)
+1. Signup → header shows username.  
+2. Submit Text, Link (YouTube nocookie), Images(3) → appear in feed.  
+3. Sort tabs render; `/?sort=top` (no `t`) works; `t=24h|7d|all` all work.  
+4. Rate-limit thresholds return **429** with friendly copy.  
+5. AstroShield fixture score=75 → red chip + 60s slowmode; ≥85 → 120s + listed in `/mod/astro`.  
+6. Mod actions visibly affect UI/ranking.  
+7. CSP: no third-party JS before consent.  
+8. `/secret-admin/` reachable (allowed IPs).  
+9. HTMX pagination: `/?page=2` valid; no duplicate IDs.
+
+## 16) Milestones (merge order)
+1) Models/migrations + seed 4 communities · 2) Routes/base views · 3) Feed cards  
+4) Post detail (safe embeds/images) · 5) Submit + validation · 6) AstroShield v1  
+7) Moderation tools · 8) Safety hardening (CSP/consent/rates) · 9) Deploy V2 (staging→prod)
 

@@ -1,7 +1,8 @@
 Change control: If templates affecting this surface change, update this file in the same PR.
 
-Palette: --color-bg, --color-surface, --color-text, --color-accent
-Spacing: 4/8/12/16/24/32
-Radii: sm/md/lg
-Fonts: --font-sans, --font-mono
-Breakpoints: 480/768/1024
+Colors: --color-bg, --color-surface, --color-text, --color-accent  
+Spacing: --space-1..--space-6 → 4,8,12,16,24,32px  
+Radii: --radius-sm, --radius-md, --radius-lg  
+Fonts: --font-sans, --font-mono  
+Breakpoints: --bp-sm:480px, --bp-md:768px, --bp-lg:1024px
+
