@@ -31,3 +31,8 @@ flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collect
 * `/r/news/` → "Submit" visible (logged-in), post appears in feed.
 * Vote/comment work; anonymous users get redirected to login for writes.
 * `/secret-admin/` → admin login loads (only from allowlisted IPs if set).
+
+### AstroShield scheduler (minimal)
+Run hourly (cron or CI runner):
+flyctl ssh console -a surejan -C "python manage.py astro_recompute"
+
