@@ -239,20 +239,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # Detect build phase for collectstatic
 IS_BUILD = os.getenv("DJANGO_COLLECTSTATIC") == "1"
 
-if os.getenv("DJANGO_TESTS", "1") in ("1", "true", "True"):
-    STORAGES = {
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        }
-    }
-else:
-    STORAGES = {
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        }
-    }
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
+STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 
 # Temporary guard to avoid 500s from missing manifest entries while iterating.
 # REMOVE once favicon/static references are correct and collectstatic is clean.

@@ -105,5 +105,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .header-right{ justify-self:end; display:flex; align-items:center; gap:12px; }
 
 /* Logo size authority (wins last) */
-.header-logo img{ max-height:none !important; height:auto !important; }
-.site-logo{ height:48px !important; width:auto; display:block; }
+.header-logo img{max-height:none !important;height:auto !important;opacity:1 !important;visibility:visible !important;filter:none !important}
+.site-logo{height:48px !important;width:auto;display:block}
+/* remove after you confirm */
+.site-logo{filter: brightness(1.2) contrast(1.05)}
