@@ -92,10 +92,18 @@ if ENABLE_TWITTER_EMBEDS:
     EMBED_WHITELIST.append("https://platform.twitter.com")
 
 # Simple per-user rate limits
+RATE_POSTS_PER_DAY_NEW = int(os.getenv("RATE_POSTS_PER_DAY_NEW", "10"))
+RATE_COMMENTS_PER_MIN_NEW = int(os.getenv("RATE_COMMENTS_PER_MIN_NEW", "8"))
+RATE_VOTES_PER_MIN_NEW = int(os.getenv("RATE_VOTES_PER_MIN_NEW", "40"))
+
+RATE_POSTS_PER_DAY_AUTH = int(os.getenv("RATE_POSTS_PER_DAY_AUTH", "30"))
+RATE_COMMENTS_PER_MIN_AUTH = int(os.getenv("RATE_COMMENTS_PER_MIN_AUTH", "20"))
+RATE_VOTES_PER_MIN_AUTH = int(os.getenv("RATE_VOTES_PER_MIN_AUTH", "120"))
+
 RATE_LIMITS = {
-    "post": {"limit": 20, "window": 86400},  # posts per day
-    "comment": {"limit": 60, "window": 60},  # comments per minute
-    "vote": {"limit": 120, "window": 60},  # votes per minute
+    "post": {"limit": RATE_POSTS_PER_DAY_AUTH, "window": 86400},  # posts per day
+    "comment": {"limit": RATE_COMMENTS_PER_MIN_AUTH, "window": 60},  # comments per minute
+    "vote": {"limit": RATE_VOTES_PER_MIN_AUTH, "window": 60},  # votes per minute
 }
 
 if not DEBUG:
