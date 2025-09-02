@@ -9,6 +9,15 @@
         <p><a class="button" href="{% url 'post_submit' %}" hx-boost="false">Submit</a></p>
       {% endif %}
       {% include "partials/sort_tabs.html" with active_sort=sort community_slug=community_slug sort_tabs=sort_tabs %}
+      {% if sort == 'top' %}
+      <div class="sort">
+        <div class="btn-group" role="group" aria-label="Select time range">
+          <a href="{% url 'community' community_slug %}?sort=top&t=24h" class="{% if t == '24h' %}active{% endif %}">Last 24h</a>
+          <a href="{% url 'community' community_slug %}?sort=top&t=7d" class="{% if t == '7d' %}active{% endif %}">Last 7d</a>
+          <a href="{% url 'community' community_slug %}?sort=top" class="{% if t == 'all' %}active{% endif %}">All</a>
+        </div>
+      </div>
+      {% endif %}
       <div class="feed">
         <div id="feed-list">
           {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}

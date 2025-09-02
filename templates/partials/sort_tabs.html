@@ -5,11 +5,11 @@
       {% if key == 'wiki' %}
         <a href="{% url 'community_wiki' community_slug %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
       {% else %}
-        <a href="{% url 'community' community_slug %}?sort={{ key }}{% if t and t != 'all' %}&t={{ t }}{% endif %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
+        <a href="{% url 'community' community_slug %}?sort={{ key }}{% if key == 'top' and t and t != 'all' %}&t={{ t }}{% endif %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
       {% endif %}
     {% else %}
       {% if key != 'wiki' %}
-        <a href="/?sort={{ key }}{% if t and t != 'all' %}&t={{ t }}{% endif %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
+        <a href="/?sort={{ key }}{% if key == 'top' and t and t != 'all' %}&t={{ t }}{% endif %}" class="{% if active_sort == key %}active{% endif %}">{{ label }}</a>
       {% endif %}
     {% endif %}
   {% endfor %}

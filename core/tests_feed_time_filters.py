@@ -66,7 +66,9 @@ class FeedRangeMixin:
 
 class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
     def _ids(self, t):
-        params = {"t": t} if t is not None else {}
+        params = {"tab": "top"}
+        if t is not None:
+            params["t"] = t
         resp = self.client.get(reverse("feed_list"), params, HTTP_HX_REQUEST="true")
         return [p.pk for p in resp.context["posts"]]
 
@@ -108,7 +110,9 @@ class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
 
 class FeedRangeFilterHomeTests(FeedRangeMixin, TestCase):
     def _ids(self, t):
-        params = {"t": t} if t is not None else {}
+        params = {"tab": "top"}
+        if t is not None:
+            params["t"] = t
         resp = self.client.get(reverse("home"), params)
         return [p.pk for p in resp.context["page"].object_list]
 

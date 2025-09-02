@@ -1,16 +1,16 @@
 <nav id="feed-controls" class="feed-controls" hx-target="#feed-list" aria-label="Feed controls">
   <div class="tabs">
-    <a href="?tab=hot{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-get="{% url 'feed_list' %}?tab=hot{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'hot' %}active{% endif %}" aria-label="Show hot posts">HOT</a>
-    <a href="?tab=new{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-get="{% url 'feed_list' %}?tab=new{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'new' %}active{% endif %}" aria-label="Show new posts">NEW</a>
-    <a href="?tab=rising{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-get="{% url 'feed_list' %}?tab=rising{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'rising' %}active{% endif %}" aria-label="Show rising posts">RISING</a>
-    <a href="?tab=controversial{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-get="{% url 'feed_list' %}?tab=controversial{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'controversial' %}active{% endif %}" aria-label="Show controversial posts">CONTROVERSIAL</a>
+    <a href="?tab=hot" hx-get="{% url 'feed_list' %}?tab=hot" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'hot' %}active{% endif %}" aria-label="Show hot posts">HOT</a>
+    <a href="?tab=new" hx-get="{% url 'feed_list' %}?tab=new" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'new' %}active{% endif %}" aria-label="Show new posts">NEW</a>
     <a href="?tab=top{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-get="{% url 'feed_list' %}?tab=top{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-push-url="true" hx-target="#feed-list" class="{% if tab == 'top' %}active{% endif %}" aria-label="Show top posts">TOP</a>
   </div>
+  {% if tab == 'top' %}
   <div class="sort">
     <div class="btn-group" role="group" aria-label="Select time range">
-      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&t=24h" hx-target="#feed-list" hx-push-url="true" class="{% if t == '24h' %}active{% endif %}">Last 24h</button>
-      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}&t=7d" hx-target="#feed-list" hx-push-url="true" class="{% if t == '7d' %}active{% endif %}">Last 7d</button>
-      <button type="button" hx-get="{% url 'feed_list' %}?tab={{ tab }}" hx-target="#feed-list" hx-push-url="true" class="{% if not t or t == 'all' %}active{% endif %}">All</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab=top&t=24h" hx-target="#feed-list" hx-push-url="true" class="{% if t == '24h' %}active{% endif %}">Last 24h</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab=top&t=7d" hx-target="#feed-list" hx-push-url="true" class="{% if t == '7d' %}active{% endif %}">Last 7d</button>
+      <button type="button" hx-get="{% url 'feed_list' %}?tab=top" hx-target="#feed-list" hx-push-url="true" class="{% if t == 'all' %}active{% endif %}">All</button>
     </div>
   </div>
+  {% endif %}
 </nav>
