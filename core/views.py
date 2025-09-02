@@ -471,20 +471,14 @@ def regenerate_recovery_codes(request):
 # Mapping of feed tabs to their ordering in the database.  Each ordering
 # includes ``-id`` as the final column to guarantee deterministic results.
 FEED_ORDER = {
-    "best": ["-best_rank", "-created_at", "-id"],
     "hot": ["-hot_rank", "-created_at", "-id"],
     "new": ["-created_at", "-id"],
-    "rising": ["-rising_rank", "-created_at", "-id"],
-    "controversial": ["-controversy", "-created_at", "-id"],
     "top": ["-score", "-created_at", "-id"],
 }
 
 SORT_TABS = [
-    ("best", "BEST"),
     ("hot", "HOT"),
     ("new", "NEW"),
-    ("rising", "RISING"),
-    ("controversial", "CONTROVERSIAL"),
     ("top", "TOP"),
     ("wiki", "WIKI"),
 ]
@@ -513,7 +507,7 @@ def feed_list(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    t = request.GET.get("t", "all")
+    t = request.GET.get("t", "all") if tab == "top" else "all"
     if t not in RANGE_MAP and t != "all":
         t = "all"
 
@@ -543,7 +537,7 @@ def home(request):
     if tab not in TAB_ORDER:
         tab = "hot"
 
-    t = request.GET.get("t", "all")
+    t = request.GET.get("t", "all") if tab == "top" else "all"
     if t not in RANGE_MAP and t != "all":
         t = "all"
 
@@ -642,11 +636,11 @@ def community(request, slug):
         community = Community.objects.get(slug=slug)
     except Community.DoesNotExist:
         return redirect("/")
-    sort = request.GET.get("sort", "best")
+    sort = request.GET.get("sort", "hot")
     if sort not in FEED_ORDER:
-        sort = "best"
+        sort = "hot"
 
-    t = request.GET.get("t", "all")
+    t = request.GET.get("t", "all") if sort == "top" else "all"
     if t not in RANGE_MAP and t != "all":
         t = "all"
 
@@ -654,7 +648,7 @@ def community(request, slug):
     page = int(request.GET.get("page", "1") or 1)
 
     qs = community.posts.select_related("author").order_by(*order)
-    if t and t != "all":
+    if sort == "top" and t and t != "all":
         delta = RANGE_MAP.get(t)
         if delta:
             since = timezone.now() - delta
@@ -666,9 +660,9 @@ def community(request, slug):
     posts = posts[:PAGE_SIZE]
 
     sort_query = ""
-    if sort and sort != "best":
+    if sort and sort != "hot":
         sort_query += f"&sort={sort}"
-    if t and t != "all":
+    if sort == "top" and t and t != "all":
         sort_query += f"&t={t}"
 
     context = {

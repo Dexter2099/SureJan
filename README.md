@@ -9,7 +9,7 @@ SureJan is an independent, Brisbane-built community forum inspired by the old Re
 
 ## Features (MVP)
 
-* **Community Feeds**: Old-Reddit style feeds with sorting options (Best, Hot, New, Rising, Controversial, Top). Pagination set to 25 posts per page.
+* **Community Feeds**: Old-Reddit style feeds with sorting options (Hot, New, Top). Pagination set to 25 posts per page.
 * **Time Filters**: When sorting by Top, buttons let you view posts from the last 24 hours, last 7 days, or all time.
 * **Seed Communities**: Two initial communities, `news` and `brisbane`, seeded via a management command.
 * **User Accounts**: Username and password based authentication (email optional). Accounts display total “points” (sum of post and comment votes).
