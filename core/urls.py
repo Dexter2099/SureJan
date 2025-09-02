@@ -38,7 +38,6 @@ urlpatterns = [
     path("c/new/", core_views.create_community, name="community_create"),
 
     # Community pages (slug-based, /r/<slug>/…)
-    path("r/<slug:slug>", core_views.community, name="community"),
     path("r/<slug:slug>/wiki", core_views.community_wiki, name="community_wiki"),
 
     # Post detail (nested under community, with id + slug)

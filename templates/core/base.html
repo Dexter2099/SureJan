@@ -10,9 +10,12 @@
 </head>
 <body>
   <header class="header-bar" data-testid="header-bar">
-    <a class="header-logo" href="{% url 'home' %}">
-      <img class="site-logo" src="{% static 'img/Surejanlogo.png' %}" alt="SureJan">
-    </a>
+    <div class="nav-left">
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'img/Surejanlogo.png' %}" alt="SureJan">
+      </a>
+      <a class="communities-link" href="{% url 'communities_index' %}">Communities ▾</a>
+    </div>
     <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
       <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
       <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
