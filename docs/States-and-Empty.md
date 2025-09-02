@@ -2,5 +2,5 @@ Change control: If templates affecting this surface change, update this file in 
 
 Feed empty: "No posts yet."
 Community empty: "Nothing here yet."
-Error generic: "Something went wrong."
+Error: "Something went wrong."
 Permission: "You need to sign in."

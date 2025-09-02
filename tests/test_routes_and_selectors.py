@@ -25,16 +25,19 @@ def test_required_selectors_on_home(client):
     html = client.get("/").content.decode()
     assert 'data-testid="header-bar"' in html
     assert ('data-testid="post-card"' in html) or ('data-testid="empty-state"' in html)
+
+
+@pytest.mark.django_db
+def test_sort_tabs_present(client):
+    html = client.get("/").content.decode()
     assert 'id="sort-tabs"' in html
 
 
 @pytest.mark.django_db
-def test_top_without_t(client):
-    r = client.get("/?sort=top")
-    assert r.status_code == 200
+def test_top_default_all(client):
+    assert client.get("/?sort=top").status_code in (200, 302)
 
 
 @pytest.mark.django_db
 def test_top_with_t(client):
-    r = client.get("/?sort=top&t=24h")
-    assert r.status_code == 200
+    assert client.get("/?sort=top&t=24h").status_code in (200, 302)

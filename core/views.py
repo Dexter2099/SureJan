@@ -511,6 +511,8 @@ def feed_list(request):
     allowed = {"24h", "7d", "all"}
     if sort != "top" or t not in allowed:
         t = None
+    if sort == "top" and t is None:
+        t = "all"
 
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
@@ -541,6 +543,8 @@ def home(request):
     allowed = {"24h", "7d", "all"}
     if sort != "top" or t not in allowed:
         t = None
+    if sort == "top" and t is None:
+        t = "all"
 
     page_number = request.GET.get("page") or 1
     qs = feed_queryset(sort, t)
@@ -645,6 +649,8 @@ def community(request, slug):
     allowed = {"24h", "7d", "all"}
     if sort != "top" or t not in allowed:
         t = None
+    if sort == "top" and t is None:
+        t = "all"
 
     order = FEED_ORDER[sort]
     page = int(request.GET.get("page", "1") or 1)
