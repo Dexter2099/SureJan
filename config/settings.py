@@ -144,6 +144,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_htmx",
     "csp",   # django-csp
+    "storages",
     "core",
 ]
 
@@ -246,23 +247,21 @@ STATICFILES_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 # REMOVE once favicon/static references are correct and collectstatic is clean.
 WHITENOISE_MANIFEST_STRICT = False
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = os.environ["MEDIA_URL"]
 
-# Optional: S3/Tigris for MEDIA uploads (toggle with DJANGO_USE_S3_MEDIA=1)
-USE_S3_MEDIA = os.environ.get("DJANGO_USE_S3_MEDIA", "").lower() in ("1", "true", "yes")
-if USE_S3_MEDIA:
-    INSTALLED_APPS.append("storages")
-    AWS_STORAGE_BUCKET_NAME = os.environ["BUCKET_NAME"]
-    AWS_S3_ENDPOINT_URL = os.environ.get("AWS_ENDPOINT_URL_S3")  # e.g. https://fly.storage.tigris.dev
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_ADDRESSING_STYLE = "virtual"
-    AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_DEFAULT_ACL = "public-read"
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
-    STORAGES["default"] = {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}
-else:
-    STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
+AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+AWS_S3_ENDPOINT_URL = os.environ["AWS_S3_ENDPOINT_URL"]  # e.g. https://fly.storage.tigris.dev
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_DEFAULT_ACL = "public-read"
+AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}
 
 # -----------------------------------------------------------------------------
 # Email
