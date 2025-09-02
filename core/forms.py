@@ -1,86 +1,94 @@
 from django import forms
 from django.utils.text import slugify
 
+import bleach
+import mistune
+
 from .models import Comment, Community, validate_image_file
 from .utils.link_safety import check_url_safety
+
+
+markdown_renderer = mistune.create_markdown()
+
+ALLOWED_TAGS = [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "a",
+    "strong",
+    "em",
+    "code",
+    "pre",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "br",
+]
+ALLOWED_ATTRIBUTES = {"a": ["href"]}
 
 
 class PostForm(forms.Form):
     """Form for submitting a post."""
 
+    POST_TYPES = [("text", "Text"), ("link", "Link"), ("images", "Images")]
+
     community = forms.ModelChoiceField(queryset=Community.objects.all(), required=True)
-    title = forms.CharField(max_length=120)
-    heading = forms.CharField(max_length=80, required=False)
+    post_type = forms.ChoiceField(choices=POST_TYPES, widget=forms.RadioSelect)
+    title = forms.CharField(max_length=300)
     body = forms.CharField(
         widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
     )
-    media = forms.FileField(required=False)
-    caption = forms.CharField(
-        widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
-    )
     link = forms.URLField(required=False)
-    image_urls = forms.CharField(
-        required=False,
-        widget=forms.Textarea(
-            attrs={"placeholder": "One image URL per line", "rows": 3}
-        ),
-    )
+    class MultiFileInput(forms.ClearableFileInput):
+        allow_multiple_selected = True
 
-    def clean_media(self):
-        media = self.cleaned_data.get("media")
-        if media and getattr(media, "content_type", "").startswith("image/"):
-            try:
-                validate_image_file(media)
-            except forms.ValidationError as exc:  # pragma: no cover - defensive
-                raise exc
-        return media
+    images = forms.FileField(required=False, widget=MultiFileInput)
+
+    def clean_body(self):
+        body = (self.cleaned_data.get("body") or "").strip()
+        if not body:
+            return ""
+        html = markdown_renderer(body)
+        return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+
+    def clean_images(self):
+        files = self.files.getlist("images")
+        if len(files) > 5:
+            raise forms.ValidationError("You can upload up to 5 images.")
+        for f in files:
+            if f.size > 4 * 1024 * 1024:
+                raise forms.ValidationError("Image too large (max 4MB).")
+            validate_image_file(f)
+        return files
 
     def clean(self):
         cleaned = super().clean()
         title = (cleaned.get("title") or "").strip()
-        body = (cleaned.get("body") or "").strip()
-        caption = (cleaned.get("caption") or "").strip()
         link = (cleaned.get("link") or "").strip()
-        image_urls_raw = (cleaned.get("image_urls") or "").strip()
-        heading = (cleaned.get("heading") or "").strip()
-        media = cleaned.get("media")
+        post_type = cleaned.get("post_type")
+        images = cleaned.get("images") or []
+        body = cleaned.get("body") or ""
 
-        # Normalize and validate image URLs
-        urls = [u.strip() for u in image_urls_raw.splitlines() if u.strip()]
-        if len(urls) > 5:
-            self.add_error("image_urls", "A maximum of five image URLs is allowed.")
-        for u in urls:
-            if not check_url_safety(u):
-                self.add_error("image_urls", "One or more image URLs are flagged as unsafe.")
-                break
-
-        cleaned.update(
-            {
-                "title": title,
-                "body": body,
-                "caption": caption,
-                "link": link,
-                "heading": heading,
-                "image_urls": urls,
-            }
-        )
+        cleaned.update({"title": title, "link": link, "images": images, "body": body})
 
         if not title:
             self.add_error("title", "Title is required.")
 
-        has_media = bool(media or link or urls)
-        if not body and not has_media:
-            raise forms.ValidationError("Provide body text or media.")
-
-        if caption and not (media or urls):
-            self.add_error("caption", "Caption requires media.")
-
-        if link and urls:
-            self.add_error("link", "Choose a link or image URLs, not both.")
-            self.add_error("image_urls", "Choose a link or image URLs, not both.")
-
-        if link and not check_url_safety(link):
-            self.add_error("link", "URL flagged as unsafe.")
+        if post_type == "text":
+            if not body:
+                self.add_error("body", "Body is required for text posts.")
+        elif post_type == "link":
+            if not link:
+                self.add_error("link", "Link is required for link posts.")
+            elif not check_url_safety(link):
+                self.add_error("link", "URL flagged as unsafe.")
+        elif post_type == "images":
+            if not images:
+                self.add_error("images", "At least one image is required.")
+        else:
+            self.add_error("post_type", "Invalid post type.")
 
         return cleaned
 
