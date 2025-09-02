@@ -10,11 +10,22 @@
 </head>
 <body>
   <header class="header-bar" data-testid="header-bar">
-    <a class="header-logo" href="{% url 'home' %}">
-      <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-    </a>
-    {% block header_center %}{% endblock %}
-    {% block header_right %}{% endblock %}
+    <div class="header-left">
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
+      </a>
+      {% comment %} Optional: <a class="nav-communities" href="/r">Communities ▾</a> {% endcomment %}
+    </div>
+
+    <nav id="sort-tabs" class="header-center" aria-label="Sort">
+      <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
+      <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
+      <a href="?sort=top{% if request.GET.t %}&t={{ request.GET.t }}{% endif %}"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
+    </nav>
+
+    <div class="header-right">
+      {% block header_right %}{% endblock %}
+    </div>
   </header>
   {% block content %}{% endblock %}
   <footer class="footer">
