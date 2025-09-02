@@ -54,8 +54,9 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .communities-dropdown .dropdown-menu a:hover{
   background:rgba(0,0,0,.06);
 }
-.communities-dropdown.open .dropdown-menu,
-.communities-dropdown:hover .dropdown-menu{
+
+/* Menu visibility controlled via JS toggling the `.open` class */
+.communities-dropdown.open .dropdown-menu{
   display:block;
 }
 
@@ -103,30 +104,4 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 
 /* final authority for header logo size */
 .site-logo { max-height: 48px; height: auto; width: auto; object-fit: contain; display: block; }
-
-/* --- Communities dropdown on logo hover (CSS-only) --- */
-.brand { position: relative; display: inline-block; }
-.brand-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  display: none;
-  margin: 6px 0 0 0;
-  padding: 6px 0;
-  list-style: none;
-  min-width: 160px;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.1);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  z-index: 1000;
-}
-.brand:hover .brand-menu,
-.brand:focus-within .brand-menu { display: block; }
-.brand-menu li { margin: 0; }
-.brand-menu a {
-  display: block;
-  padding: 8px 12px;
-  text-decoration: none;
-}
-.brand-menu a:hover { text-decoration: underline; }
 
