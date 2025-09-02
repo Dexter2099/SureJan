@@ -29,8 +29,8 @@ Ship a small, fast, safe, **local forum** for 4 starter communities with simple 
 - `/submit` — Submit post.  
 - `/mod/astro` — Minimal mod list (reports/notes + high-score posts).  
 - `/methods` — Public write-up of AstroShield v1 and safety measures.  
-**Sort:** Hot (default), New, Top(24h/7d/All).  
-**Time filter:** Applied **only** when requested (`?t=24h|7d|all`).
+**Sort:** Hot (default), New, Top.
+**Time filter (Top only):** none by default; apply when requested (`?t=24h|7d|all`).
 
 ## 4) UX & Layout (baseline)
 - **Centered feed** (≈700px) with **right gutter** sidebar (300–320px) containing only: **Submit Post** (primary CTA) and **Anti-Astroturf** link.  

@@ -1,7 +1,11 @@
 {% url 'feed_list' as feed_url %}
 {% for post in posts %}
   {% if forloop.last and next_page %}
-    {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&range='|add:range|add:'&page='|add:next_page %}
+    {% if t and t != 'all' %}
+      {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&t='|add:t|add:'&page='|add:next_page %}
+    {% else %}
+      {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&page='|add:next_page %}
+    {% endif %}
   {% else %}
     {% include "partials/feed_card.html" with post=post %}
   {% endif %}

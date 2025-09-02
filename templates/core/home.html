@@ -8,12 +8,11 @@
 
         <form method="get" class="range-selector" style="margin-bottom:1rem;">
           <input type="hidden" name="tab" value="{{ tab }}">
-          <label for="range">Time range:</label>
-          <select name="range" id="range">
-            <option value="day" {% if range == 'day' %}selected{% endif %}>Last Day</option>
-            <option value="7days" {% if range == '7days' %}selected{% endif %}>Last 7 Days</option>
-            <option value="month" {% if range == 'month' %}selected{% endif %}>Last Month</option>
-            <option value="year" {% if range == 'year' %}selected{% endif %}>Last Year</option>
+          <label for="t">Time range:</label>
+          <select name="t" id="t">
+            <option value="24h" {% if t == '24h' %}selected{% endif %}>Last 24 Hours</option>
+            <option value="7d" {% if t == '7d' %}selected{% endif %}>Last 7 Days</option>
+            <option value="all" {% if t == 'all' %}selected{% endif %}>All Time</option>
           </select>
           <button type="submit" class="btn">Apply</button>
         </form>
@@ -26,7 +25,7 @@
 
         {% if page.has_next %}
           <p style="text-align:center;margin:16px 0;">
-            <a class="btn" href="?page={{ page.next_page_number }}&tab={{ tab }}&range={{ range }}">Load more</a>
+            <a class="btn" href="?page={{ page.next_page_number }}&tab={{ tab }}{% if t and t != 'all' %}&t={{ t }}{% endif %}">Load more</a>
           </p>
         {% endif %}
       </section>

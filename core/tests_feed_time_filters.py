@@ -65,29 +65,22 @@ class FeedRangeMixin:
 
 
 class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
-    def _ids(self, range_):
-        resp = self.client.get(
-            reverse("feed_list"), {"range": range_}, HTTP_HX_REQUEST="true"
-        )
+    def _ids(self, t):
+        params = {"t": t} if t is not None else {}
+        resp = self.client.get(reverse("feed_list"), params, HTTP_HX_REQUEST="true")
         return [p.pk for p in resp.context["posts"]]
 
-    def test_day_filter(self):
-        ids = self._ids("day")
+    def test_24h_filter(self):
+        ids = self._ids("24h")
         self.assertEqual(ids, [self.day_post.pk])
         self.assertNotIn(self.week_post.pk, ids)
 
-    def test_7days_filter(self):
-        ids = self._ids("7days")
+    def test_7d_filter(self):
+        ids = self._ids("7d")
         self.assertSetEqual(set(ids), {self.day_post.pk, self.week_post.pk})
 
-    def test_month_filter(self):
-        ids = self._ids("month")
-        self.assertSetEqual(
-            set(ids), {self.day_post.pk, self.week_post.pk, self.month_post.pk}
-        )
-
-    def test_year_filter(self):
-        ids = self._ids("year")
+    def test_all_filter(self):
+        ids = self._ids("all")
         self.assertSetEqual(
             set(ids),
             {
@@ -95,33 +88,41 @@ class FeedRangeFilterHTMXTests(FeedRangeMixin, TestCase):
                 self.week_post.pk,
                 self.month_post.pk,
                 self.year_post.pk,
+                self.old_post.pk,
             },
         )
-        self.assertNotIn(self.old_post.pk, ids)
+
+    def test_default_all(self):
+        ids = self._ids(None)
+        self.assertSetEqual(
+            set(ids),
+            {
+                self.day_post.pk,
+                self.week_post.pk,
+                self.month_post.pk,
+                self.year_post.pk,
+                self.old_post.pk,
+            },
+        )
 
 
 class FeedRangeFilterHomeTests(FeedRangeMixin, TestCase):
-    def _ids(self, range_):
-        resp = self.client.get(reverse("home"), {"range": range_})
+    def _ids(self, t):
+        params = {"t": t} if t is not None else {}
+        resp = self.client.get(reverse("home"), params)
         return [p.pk for p in resp.context["page"].object_list]
 
-    def test_day_filter(self):
-        ids = self._ids("day")
+    def test_24h_filter(self):
+        ids = self._ids("24h")
         self.assertEqual(ids, [self.day_post.pk])
         self.assertNotIn(self.week_post.pk, ids)
 
-    def test_7days_filter(self):
-        ids = self._ids("7days")
+    def test_7d_filter(self):
+        ids = self._ids("7d")
         self.assertSetEqual(set(ids), {self.day_post.pk, self.week_post.pk})
 
-    def test_month_filter(self):
-        ids = self._ids("month")
-        self.assertSetEqual(
-            set(ids), {self.day_post.pk, self.week_post.pk, self.month_post.pk}
-        )
-
-    def test_year_filter(self):
-        ids = self._ids("year")
+    def test_all_filter(self):
+        ids = self._ids("all")
         self.assertSetEqual(
             set(ids),
             {
@@ -129,6 +130,19 @@ class FeedRangeFilterHomeTests(FeedRangeMixin, TestCase):
                 self.week_post.pk,
                 self.month_post.pk,
                 self.year_post.pk,
+                self.old_post.pk,
             },
         )
-        self.assertNotIn(self.old_post.pk, ids)
+
+    def test_default_all(self):
+        ids = self._ids(None)
+        self.assertSetEqual(
+            set(ids),
+            {
+                self.day_post.pk,
+                self.week_post.pk,
+                self.month_post.pk,
+                self.year_post.pk,
+                self.old_post.pk,
+            },
+        )

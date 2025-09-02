@@ -13,19 +13,17 @@ TAB_ORDER = {
 }
 
 RANGE_MAP = {
-    "day": timedelta(days=1),
-    "7days": timedelta(days=7),
-    "month": timedelta(days=30),
-    "year": timedelta(days=365),
+    "24h": timedelta(days=1),
+    "7d": timedelta(days=7),
 }
 
 
-def feed_queryset(tab: str, range_: str):
+def feed_queryset(tab: str, t: str):
     """Return a queryset for the given tab and time range."""
     order = TAB_ORDER.get(tab, TAB_ORDER["hot"])
     qs = Post.objects.select_related("community", "author").order_by(*order)
-    if range_ != "all":
-        delta = RANGE_MAP.get(range_)
+    if t and t != "all":
+        delta = RANGE_MAP.get(t)
         if delta:
             since = timezone.now() - delta
             qs = qs.filter(created_at__gte=since)
