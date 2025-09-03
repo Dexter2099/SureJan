@@ -1,12 +1,4 @@
-<div class="account-block">
-  <p class="side-title">Account</p>
-  {% if user.is_authenticated %}
-    <p>{{ user.username }}</p>
-  {% else %}
-    <a class="sidebar-link" href="{% url 'login' %}">Login</a>
-    <a class="sidebar-link" href="{% url 'signup' %}">Signup</a>
-  {% endif %}
-</div>
+{% include "partials/user_box.html" %}
 <div class="sidebar-cta" data-testid="sidebar-cta">
   <a class="btn btn-primary" href="{% url 'post_submit' %}" data-testid="sidebar-submit">Submit Post</a>
   <p class="muted"><a class="sidebar-link" href="{% url 'transparency_methods' %}" data-testid="sidebar-astro">Anti-Astroturf</a></p>
