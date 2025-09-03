@@ -1,5 +1,3 @@
 {% for post in posts %}
   {% include "core/partials/post_row.html" with post=post %}
-{% empty %}
-  <div class="empty-state" data-testid="empty-state">No posts yet.</div>
 {% endfor %}

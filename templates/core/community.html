@@ -9,14 +9,11 @@
 {% endblock %}
 
 {% block content %}
-  {# Title: prefer explicit display fields, then slug; no prefixes #}
-  <h1 class="page-title">
-    {{ community.title|default:community.name|default:community.slug }}
-  </h1>
+  <h1>{{ community.name }}</h1>
 
-  {% if posts and posts|length %}
-    {% include "core/partials/post_list.html" with posts=posts %}
-  {% else %}
-    <div class="empty-state" data-testid="empty-state">No posts yet.</div>
+  {% include "core/partials/post_list.html" with posts=posts %}
+
+  {% if not posts %}
+    <div class="empty-community">No posts here</div>
   {% endif %}
 {% endblock %}
