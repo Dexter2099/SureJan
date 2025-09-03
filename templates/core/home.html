@@ -6,7 +6,8 @@
 {% endblock %}
 {% block content %}
 <section aria-labelledby="feed-heading">
-  <h1 id="feed-heading" class="sr-only">Feed</h1>
+  {# optional: replace a “Feed” title #}
+  <h1 id="feed-heading" class="sr-only">Home</h1>
   {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
 </section>
 {% endblock %}
