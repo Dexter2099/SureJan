@@ -1,7 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.template.loader import render_to_string
 from django.test import TestCase
 from django.urls import reverse
+from io import BytesIO
+from PIL import Image
 
 from ..models import Comment, Community, Post
 
@@ -51,3 +55,35 @@ class CommentLinkTests(TestCase):
             user_url = reverse("user_overview", args=[comment.author.username])
             self.assertEqual(user_url, f"/u/{comment.author.username}/")
             self.assertContains(resp, f'href="{user_url}"')
+
+
+class PostLinkTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        U = get_user_model()
+        self.user = U.objects.create_user("alice", password="pwd")
+        self.community = Community.objects.create(
+            slug="t", name="Test", title="Test", created_by=self.user
+        )
+        buf = BytesIO()
+        Image.new("RGB", (1, 1)).save(buf, format="PNG")
+        img = SimpleUploadedFile("a.png", buf.getvalue(), content_type="image/png")
+        self.post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="image",
+            title="Hello",
+            image=img,
+        )
+
+    def test_feed_card_uses_absolute_url(self):
+        url = self.post.get_absolute_url()
+        html = render_to_string("partials/feed_card.html", {"post": self.post})
+        self.assertEqual(html.count(f'href="{url}"'), 2)
+        self.assertIn(f'href="{url}#comments"', html)
+
+    def test_post_row_uses_absolute_url(self):
+        url = self.post.get_absolute_url()
+        html = render_to_string("core/partials/post_row.html", {"post": self.post})
+        self.assertEqual(html.count(f'href="{url}"'), 2)
+        self.assertIn(f'href="{url}#comments"', html)
