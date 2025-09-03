@@ -33,6 +33,9 @@ def build_embed_html(url: str) -> str:
         )
 
     thumb = data.get("thumbnail_url", "")
+    # Prefer secure thumbnails when available
+    if thumb.startswith("http://"):
+        thumb = "https://" + thumb[len("http://") :]
     html = data.get("html", "")
 
     src = ""

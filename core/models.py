@@ -242,8 +242,14 @@ class PostImageLink(models.Model):
     url = models.URLField()
 
     def save(self, *args, **kwargs):
+        # Enforce a maximum of five images per post
         if not self.pk and self.post.image_links.count() >= 5:
             raise ValidationError("Maximum of 5 images per post")
+
+        # Upgrade insecure HTTP URLs to HTTPS before saving
+        if self.url and self.url.startswith("http://"):
+            self.url = "https://" + self.url[len("http://") :]
+
         super().save(*args, **kwargs)
 
 

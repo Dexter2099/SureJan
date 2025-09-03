@@ -28,3 +28,10 @@ class PostImageLinkTests(TestCase):
             PostImageLink.objects.create(
                 post=self.post, url="http://example.com/6.jpg"
             )
+
+    def test_http_url_upgraded_to_https(self):
+        link = PostImageLink.objects.create(
+            post=self.post, url="http://example.com/img.jpg"
+        )
+        link.refresh_from_db()
+        self.assertEqual(link.url, "https://example.com/img.jpg")

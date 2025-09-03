@@ -34,6 +34,9 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'data-src="https://www.youtube-nocookie.com/embed/abc"')
         self.assertContains(resp, 'href="https://www.youtube.com/watch?v=abc"')
+        self.assertContains(
+            resp, 'src="https://img.youtube.com/vi/abc/hqdefault.jpg"'
+        )
 
     @patch("core.utils.embeds.fetch_oembed")
     def test_rumble_embed_has_placeholder(self, mock_oembed):
@@ -54,6 +57,7 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'data-src="https://rumble.com/embed/vxyz/?pub=4"')
         self.assertContains(resp, 'href="https://rumble.com/vxyz-test.html"')
+        self.assertContains(resp, 'src="https://thumb.jpg"')
 
     def test_image_slideshow_renders(self):
         post = Post.objects.create(
@@ -69,3 +73,4 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'class="post-images"')
         self.assertContains(resp, 'href="#img1"')
+        self.assertContains(resp, 'src="https://example.com/0.jpg"')
