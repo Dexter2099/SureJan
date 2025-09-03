@@ -247,36 +247,36 @@ STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 # REMOVE once favicon/static references are correct and collectstatic is clean.
 WHITENOISE_MANIFEST_STRICT = False
 
-# required envs for S3 in runtime
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
+# Required envs
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")  # e.g. https://fly.storage.tigris.dev
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
-
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
+# MEDIA_URL must come from env in runtime
+# (okay to be dummy during build)
 if IS_BUILD:
-    # allow settings to import during collectstatic
     MEDIA_URL = os.getenv("MEDIA_URL", "https://example.invalid/")
 else:
-    # enforce cloud-only at runtime
     required = [
         AWS_STORAGE_BUCKET_NAME,
         AWS_ACCESS_KEY_ID,
         AWS_SECRET_ACCESS_KEY,
         AWS_S3_ENDPOINT_URL,
+        os.getenv("MEDIA_URL"),
     ]
     if not all(required):
         raise RuntimeError("S3 media env not configured")
-    MEDIA_URL = os.environ["MEDIA_URL"]  # must be set in runtime env
+    MEDIA_URL = os.environ["MEDIA_URL"]
 
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 AWS_DEFAULT_ACL = "public-read"
 AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
 
+# Ensure STORAGES['default'] points to S3
 STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}
 
 # -----------------------------------------------------------------------------
