@@ -721,16 +721,37 @@ def post_detail(request, community, pk, slug):
     post = get_object_or_404(
         Post.objects.prefetch_related("image_links"), pk=pk, community__slug=community
     )
-    comments = post.comments.select_related("author").order_by("path")
-    form = CommentForm()
-    embed_html = build_embed_html(post.content_url)
+    c_sort = request.GET.get("c_sort", "best")
+    q = request.GET.get("q", "").strip()
+    if c_sort not in {"best", "top", "new", "controversial"}:
+        c_sort = "best"
+
+    comments = post.comments.select_related("author")
+    if q:
+        comments = comments.filter(body__icontains=q)
+
+    if c_sort == "top":
+        comments = comments.order_by("-score", "-created_at")
+    elif c_sort == "new":
+        comments = comments.order_by("-created_at")
+    elif c_sort == "controversial":
+        comments = comments.order_by(F("score").abs().desc(), "-created_at")
+    else:  # best
+        comments = comments.order_by("-score", "path")
+
     images = list(post.image_links.all())
+    has_gallery = bool(images)
+    has_upload = bool(post.image)
+    show_embed = bool(post.content_url) and not (has_gallery or has_upload)
+    embed_html = build_embed_html(post.content_url) if show_embed else ""
+
     context = {
         "post": post,
         "comments": comments,
-        "form": form,
         "embed_html": embed_html,
         "images": images,
+        "c_sort": c_sort,
+        "q": q,
     }
     return render(request, "core/post_detail.html", context)
 
@@ -739,16 +760,37 @@ def post_detail_id(request, pk):
     """Simpler post detail view addressed by ID only."""
 
     post = get_object_or_404(Post.objects.prefetch_related("image_links"), pk=pk)
-    comments = post.comments.select_related("author").order_by("path")
-    form = CommentForm()
-    embed_html = build_embed_html(post.content_url)
+    c_sort = request.GET.get("c_sort", "best")
+    q = request.GET.get("q", "").strip()
+    if c_sort not in {"best", "top", "new", "controversial"}:
+        c_sort = "best"
+
+    comments = post.comments.select_related("author")
+    if q:
+        comments = comments.filter(body__icontains=q)
+
+    if c_sort == "top":
+        comments = comments.order_by("-score", "-created_at")
+    elif c_sort == "new":
+        comments = comments.order_by("-created_at")
+    elif c_sort == "controversial":
+        comments = comments.order_by(F("score").abs().desc(), "-created_at")
+    else:  # best
+        comments = comments.order_by("-score", "path")
+
     images = list(post.image_links.all())
+    has_gallery = bool(images)
+    has_upload = bool(post.image)
+    show_embed = bool(post.content_url) and not (has_gallery or has_upload)
+    embed_html = build_embed_html(post.content_url) if show_embed else ""
+
     context = {
         "post": post,
         "comments": comments,
-        "form": form,
         "embed_html": embed_html,
         "images": images,
+        "c_sort": c_sort,
+        "q": q,
     }
     return render(request, "core/post_detail.html", context)
 
