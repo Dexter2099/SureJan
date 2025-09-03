@@ -7,6 +7,10 @@ SureJan is an independent, Brisbane-built community forum inspired by the old Re
 
 **Live site:** back under development as of 31/08/2025
 
+## V3 UI Specs
+- [V3 One-Pager](docs/V3-onepager.md) — quick summary
+- [UI Contract](docs/UI-contract.md) — full layout and selectors
+
 ## Features (MVP)
 
 * **Community Feeds**: Old-Reddit style feeds with sorting options (Hot, New, Top). Pagination set to 25 posts per page.
