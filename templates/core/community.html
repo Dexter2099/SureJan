@@ -9,7 +9,10 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="page-title">r/{{ community.name|default:community.slug }}</h1>
+  {# Title: prefer explicit display fields, then slug; no prefixes #}
+  <h1 class="page-title">
+    {{ community.title|default:community.name|default:community.slug }}
+  </h1>
 
   {% if posts and posts|length %}
     {% include "core/partials/post_list.html" with posts=posts %}
