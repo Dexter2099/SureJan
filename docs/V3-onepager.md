@@ -2,87 +2,46 @@
 
 > **Change control:** If this spec changes, update this file and the Penpot wireframes in the same PR.
 
----
-
 ## Scope
-- **Pages covered**
-  - Main Page (feed + left/right sidebars)
-  - Submit Post Page
-  - Post Detail (thread view)
-- **Communities supported initially**
-  - News
-  - Brisbane
-  - Politics
-  - Social
-
----
+- Pages: Main, Submit Post, Post Detail
+- Communities: News, Brisbane, Politics, Social
 
 ## Grid
-- Frame width: **1440px**
-- Content shell: **1024px**, centered
-  - Feed: **700px**
-  - Gutter: **24px**
-  - Sidebar (right): **300px**
-- Left sidebar: **~200–240px** for communities list
-- Mobile `<768px`: single column; feed first, then sidebars stacked
+- Frame: 1440px
+- Content shell: 1024px centered (Feed 700 + Gutter 24 + Sidebar 300)
+- Left sidebar: ~200–240px Communities list
+- Mobile <768px: single column (feed → sidebars)
 
----
+## Header (128px)
+- Left: Logo → Home
+- Center: Hot · New · Top tabs
+- Right: Account/Login
 
-## Header (128px tall)
-- Left: **Logo → Home**
-- Center: **Tabs Hot · New · Top**
-- Right: **Account / Login | Signup**
+## Left Sidebar
+- Label: Communities
+- Links: News, Brisbane, Politics, Social
 
----
+## Right Sidebar
+- Account/Login
+- Submit Post (CTA)
+- Anti-Astroturf
 
-## Left Sidebar (Communities)
-- Label: *Communities*
-- List of static links:
-  - News
-  - Brisbane
-  - Politics
-  - Social
+## Main Feed
+- Post card: Title, meta, optional media, body preview, actions
 
----
+## Submit Post
+- Community selector (required)
+- Title (required)
+- Media (optional)
+- Body (optional if media present)
+- Submit button
+- Validation: Title + (Body or Media)
 
-## Right Sidebar (User / Actions)
-- If logged in: `{username}`
-- If not logged in: Login | Signup
-- **Submit Post** (primary CTA)
-- **Anti-Astroturf** link
-
----
-
-## Main Page (Feed)
-- Stacked **post cards** in feed column
-  - Title (link to detail page)
-  - Meta: community · author · time
-  - Optional media (image, link, video preview)
-  - Body preview (if text post)
-  - Actions: vote (▲▼), comment count, menu
-
----
-
-## Submit Post Page
-- **Community selector** (required)
-- **Post Title** (required)
-- **Post Media** (optional: image, link, video)
-- **Post Body** (optional if media present)
-- **Submit button**
-- Validation: must include a title and at least body or media
-
----
-
-## Post Detail Page
-- Shows one post in full (title, meta, media, body, actions)
-- **Comment input box**: textarea + submit
-- **Comment thread**: flat list of replies (simple layout for now)
-- Each comment:
-  - Author, time
-  - Comment text
-  - Actions: vote, reply
-
----
+## Post Detail
+- Full post (title/meta/media/body/actions)
+- Comment input
+- Comment list (flat, simple)
 
 ## Footer
-- Simple bar with links: Terms · Privacy · About
+- Terms · Privacy · About
+
