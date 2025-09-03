@@ -27,6 +27,14 @@ class RouteTests(TestCase):
         resp = self.client.get(reverse("community", args=[self.community.slug]))
         self.assertEqual(resp.status_code, 200)
 
+    def test_c_prefix_redirects(self):
+        resp = self.client.get(f"/c/{self.community.slug}/")
+        self.assertRedirects(
+            resp,
+            reverse("community", args=[self.community.slug]),
+            status_code=301,
+        )
+
     def test_post_detail_id(self):
         resp = self.client.get(reverse("post_detail_id", args=[self.post.pk]))
         self.assertEqual(resp.status_code, 200)
