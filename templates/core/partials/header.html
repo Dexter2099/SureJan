@@ -14,11 +14,7 @@
       {% endblock %}
     </nav>
     <div class="hdr-right">
-      {% if request.user.is_authenticated %}
-        <span class="account-name">{{ request.user.username }}</span>
-      {% else %}
-        <a href="{% url 'login' %}">Login</a> | <a href="{% url 'signup' %}">Signup</a>
-      {% endif %}
+      {% block header_right %}{% endblock %}
     </div>
   </div>
 </header>
