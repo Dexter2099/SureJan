@@ -3,7 +3,7 @@
   {% if post.heading %}
   <h3 class="post-heading">{{ post.heading }}</h3>
   {% endif %}
-  {% if post.image %}
+  {% if post.image and post.image.url %}
   <div class="post-image"><img src="{{ post.image.url }}" loading="lazy" decoding="async" alt=""></div>
   {% elif post.embed_html %}
   <div class="post-embed">{{ post.embed_html|safe }}</div>
