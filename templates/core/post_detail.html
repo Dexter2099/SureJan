@@ -17,17 +17,36 @@
     </div>
   </header>
 
-  <div class="post-media">
-    {% if images %}
-      {% for image in images %}
-        <img src="{{ image.url }}" alt="" class="post-image" loading="lazy" decoding="async">
-      {% endfor %}
-    {% elif post.image %}
-      <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-    {% elif embed_html %}
-      <div class="post-embed">{{ embed_html|safe }}</div>
-    {% endif %}
+{% comment %} Media priority: gallery → upload → embed → link {% endcomment %}
+{% if images %}
+  <div class="post-gallery">
+    {% for link in images %}
+      <figure class="post-media">
+        <img
+          src="{{ link.url|default:link }}"
+          alt="{{ post.title }}"
+          loading="lazy" decoding="async" referrerpolicy="no-referrer"
+          onerror="this.onerror=null; this.closest('figure').remove()"
+        >
+      </figure>
+    {% endfor %}
   </div>
+{% elif post.image %}
+  <figure class="post-media">
+    <img
+      src="{{ post.image.url }}"
+      alt="{{ post.title }}"
+      loading="lazy" decoding="async" referrerpolicy="no-referrer"
+      onerror="this.onerror=null; this.closest('figure').remove()"
+    >
+  </figure>
+{% elif embed_html %}
+  <div class="post-embed aspect-16-9">
+    <div class="embed-inner">{{ embed_html|safe }}</div>
+  </div>
+{% elif post.content_url %}
+  <p class="link-card"><a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.content_url }}</a></p>
+{% endif %}
 
   {% if post.body %}
   <div class="post-body prose">
