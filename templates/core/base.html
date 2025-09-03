@@ -11,20 +11,18 @@
 <body>
   {% include "core/partials/header.html" %}
   <div class="page">
-    <aside class="left-communities">
+    <aside class="left-communities" aria-label="Communities">
       {% include "core/partials/left_communities.html" %}
-      {% block left_communities %}{% endblock %}
     </aside>
-    <main class="shell-1024">
+    <main class="shell-1024" role="main">
       <div class="grid-3">
-        <div class="feed-col">
+        <section class="feed-col">
           {% block content %}{% endblock %}
-        </div>
-        <div class="gutter-24"></div>
-        <div class="right-sidebar">
+        </section>
+        <div class="gutter-24" aria-hidden="true"></div>
+        <aside class="right-sidebar">
           {% include "core/partials/right_sidebar.html" %}
-          {% block right_sidebar %}{% endblock %}
-        </div>
+        </aside>
       </div>
     </main>
   </div>
