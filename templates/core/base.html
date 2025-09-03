@@ -8,45 +8,26 @@
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block head %}{% endblock %}
 </head>
-<body>
-  <!-- Header -->
-  <header class="header-bar" data-testid="header-bar">
-    <div class="nav-left">
-      <!-- Logo = Home -->
-      <a class="header-logo" href="{% url 'home' %}">
-        <img class="site-logo" src="{% static 'logo.png' %}" alt="SureJan">
-      </a>
-    </div>
-
-    <!-- Centered sort tabs -->
-    <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
-      <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
-      <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
-      <a href="?sort=top"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
-    </nav>
-
-    <div class="nav-right"><!-- reserved for auth/user links --></div>
-  </header>
-
-  <!-- Page body -->
-  <div class="page">
-    <aside class="left-communities" aria-label="Communities">
-      {% include "core/partials/left_communities.html" %}
-    </aside>
-
-    <main class="shell-1024" role="main">
-      <div class="grid-3">
-        <section class="feed-col">
-          {% block content %}{% endblock %}
-        </section>
-        <div class="gutter-24" aria-hidden="true"></div>
-        <aside class="right-sidebar">
-          {% include "core/partials/right_sidebar.html" %}
-        </aside>
+<body class="layout-root">
+  {% include "core/partials/header.html" %}
+  <main id="app-main" class="layout-main" role="main">
+    <div class="page">
+      <aside class="left-communities" aria-label="Communities">
+        {% include "core/partials/left_communities.html" %}
+      </aside>
+      <div class="shell-1024">
+        <div class="grid-3">
+          <section class="feed-col">
+            {% block content %}{% endblock %}
+          </section>
+          <div class="gutter-24" aria-hidden="true"></div>
+          <aside class="right-sidebar">
+            {% include "core/partials/right_sidebar.html" %}
+          </aside>
+        </div>
       </div>
-    </main>
-  </div>
-
+    </div>
+  </main>
   {% include "core/partials/footer.html" %}
   {% block scripts %}{% endblock %}
 </body>

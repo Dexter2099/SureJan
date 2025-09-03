@@ -147,3 +147,47 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   text-decoration: none;
 }
 .nav-tabs { display:flex; justify-content:center; gap:32px; }
+
+/* Sticky footer layout */
+html, body { height: 100%; }
+body.layout-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.layout-main { flex: 1 0 auto; }
+
+/* Footer */
+.site-footer {
+  margin-top: auto;         /* push to bottom */
+  width: 100%;
+  border-top: 1px solid var(--border, #e5e7eb);
+  background: var(--footer-bg, #fff);
+}
+.site-footer .footer-shell {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 16px 12px;
+}
+.site-footer .footer-links {
+  margin: 0;
+  color: var(--muted, #6b7280);
+  font-size: 14px;
+}
+.site-footer .footer-links a {
+  text-decoration: none;
+}
+
+/* Prevent footer from inheriting grid/aside styling */
+.page .site-footer, .left-communities .site-footer { 
+  /* never nest footers inside grid columns */
+  all: unset; /* reset if accidentally nested */
+}
+
+/* If 'all: unset' is too aggressive for your stack, instead ensure the footer is not inside .page */
+
+/* Optional: ensure .page grid doesn’t overlap the footer */
+.page { position: relative; }
+
+/* Ensure left column doesn't wrap the footer on short pages */
+.left-communities { align-self: flex-start; }
