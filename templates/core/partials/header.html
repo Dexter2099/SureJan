@@ -1,7 +1,11 @@
 {% load static %}
 <header class="header-bar" data-testid="header-bar">
   <div class="header-inner">
-    <div class="hdr-left"></div>
+    <div class="hdr-left">
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'logo.png' %}" alt="SureJan">
+      </a>
+    </div>
     <nav id="sort-tabs" class="hdr-center nav-tabs" aria-label="Global sort">
       {% block header_center %}
       <a href="/?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
