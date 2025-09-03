@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 from datetime import timedelta
 from django.utils import timezone
 from django.utils.text import slugify
@@ -150,6 +151,9 @@ class Post(models.Model):
     @property
     def slug(self):
         return slugify(self.title)
+
+    def get_absolute_url(self):
+        return reverse("post_detail", args=[self.community.slug, self.pk, self.slug])
 
     class Meta:
         indexes = [
