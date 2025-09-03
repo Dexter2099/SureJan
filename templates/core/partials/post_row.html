@@ -1,26 +1,28 @@
 <article class="post-card" data-testid="post-card">
-  {% if post.image_thumb or post.image %}
-  <a href="{{ post.get_absolute_url }}" class="thumb">
-    {% if post.image_thumb %}
-    <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
-    {% else %}
-    <img src="{{ post.image.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+  {% with detail_url=post.get_absolute_url %}
+    {% if post.image_thumb or post.image %}
+    <a href="{{ detail_url }}" class="thumb">
+      {% if post.image_thumb %}
+      <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+      {% else %}
+      <img src="{{ post.image.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+      {% endif %}
+    </a>
     {% endif %}
-  </a>
-  {% endif %}
-  <div class="post-meta">
-    r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
-  </div>
-  <h3 class="post-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
-  {% if post.body %}
-  <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
-  {% endif %}
-  <div class="post-actions">
-    <div class="vote">
-      <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
-      <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
-      <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+    <div class="post-meta">
+      r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
     </div>
-    <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
-  </div>
+    <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
+    {% if post.body %}
+    <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
+    {% endif %}
+    <div class="post-actions">
+      <div class="vote">
+        <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
+        <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
+        <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+      </div>
+      <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
+    </div>
+  {% endwith %}
 </article>

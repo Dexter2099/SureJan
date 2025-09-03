@@ -1,7 +1,6 @@
 {% load url_domain astro_filters %}
 <article class="post-card" data-testid="post-card">
-{% with detail_url=post.get_absolute_url|default:None %}
-  {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
+{% with detail_url=post.get_absolute_url %}
   {% if post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" aria-label="Open post">
       {% if post.image_thumb %}
@@ -18,11 +17,10 @@
       {% endif %}
     </a>
   {% endif %}
-{% endwith %}
   <div class="post-meta">
     r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
-  <h3 class="post-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+  <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
   {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
   {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
   {% if post.body %}
@@ -34,7 +32,7 @@
       <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
       <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
     </div>
-    <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
+    <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
     <details class="astro-why">
       <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>
@@ -46,4 +44,5 @@
     </details>
     {% endif %}
   </div>
+{% endwith %}
 </article>
