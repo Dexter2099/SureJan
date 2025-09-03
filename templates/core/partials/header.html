@@ -2,7 +2,9 @@
 <header class="header-bar" data-testid="header-bar">
   <div class="header-inner">
     <div class="hdr-left">
-      <a href="/" class="header-logo"><img class="site-logo" src="{% static 'img/logo.svg' %}" alt="SureJan"></a>
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'logo.png' %}" alt="SureJan">
+      </a>
     </div>
     <nav class="hdr-center" id="sort-tabs" aria-label="Sort">
       {% block header_center %}

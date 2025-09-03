@@ -19,6 +19,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   border-bottom:1px solid var(--color-border);
   display:flex; align-items:center; gap:var(--space-4);
   padding: var(--space-3) var(--space-6);
+  height:128px;
 }
 
 .nav-links a{ padding:4px 8px; border-radius:6px; text-decoration:none; }
@@ -84,32 +85,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 
 .header-logo{display:flex;align-items:center}
 
-
-/* Header grid: left | center | right */
-.header-bar{
-  display:grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items:center;
-  gap:12px;
-}
-
-/* Left: logo */
-.header-left{ display:flex; align-items:center; gap:12px; }
-
-/* Center: tabs truly centered */
-.header-center{ justify-self:center; display:flex; gap:16px; }
-.header-center a{ text-decoration:none; padding:4px 8px; border-radius:6px; }
-.header-center a[aria-current="page"]{ background:rgba(0,0,0,0.06); }
-
-/* Right area stays aligned to end */
-.header-right{ justify-self:end; display:flex; align-items:center; gap:12px; }
-
-/* final authority for header logo size */
-.site-logo { max-height: 48px; height: auto; width: auto; object-fit: contain; display: block; }
-
-
-/* V3 layout -------------------------------------------------- */
-.header-bar{min-height:128px;}
+  /* V3 layout -------------------------------------------------- */
 .page{display:flex;}
 .left-communities{width:200px;}
 .shell-1024{flex:1;max-width:1024px;margin:0 auto;padding:0 var(--space-6);}
@@ -138,10 +114,9 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 /* --- V3 layout lock (append; ~50 LOC) --- */
 
 /* Header: 128px band with 3 zones */
-.header-bar{height:128px;display:flex;align-items:center;background:#fff;border-bottom:1px solid #e5e7eb}
 .header-inner{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:center;padding:0 24px}
 .hdr-left{justify-self:start}.hdr-center{justify-self:center}.hdr-right{justify-self:end}
-.site-logo{max-height:48px;height:auto;width:auto;display:block}
+.site-logo{max-height:48px;height:auto;width:auto;object-fit:contain;display:block}
 
 /* Page: left communities (200–240) + main shell */
 .page{display:grid;grid-template-columns:minmax(200px,240px) 1fr}
