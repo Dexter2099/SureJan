@@ -1,17 +1,25 @@
 {% load url_domain astro_filters %}
 <article class="post-card" data-testid="post-card">
-{% with detail_url=post.get_absolute_url %}
-  {% with thumb=post.image_thumb|default:post.image %}
-    {% if thumb %}
+{% with detail_url=post.get_absolute_url|default:None %}
+  {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
+
+  {% if post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" aria-label="Open post">
-      <img
-        src="{{ thumb.url }}"
-        alt="{{ post.title }}"
-        loading="lazy" decoding="async"
-        width="640" height="360">
+      {% if post.image_thumb %}
+        <img
+          src="{{ post.image_thumb.url }}"
+          alt="{{ post.title }}"
+          loading="lazy" decoding="async"
+          width="640" height="360">
+      {% else %}
+        <img
+          src="{{ post.image.url }}"
+          alt="{{ post.title }}"
+          loading="lazy" decoding="async"
+          width="640" height="360">
+      {% endif %}
     </a>
-    {% endif %}
-  {% endwith %}
+  {% endif %}
   <div class="post-meta">
     r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
