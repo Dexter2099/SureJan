@@ -1,19 +1,39 @@
-{% load static %}
+{{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}SureJan{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block head %}{% endblock %}
 </head>
 <body>
-  {% include "core/partials/header.html" %}
+  <!-- Header -->
+  <header class="header-bar" data-testid="header-bar">
+    <div class="nav-left">
+      <!-- Logo = Home -->
+      <a class="header-logo" href="{% url 'home' %}">
+        <img class="site-logo" src="{% static 'logo.png' %}" alt="SureJan">
+      </a>
+    </div>
+
+    <!-- Centered sort tabs -->
+    <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
+      <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
+      <a href="?sort=new"{% if request.GET.sort == 'new' %} aria-current="page"{% endif %}>New</a>
+      <a href="?sort=top"{% if request.GET.sort == 'top' %} aria-current="page"{% endif %}>Top</a>
+    </nav>
+
+    <div class="nav-right"><!-- reserved for auth/user links --></div>
+  </header>
+
+  <!-- Page body -->
   <div class="page">
     <aside class="left-communities" aria-label="Communities">
       {% include "core/partials/left_communities.html" %}
     </aside>
+
     <main class="shell-1024" role="main">
       <div class="grid-3">
         <section class="feed-col">
@@ -26,6 +46,7 @@
       </div>
     </main>
   </div>
+
   {% include "core/partials/footer.html" %}
   {% block scripts %}{% endblock %}
 </body>
