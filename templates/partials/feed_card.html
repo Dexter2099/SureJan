@@ -1,7 +1,7 @@
 {% load url_domain astro_filters %}
-<article class="post-card" id="post-{{ post.pk }}" data-testid="post-card"{% if load_more_url %} hx-get="{{ load_more_url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-target="this" hx-push-url="true"{% endif %}>
+<article class="post-card" data-testid="post-card">
   {% if post.image_thumb or post.image %}
-  <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}" class="thumb">
+  <a href="{{ post.get_absolute_url }}" class="thumb">
     {% if post.image_thumb %}
     <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
     {% else %}
@@ -10,22 +10,21 @@
   </a>
   {% endif %}
   <div class="post-meta">
-    <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
-    •
-    <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
-    •
-    <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }}</time>
+    r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
-  <h2 class="post-title line-clamp"><a href="{% url 'post_detail' post.community.slug post.pk post.slug %}">{{ post.title }}</a></h2>
+  <h3 class="post-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
   {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
   {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
+  {% if post.body %}
+  <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
+  {% endif %}
   <div class="post-actions">
     <div class="vote">
       <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
       <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
       <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
     </div>
-    <a href="{% url 'post_detail' post.community.slug post.pk post.slug %}#comments">{{ post.comment_count }} comments</a>
+    <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
     <details class="astro-why">
       <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>
