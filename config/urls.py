@@ -24,7 +24,7 @@ urlpatterns = [
     path("privacy/", TemplateView.as_view(template_name="legal/privacy.html"), name="privacy"),
     path("rules/", TemplateView.as_view(template_name="legal/rules.html"), name="rules"),
     path("r", core.communities_index, name="communities_index"),
-    path("r/<slug:slug>", core.community, name="community"),
+    path("c/<slug:slug>/", core.community, name="community"),
     path("", include("core.urls")),
 ]
 
