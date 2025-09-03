@@ -1,7 +1,7 @@
 <h2 class="side-title">Communities</h2>
 <nav class="comm-list" aria-label="Communities">
-  <a href="/r/news/">News</a>
-  <a href="/r/brisbane/">Brisbane</a>
-  <a href="/r/politics/">Politics</a>
-  <a href="/r/social/">Social</a>
+  <a href="{% url 'community' slug='news' %}">News</a>
+  <a href="{% url 'community' slug='brisbane' %}">Brisbane</a>
+  <a href="{% url 'community' slug='politics' %}">Politics</a>
+  <a href="{% url 'community' slug='social' %}">Social</a>
 </nav>
