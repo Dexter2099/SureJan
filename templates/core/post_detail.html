@@ -7,94 +7,75 @@
 {% endblock %}
 
 {% block content %}
-<div class="post-page">
-  <article class="post-thing">
-    <div class="vote">
-      <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
-      <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
-      <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+<article class="post-detail">
+  <header class="post-header">
+    <h1>{{ post.title }}</h1>
+    <div class="meta">
+      by <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
+      in <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
+      • <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} ago</time>
     </div>
-    <div class="post-body">
-      <header class="post-head">
-        <h1>
-          {% if post.content_url %}<a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.title }}</a>{% else %}{{ post.title }}{% endif %}
-        </h1>
-        <div class="post-meta">
-          submitted <time datetime="{{ post.created_at|date:'c' }}" data-ts="{{ post.created_at|date:'U' }}" title="{{ post.created_at|date:'Y-m-d H:i' }}">{{ post.created_at|timesince }} ago</time> by
-          <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
-          to <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
-        </div>
-      </header>
-      {% if ASTROTURF_WATCH %}
-      <div id="chips-{{ post.id }}"
-           hx-get="{% url 'post_signals_chips' post.id %}"
-           hx-trigger="load" hx-swap="innerHTML"></div>
-      {% endif %}
-      <div class="post-content">
-        {% if post.is_deleted %}
-          <p><em>{% if post.deleted_by and post.deleted_by.is_staff %}Removed by moderators.{% else %}[deleted] by author.{% endif %}</em></p>
-        {% else %}
-          {% if post.heading %}
-            <h2 class="post-heading">{{ post.heading }}</h2>
-          {% endif %}
-          {% if post.content_url %}
-            {{ embed_html|safe }}
-          {% elif images %}
-            {% include "partials/post_images.html" with images=images %}
-          {% elif post.image %}
-            <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          {% elif post.embed_html %}
-            <div class="post-embed">{{ post.embed_html|safe }}</div>
-          {% endif %}
-          {% if post.body %}
-            <div class="post-caption prose">
-              {{ post.body|safe }}
-            </div>
-          {% endif %}
-        {% endif %}
-      </div>
-      <nav class="post-actions">
-        <a href="#comments" id="comment-count">
-          {{ post.comment_count }} comment{{ post.comment_count|pluralize }}
-        </a>
-        <a href="#" onclick="navigator.clipboard.writeText(window.location.href);return false;">share</a>
-        <a href="{% url 'community' post.community.slug %}">back to r/{{ post.community.slug }}</a>
-        {% if request.user.is_authenticated and not post.is_deleted %}
-          {% if request.user.is_staff or post|can_author_delete:request.user %}
-            <form method="post"
-                  action="{% url 'post_delete_owner' post.pk %}"
-                  hx-post="{% url 'post_delete_owner' post.pk %}"
-                  hx-swap="none"
-                  hx-confirm="Delete this post? (If it has comments, only the content will be deleted)">
-              {% csrf_token %}
-              <button type="submit" class="linklike">delete</button>
-            </form>
-          {% endif %}
-          {% if request.user == post.author and post|can_author_delete:request.user %}
-            <span class="delete-window">Delete within 15 minutes…</span>
-          {% endif %}
-        {% endif %}
-        {% if user.is_authenticated %}
-        <a href="{% url 'report' %}?target_type=post&object_id={{ post.pk }}">[report]</a>
-        {% endif %}
-      </nav>
-      {% include "core/partials/mod_controls.html" with post=post %}
-    </div>
-  </article>
-</div>
+  </header>
 
-<div id="comments">
-  {% for c in comments %}
-    {% if not c.parent_id %}
-      {% include "core/partials/comment.html" with comment=c user=request.user %}
+  <div class="post-media">
+    {% if images %}
+      {% for image in images %}
+        <img src="{{ image.url }}" alt="" class="post-image" loading="lazy" decoding="async">
+      {% endfor %}
+    {% elif post.image %}
+      <img src="{{ post.image.url }}" alt="" class="post-image" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+    {% elif embed_html %}
+      <div class="post-embed">{{ embed_html|safe }}</div>
     {% endif %}
-  {% empty %}
-    <p>No comments yet.</p>
-  {% endfor %}
-</div>
-<div>
-  {% include "core/partials/comment_form.html" with post=post parent=post comment=None %}
-</div>
+  </div>
+
+  {% if post.body %}
+  <div class="post-body prose">
+    {{ post.body|safe }}
+  </div>
+  {% endif %}
+
+  <div class="post-actions">
+    <form hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+      {% csrf_token %}
+      <button type="submit" aria-label="Upvote">▲</button>
+    </form>
+    <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
+    <form hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+      {% csrf_token %}
+      <button type="submit" aria-label="Downvote">▼</button>
+    </form>
+    <a href="{{ post_url }}" class="share-link">share</a>
+    <button type="button" class="copy-link" data-link="{{ post_url }}">copy link</button>
+  </div>
+</article>
+
+<section id="comments">
+  <form method="get" class="comment-filters">
+    <select name="c_sort">
+      <option value="best" {% if c_sort == 'best' %}selected{% endif %}>best</option>
+      <option value="top" {% if c_sort == 'top' %}selected{% endif %}>top</option>
+      <option value="new" {% if c_sort == 'new' %}selected{% endif %}>new</option>
+      <option value="controversial" {% if c_sort == 'controversial' %}selected{% endif %}>controversial</option>
+    </select>
+    <input type="search" name="q" placeholder="search comments" value="{{ request.GET.q }}">
+  </form>
+
+  <div class="comment-composer">
+    <form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comment-tree" hx-swap="beforeend" method="post">
+      {% csrf_token %}
+      <textarea name="body" rows="4" required></textarea>
+      <div class="form-actions">
+        <button type="reset">Cancel</button>
+        <button type="submit">Comment</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="comment-tree">
+    {% include "core/partials/comment.html" with post=post comments=comments only %}
+  </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
