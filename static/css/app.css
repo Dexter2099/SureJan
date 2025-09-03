@@ -107,3 +107,21 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 /* final authority for header logo size */
 .site-logo { max-height: 48px; height: auto; width: auto; object-fit: contain; display: block; }
 
+
+/* V3 layout -------------------------------------------------- */
+.header-bar{min-height:128px;}
+.page{display:flex;}
+.left-communities{width:200px;}
+.shell-1024{flex:1;max-width:1024px;margin:0 auto;padding:0 var(--space-6);}
+.grid-3{display:grid;grid-template-columns:minmax(0,1fr) 24px var(--sidebar-width);align-items:start;}
+.feed-col{grid-column:1;}
+.gutter-24{grid-column:2;}
+.right-sidebar{grid-column:3;}
+@media (max-width:1023px){
+  .page{flex-direction:column;}
+  .left-communities{order:2;width:auto;}
+  .shell-1024{max-width:none;padding:0 var(--space-4);}
+  .grid-3{grid-template-columns:1fr;}
+  .gutter-24{display:none;}
+  .right-sidebar{display:none;}
+}
