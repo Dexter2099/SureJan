@@ -117,12 +117,6 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 /* Header: 128px band with 3 zones */
 .header-inner{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:center;padding:0 24px}
 .hdr-left{justify-self:start}.hdr-center{justify-self:center}.hdr-right{justify-self:end}
-.site-logo{max-height:64px;height:auto;width:auto;object-fit:contain;display:block}
-
-/* Keep it tidy on phones */
-@media (max-width: 768px){
-  .site-logo { max-height: 32px; }
-}
 
 /* Page: left communities (200–240) + main shell */
 .page{display:grid;grid-template-columns:minmax(200px,240px) 1fr}
@@ -199,3 +193,17 @@ body.layout-root {
 
 /* Ensure left column doesn't wrap the footer on short pages */
 .left-communities { align-self: flex-start; }
+
+/* Header logo size (forces upscaling if the source is small) */
+.header-bar .site-logo{
+  height: 64px;        /* or 86px if you want ~80% bigger than 48 */
+  max-height: none;    /* don't clamp it back down */
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Keep it tidy on phones */
+@media (max-width: 768px){
+  .header-bar .site-logo{ height: 32px; }
+}
