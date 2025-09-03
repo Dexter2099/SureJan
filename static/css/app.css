@@ -119,6 +119,11 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .hdr-left{justify-self:start}.hdr-center{justify-self:center}.hdr-right{justify-self:end}
 .site-logo{max-height:64px;height:auto;width:auto;object-fit:contain;display:block}
 
+/* Keep it tidy on phones */
+@media (max-width: 768px){
+  .site-logo { max-height: 32px; }
+}
+
 /* Page: left communities (200–240) + main shell */
 .page{display:grid;grid-template-columns:minmax(200px,240px) 1fr}
 .left-communities{border-right:1px solid #eee;padding:24px 12px}
