@@ -139,3 +139,11 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   .grid-3{grid-template-columns:1fr}
   .right-sidebar{margin-top:24px}
 }
+
+/* Space out header sort links */
+.nav-tabs a {
+  margin: 0 16px;
+  text-decoration: none;
+}
+.nav-tabs { display:flex; justify-content:center; gap:32px; }
+.sidebar-logo { display:block; margin:0 0 16px; }
