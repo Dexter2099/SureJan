@@ -12,6 +12,7 @@
   {% include "core/partials/header.html" %}
   <div class="page">
     <aside class="left-communities">
+      {% include "core/partials/left_communities.html" %}
       {% block left_communities %}{% endblock %}
     </aside>
     <main class="shell-1024">
@@ -21,6 +22,7 @@
         </div>
         <div class="gutter-24"></div>
         <div class="right-sidebar">
+          {% include "core/partials/right_sidebar.html" %}
           {% block right_sidebar %}{% endblock %}
         </div>
       </div>
