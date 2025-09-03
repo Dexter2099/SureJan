@@ -9,27 +9,24 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-  <header class="header-bar">
-    <details class="communities-dropdown">
-      <summary class="communities-toggle header-logo" aria-haspopup="true">
-        <img class="site-logo" src="{% static 'img/logo.png' %}" alt="SureJan">
-      </summary>
-      <ul class="dropdown-menu" aria-label="Communities">
-        <li><a href="/r/news/">NEWS</a></li>
-        <li><a href="/r/brisbane/">BRISBANE</a></li>
-        <li><a href="/r/politics/">POLITICS</a></li>
-        <li><a href="/r/social/">SOCIAL</a></li>
-      </ul>
-    </details>
-    {% block header_center %}{% endblock %}
-    {% block header_right %}{% endblock %}
-  </header>
-  {% block content %}{% endblock %}
-  <footer class="footer">
-    <a href="{% url 'terms' %}">Terms</a> ·
-    <a href="{% url 'privacy' %}">Privacy</a> ·
-    <a href="{% url 'rules' %}">Rules</a>
-  </footer>
+  {% include "core/partials/header.html" %}
+  <div class="page">
+    <aside class="left-communities">
+      {% block left_communities %}{% endblock %}
+    </aside>
+    <main class="shell-1024">
+      <div class="grid-3">
+        <div class="feed-col">
+          {% block content %}{% endblock %}
+        </div>
+        <div class="gutter-24"></div>
+        <div class="right-sidebar">
+          {% block right_sidebar %}{% endblock %}
+        </div>
+      </div>
+    </main>
+  </div>
+  {% include "core/partials/footer.html" %}
   {% block scripts %}{% endblock %}
 </body>
 </html>
