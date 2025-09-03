@@ -135,3 +135,32 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 /* Form styles -------------------------------------------------- */
 .form-row{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-4);}
 .form-helper{margin-bottom:var(--space-4);color:#666;font-size:0.875rem;}
+/* --- V3 layout lock (append; ~50 LOC) --- */
+
+/* Header: 128px band with 3 zones */
+.header-bar{height:128px;display:flex;align-items:center;background:#fff;border-bottom:1px solid #e5e7eb}
+.header-inner{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:center;padding:0 24px}
+.hdr-left{justify-self:start}.hdr-center{justify-self:center}.hdr-right{justify-self:end}
+.site-logo{max-height:48px;height:auto;width:auto;display:block}
+
+/* Page: left communities (200–240) + main shell */
+.page{display:grid;grid-template-columns:minmax(200px,240px) 1fr}
+.left-communities{border-right:1px solid #eee;padding:24px 12px}
+.side-title{margin:0 0 8px;font-weight:600}
+.comm-list a{display:block;padding:6px 4px;text-decoration:none}
+
+/* Main shell: fixed 1024 grid inside */
+.shell-1024{max-width:1024px;margin:0 auto;padding:24px 12px}
+.grid-3{display:grid;grid-template-columns:700px 24px 300px;align-items:start}
+.feed-col{min-width:0}.gutter-24{min-width:24px}.right-sidebar{min-width:0}
+
+/* Sidebar widgets */
+.sidebar-cta{border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#fff;margin:16px 0;text-align:center}
+
+/* Mobile */
+@media (max-width:768px){
+  .page{display:block}
+  .shell-1024{max-width:100%}
+  .grid-3{grid-template-columns:1fr}
+  .right-sidebar{margin-top:24px}
+}

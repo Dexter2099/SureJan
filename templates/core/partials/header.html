@@ -1,26 +1,18 @@
 {% load static %}
 <header class="header-bar" data-testid="header-bar">
-  <div class="header-left">
-    <details class="communities-dropdown">
-      <summary class="communities-toggle header-logo" aria-haspopup="true">
-        <img class="site-logo" src="{% static 'img/logo.svg' %}" alt="SureJan">
-      </summary>
-      <ul class="dropdown-menu" aria-label="Communities">
-        <li><a href="/r/news/">NEWS</a></li>
-        <li><a href="/r/brisbane/">BRISBANE</a></li>
-        <li><a href="/r/politics/">POLITICS</a></li>
-        <li><a href="/r/social/">SOCIAL</a></li>
-      </ul>
-    </details>
-  </div>
-  <nav id="sort-tabs" class="header-center" aria-label="Sort">
-    {% block header_center %}
-    <a href="?sort=hot" aria-current="page">Hot</a>
-    <a href="?sort=new">New</a>
-    <a href="?sort=top">Top</a>
-    {% endblock %}
-  </nav>
-  <div class="header-right">
-    {% block header_right %}{% endblock %}
+  <div class="header-inner">
+    <div class="hdr-left">
+      <a href="/" class="header-logo"><img class="site-logo" src="{% static 'img/logo.svg' %}" alt="SureJan"></a>
+    </div>
+    <nav class="hdr-center" id="sort-tabs" aria-label="Sort">
+      {% block header_center %}
+      <a href="?sort=hot" aria-current="page">Hot</a>
+      <a href="?sort=new">New</a>
+      <a href="?sort=top">Top</a>
+      {% endblock %}
+    </nav>
+    <div class="hdr-right">
+      {% block header_right %}{% endblock %}
+    </div>
   </div>
 </header>
