@@ -22,7 +22,7 @@ This folder contains the exported **Penpot wireframes** for SureJan V3.
 
 ## Usage
 - These wireframes are **layout references only**.  
-- All code must follow the authoritative spec in `docs/V3-onepager.md` and `docs/UI-contract.md`.  
+- All code must follow the authoritative spec in `docs/V3-onepager.md` and `docs/UI-contract-V3.md`.  
 - If wireframes or layout change, update this folder and the spec files in the **same PR**.
 
 ## Export formats
@@ -35,5 +35,5 @@ This folder contains the exported **Penpot wireframes** for SureJan V3.
 **Change control:**  
 Any change to the UI layout (header, grid widths, sidebar contents, form fields) must update:
 1. `docs/V3-onepager.md`
-2. `docs/UI-contract.md`
+2. `docs/UI-contract-V3.md`
 3. The exports in this folder
