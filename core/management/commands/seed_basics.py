@@ -9,8 +9,8 @@ class Command(BaseCommand):
         seeds = [
             ("news", "News"),
             ("brisbane", "Brisbane"),
-            ("tech", "Technology"),
-            ("fun", "Fun"),
+            
+            
             ("politics", "Politics"),
             ("social", "Social"),
         ]
