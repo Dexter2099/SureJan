@@ -11,6 +11,8 @@ class Command(BaseCommand):
             ("brisbane", "Brisbane"),
             ("tech", "Technology"),
             ("fun", "Fun"),
+            ("politics", "Politics"),
+            ("social", "Social"),
         ]
         U = get_user_model()
         user, _ = U.objects.get_or_create(username="admin")
