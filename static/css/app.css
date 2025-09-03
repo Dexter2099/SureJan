@@ -71,6 +71,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   margin-bottom:var(--space-5);
 }
 .empty-state{ color:#666666; padding:var(--space-6) 0; text-align:center; }
+.empty-community{ color:#666666; padding:var(--space-6) 0; text-align:center; }
 
 /* Two-column layout -------------------------------------------------- */
 .layout-grid{ display:flex; flex-direction:column; gap:var(--space-6); }
