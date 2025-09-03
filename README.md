@@ -9,7 +9,7 @@ SureJan is an independent, Brisbane-built community forum inspired by the old Re
 
 ## V3 UI Specs
 - [V3 One-Pager](docs/V3-onepager.md) — quick summary
-- [UI Contract](docs/UI-contract.md) — full layout and selectors
+- [UI Contract](docs/UI-contract-V3.md) — full layout and selectors
 
 ## Features (MVP)
 
