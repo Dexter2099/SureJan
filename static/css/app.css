@@ -147,4 +147,3 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
   text-decoration: none;
 }
 .nav-tabs { display:flex; justify-content:center; gap:32px; }
-.sidebar-logo { display:block; margin:0 0 16px; }
