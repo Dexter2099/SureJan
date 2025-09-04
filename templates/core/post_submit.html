@@ -5,7 +5,7 @@
 <div class="submit-wrapper">
   <a href="{% url 'home' %}">← Back to feed</a>
   <h1>Submit Post</h1>
-  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false" data-testid="submit-form" data-preview-url="{% url 'preview_markdown' %}">
+  <form id="post-form" method="post" enctype="multipart/form-data" data-testid="submit-form" data-preview-url="{% url 'preview_markdown' %}">
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">
@@ -34,6 +34,7 @@
       {{ form.link.label_tag }} {{ form.link }}
       {{ form.link.errors }}
     </div>
+    <div id="link-preview"></div>
     <div class="form-row" id="images-row" style="display:none">
       <label for="image-url-1">Image URL 1</label>
       <input type="url" id="image-url-1" name="image_url_1" class="image-url-input">
