@@ -3,7 +3,7 @@
 <div class="shell">
   <ul>
     {% for c in communities %}
-      <li><a href="{% url 'community' c.slug %}{{ qs }}">{{ c.name }}</a></li>
+      <li><a href="{% url 'community' c.slug %}{{ qs }}">c/{{ c.slug }}</a></li>
     {% endfor %}
   </ul>
 </div>
