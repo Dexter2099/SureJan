@@ -30,7 +30,8 @@
   <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
   {% endif %}
   <div class="post-actions">
-    <div class="vote" id="post-{{ post.pk }}-vote">
+    <div class="vote post-vote" id="post-{{ post.pk }}-vote"
+         hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)">
       <button
         hx-post="{% url 'vote_post' post.pk %}"
         hx-vals='{"v":1}'
