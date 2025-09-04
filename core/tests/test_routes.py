@@ -93,9 +93,10 @@ class RouteTests(TestCase):
         self.client.post(url, {"v": 1})
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
-        self.client.post(url, {"v": 0})
+        resp = self.client.post(url, {"v": 1})
+        self.assertEqual(resp.status_code, 409)
         self.post.refresh_from_db()
-        self.assertEqual(self.post.score, 0)
+        self.assertEqual(self.post.score, 1)
 
     def test_vote_comment_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")

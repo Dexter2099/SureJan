@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 
 from .models import Community, Post
-from .votes import apply_vote
+from .services.votes import cast_vote_post_once
 
 
 class HotRankTests(TestCase):
@@ -47,7 +47,7 @@ class HotRankTests(TestCase):
             title="v",
         )
         old_hot = post.hot_rank
-        apply_vote(self.user, "post", post.pk, 1)
+        cast_vote_post_once(self.user, post, 1)
         post.refresh_from_db()
         self.assertNotEqual(post.hot_rank, old_hot)
 
