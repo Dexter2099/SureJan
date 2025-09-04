@@ -16,31 +16,7 @@
   </div>
 
     <div class="comment-actions">
-      <div class="comment-vote" id="comment-{{ comment.pk }}-vote"{% if user.is_authenticated %}
-           hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
-        {% if user.is_authenticated %}
-        <button
-          hx-post="{% url 'vote_comment' comment.pk %}"
-          hx-vals='{"v":1}'
-          hx-target="#comment-score-{{ comment.pk }}"
-          hx-swap="outerHTML"
-          aria-label="Upvote">▲</button>
-
-        <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
-
-        <button
-          hx-post="{% url 'vote_comment' comment.pk %}"
-          hx-vals='{"v":-1}'
-          hx-target="#comment-score-{{ comment.pk }}"
-          hx-swap="outerHTML"
-          aria-label="Downvote">▼</button>
-        {% else %}
-        <button disabled aria-label="Upvote">▲</button>
-        <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
-        <button disabled aria-label="Downvote">▼</button>
-        <a href="{% url 'login' %}?next={{ request.path }}">Log in to vote</a>
-        {% endif %}
-      </div>
+        {% include "core/partials/vote_widget.html" with comment=comment user=user request=request tag='div' only %}
 
       <a class="reply"
          hx-get="{% url 'comment_reply_form' comment.pk %}"
