@@ -21,7 +21,7 @@
     </a>
   {% endif %}
   <div class="post-meta">
-    r/{{ post.community.slug }} · {{ post.author.username }} · {{ post.created_at|timesince }} ago
+    <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a> · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
   <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
   {% if post.is_deleted %}<span class="state-badge">deleted</span>{% endif %}
