@@ -1320,8 +1320,11 @@ def vote_post(request, pk):
     except ValueError:
         return HttpResponseBadRequest("Invalid vote")
 
-    score = Post.objects.get(pk=pk).score
-    return HttpResponse(f"<span id='post-score-{pk}'>{score}</span>")
+    post = Post.objects.get(pk=pk)
+    html = f'<span id="post-score-{post.pk}" class="score">{post.score}</span>'
+    if request.headers.get("HX-Request") == "true":
+        return HttpResponse(html, content_type="text/html")
+    return redirect(post.get_absolute_url())
 
 
 @login_required

@@ -51,3 +51,19 @@ class RouteTests(TestCase):
     def test_methods(self):
         resp = self.client.get(reverse("transparency_methods"))
         self.assertEqual(resp.status_code, 200)
+
+    def test_vote_post_htmx_returns_span(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(f"{url}?v=1", HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        self.assertHTMLEqual(
+            resp.content.decode(),
+            f'<span id="post-score-{self.post.pk}" class="score">1</span>',
+        )
+
+    def test_vote_post_non_htmx_redirects(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(f"{url}?v=1")
+        self.assertRedirects(resp, self.post.get_absolute_url())
