@@ -1298,78 +1298,36 @@ def comment_delete(request, pk):
 
 @login_required
 @require_POST
-@csrf_protect
-@ratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_post(request, pk):
-    """Handle voting on a post."""
-
-    if getattr(request, "limited", False):
-        resp = HttpResponse("Too many requests", status=429)
-        resp.headers["X-RateLimit-Triggered"] = "1"
-        return resp
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
-
+    v = int(request.GET.get("v", "0") or 0)
+    post = get_object_or_404(Post, pk=pk)
+    from .votes import apply_vote
+    apply_vote(request.user, "post", post.pk, v)
     try:
-        value = int(request.GET.get("v") or request.POST.get("v"))
-    except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid vote")
-
-    try:
-        apply_vote(request.user, "post", pk, value)
-    except ValueError:
-        return HttpResponseBadRequest("Invalid vote")
-
-    post = Post.objects.get(pk=pk)
-    html = f'<span id="post-score-{post.pk}" class="score">{post.score}</span>'
+        post.refresh_from_db(fields=["score"])
+    except Exception:
+        post.refresh_from_db()
     if request.headers.get("HX-Request") == "true":
+        html = f'<span id="post-score-{post.pk}" class="score">{post.score}</span>'
         return HttpResponse(html, content_type="text/html")
     return redirect(post.get_absolute_url())
 
 
 @login_required
 @require_POST
-@csrf_protect
-@ratelimit(key="user", rate="120/m", method=["POST"], block=False)
 def vote_comment(request, pk):
-    """Handle voting on a comment."""
-
-    if getattr(request, "limited", False):
-        resp = HttpResponse("Too many requests", status=429)
-        resp.headers["X-RateLimit-Triggered"] = "1"
-        return resp
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
-
+    v = int(request.GET.get("v", "0") or 0)
+    cmt = get_object_or_404(Comment, pk=pk)
+    from .votes import apply_vote
+    apply_vote(request.user, "comment", cmt.pk, v)
     try:
-        value = int(request.GET.get("v") or request.POST.get("v"))
-    except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid vote")
-
-    try:
-        _, _, new_value = apply_vote(request.user, "comment", pk, value)
-    except ValueError:
-        return HttpResponseBadRequest("Invalid vote")
-
-    comment = Comment.objects.get(pk=pk)
-    if request.headers.get("HX-Target", "").startswith("cscore-"):
-        return render(
-            request, "core/partials/comment_score.html", {"comment": comment}
-        )
-    score = comment.score
-    up_pressed = "true" if new_value == 1 else "false"
-    down_pressed = "true" if new_value == -1 else "false"
-    url = reverse("vote_comment", args=[pk])
-    html = (
-        f"<span id='comment-score-{pk}' class='score' hx-swap-oob='outerHTML'>{score}</span>"
-        f"<button id='comment-up-{pk}' hx-post='{url}?v=1' hx-swap='none' "
-        f"hx-disabled-elt='#comment-up-{pk}, #comment-down-{pk}' "
-        f"class='up' aria-label='Upvote' aria-pressed='{up_pressed}' hx-swap-oob='outerHTML'>▲</button>"
-        f"<button id='comment-down-{pk}' hx-post='{url}?v=-1' hx-swap='none' "
-        f"hx-disabled-elt='#comment-up-{pk}, #comment-down-{pk}' "
-        f"class='down' aria-label='Downvote' aria-pressed='{down_pressed}' hx-swap-oob='outerHTML'>▼</button>"
-    )
-    return HttpResponse(html)
+        cmt.refresh_from_db(fields=["score"])
+    except Exception:
+        cmt.refresh_from_db()
+    if request.headers.get("HX-Request") == "true":
+        html = f'<span id="cscore-{cmt.pk}" class="score">{cmt.score}</span>'
+        return HttpResponse(html, content_type="text/html")
+    return redirect(cmt.post.get_absolute_url())
 
 
 @login_required
