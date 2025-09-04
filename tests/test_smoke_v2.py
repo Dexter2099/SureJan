@@ -7,6 +7,7 @@ import os
 from django.core.management import call_command
 from django.urls import reverse
 from django.core.cache import cache
+import re
 
 from core.models import Community, Post
 
@@ -79,6 +80,7 @@ def test_signup_submit_sort_and_commands(client):
     # astro_recompute should exit 0
     call_command('astro_recompute')
 
-    # ensure no third-party JS before consent
+    # ensure only allowed third-party JS (HTMX) before consent
     html = client.get('/').content.decode()
-    assert 'src="http' not in html
+    external_scripts = re.findall(r'src="(http[^"]+)"', html)
+    assert external_scripts == ["https://unpkg.com/htmx.org@1.9.12"]
