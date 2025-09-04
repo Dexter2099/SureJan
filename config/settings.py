@@ -243,9 +243,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 
-# Temporary guard to avoid 500s from missing manifest entries while iterating.
-# REMOVE once favicon/static references are correct and collectstatic is clean.
-WHITENOISE_MANIFEST_STRICT = False
+# Enforce manifest integrity for static files to surface missing references.
+WHITENOISE_MANIFEST_STRICT = True
 
 # Required envs
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
