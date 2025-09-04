@@ -1316,7 +1316,10 @@ def vote_post(request, pk):
     except Exception:
         post.refresh_from_db()
     if request.headers.get("HX-Request") == "true":
-        html = f'<span id="post-score-{post.pk}" class="score">{post.score}</span>'
+        html = render_to_string(
+            "partials/score_span.html",
+            {"id": f"post-score-{post.pk}", "score": post.score},
+        )
         return HttpResponse(html, content_type="text/html")
     return redirect(post.get_absolute_url())
 
@@ -1341,7 +1344,10 @@ def vote_comment(request, pk):
     except Exception:
         cmt.refresh_from_db()
     if request.headers.get("HX-Request") == "true":
-        html = f'<span id="cscore-{cmt.pk}" class="score">{cmt.score}</span>'
+        html = render_to_string(
+            "partials/score_span.html",
+            {"id": f"cscore-{cmt.pk}", "score": cmt.score},
+        )
         return HttpResponse(html, content_type="text/html")
     return redirect(cmt.post.get_absolute_url())
 

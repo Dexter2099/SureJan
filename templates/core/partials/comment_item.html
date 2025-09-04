@@ -19,7 +19,7 @@
         <button type="submit" aria-label="Upvote">▲</button>
       </form>
 
-      <span id="cscore-{{ comment.pk }}" class="score">{{ comment.score }}</span>
+      {% include "core/partials/comment_score.html" %}
 
       <form hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
             hx-target="#cscore-{{ comment.pk }}"
