@@ -1,4 +1,4 @@
-// Handles enabling/disabling the submit buttons on the post submit form.
+// Handles enabling/disabling the submit button on the post submit form.
 document.addEventListener('DOMContentLoaded', () => {
   const titleEl = document.querySelector('#id_title');
   const bodyEl = document.querySelector('#id_body');
@@ -11,9 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentUrl = contentUrlEl?.value.trim();
     const imagesHasValue = !!(imagesEl && ((imagesEl.files && imagesEl.files.length > 0) || imagesEl.value));
     const ok = title && (body || contentUrl || imagesHasValue);
-    document.querySelectorAll('#post-btn,#post-btn-mobile').forEach(btn => {
-      if (btn) btn.disabled = !ok;
-    });
+    const postBtn = document.querySelector('#post-btn');
+    if (postBtn) postBtn.disabled = !ok;
   }
 
   [titleEl, bodyEl, contentUrlEl, imagesEl].forEach(el => {
