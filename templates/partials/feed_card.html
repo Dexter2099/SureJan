@@ -49,7 +49,7 @@
         <button type="submit" aria-label="Downvote">▼</button>
       </form>
     </div>
-    <a href="{{ detail_url }}#comments">{{ post.comments.count }} comments</a>
+    <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
     <details class="astro-why">
       <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>

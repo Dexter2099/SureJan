@@ -39,7 +39,7 @@
           <button type="submit" aria-label="Downvote">▼</button>
         </form>
       </div>
-      <a href="{{ post.get_absolute_url }}#comments">{{ post.comments.count }} comments</a>
+      <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
     </div>
   {% endwith %}
 </article>
