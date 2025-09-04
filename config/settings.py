@@ -117,7 +117,7 @@ if not DEBUG:
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
-            "script-src": ("'self'", "https://unpkg.com"),
+            "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": ("'self'", "https:", "data:"),
             "connect-src": ("'self'",),
