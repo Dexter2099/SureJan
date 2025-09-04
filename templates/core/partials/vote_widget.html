@@ -1,25 +1,43 @@
-<div class="vote post-vote" id="post-{{ post.pk }}-vote"{% if user.is_authenticated %}
+{% comment %}
+  Generic vote widget for posts and comments.
+  Pass either ``post`` or ``comment``. Optionally override ``tag``
+  to change the wrapper element (defaults: div for posts, span for comments).
+{% endcomment %}
+{% with obj=post|default:comment kind=post|yesno:"post,comment" default_wrapper=post|yesno:"div,span" %}
+  {% with wrapper=tag|default:default_wrapper %}
+<{{ wrapper }} class="vote {{ kind }}-vote" id="{{ kind }}-{{ obj.pk }}-vote"{% if user.is_authenticated %}
      hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
   {% if user.is_authenticated %}
   <button
-    hx-post="{% url 'vote_post' post.pk %}"
+    hx-post="{% if kind == 'post' %}{% url 'vote_post' obj.pk %}{% else %}{% url 'vote_comment' obj.pk %}{% endif %}"
     hx-vals='{"v":1}'
-    hx-target="#post-score-{{ post.pk }}"
+    hx-target="#{{ kind }}-score-{{ obj.pk }}"
     hx-swap="outerHTML"
     aria-label="Upvote">▲</button>
 
-  {% include "core/partials/post_score.html" with post=post only %}
+  {% if kind == 'post' %}
+    {% include "core/partials/post_score.html" with post=obj only %}
+  {% else %}
+    {% include "core/partials/comment_score.html" with comment=obj only %}
+  {% endif %}
 
   <button
-    hx-post="{% url 'vote_post' post.pk %}"
+    hx-post="{% if kind == 'post' %}{% url 'vote_post' obj.pk %}{% else %}{% url 'vote_comment' obj.pk %}{% endif %}"
     hx-vals='{"v":-1}'
-    hx-target="#post-score-{{ post.pk }}"
+    hx-target="#{{ kind }}-score-{{ obj.pk }}"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
   {% else %}
   <button disabled aria-label="Upvote">▲</button>
-  {% include "core/partials/post_score.html" with post=post only %}
+  {% if kind == 'post' %}
+    {% include "core/partials/post_score.html" with post=obj only %}
+  {% else %}
+    {% include "core/partials/comment_score.html" with comment=obj only %}
+  {% endif %}
   <button disabled aria-label="Downvote">▼</button>
   <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to vote</a>
   {% endif %}
-</div>
+</{{ wrapper }}>
+  {% endwith %}
+{% endwith %}
+
