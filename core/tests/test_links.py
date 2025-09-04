@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from io import BytesIO
 from PIL import Image
@@ -75,20 +75,24 @@ class PostLinkTests(TestCase):
             title="Hello",
             image=img,
         )
+        self.factory = RequestFactory()
 
     def test_feed_card_uses_absolute_url(self):
         url = self.post.get_absolute_url()
-        html = render_to_string("partials/feed_card.html", {"post": self.post})
+        request = self.factory.get("/")
+        html = render_to_string("partials/feed_card.html", {"post": self.post}, request=request)
         self.assertEqual(html.count(f'href="{url}"'), 2)
         self.assertIn(f'href="{url}#comments"', html)
 
     def test_post_row_uses_absolute_url(self):
         url = self.post.get_absolute_url()
-        html = render_to_string("core/partials/post_row.html", {"post": self.post})
+        request = self.factory.get("/")
+        html = render_to_string("core/partials/post_row.html", {"post": self.post}, request=request)
         self.assertEqual(html.count(f'href="{url}"'), 2)
         self.assertIn(f'href="{url}#comments"', html)
 
     def test_post_row_links_author(self):
         user_url = reverse("user_overview", args=[self.user.username])
-        html = render_to_string("core/partials/post_row.html", {"post": self.post})
+        request = self.factory.get("/")
+        html = render_to_string("core/partials/post_row.html", {"post": self.post}, request=request)
         self.assertIn(f'href="{user_url}"', html)

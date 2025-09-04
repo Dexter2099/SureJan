@@ -55,8 +55,9 @@
   {% endif %}
 
   <div class="post-actions">
-    <div class="vote post-vote" id="post-{{ post.pk }}-vote"
-         hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)">
+    <div class="vote post-vote" id="post-{{ post.pk }}-vote"{% if user.is_authenticated %}
+         hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
+      {% if user.is_authenticated %}
       <button
         hx-post="{% url 'vote_post' post.pk %}"
         hx-vals='{"v":1}'
@@ -72,6 +73,12 @@
         hx-target="#post-score-{{ post.pk }}"
         hx-swap="outerHTML"
         aria-label="Downvote">▼</button>
+      {% else %}
+      <button disabled aria-label="Upvote">▲</button>
+      {% include "core/partials/post_score.html" with post=post only %}
+      <button disabled aria-label="Downvote">▼</button>
+      <a href="{% url 'login' %}?next={{ request.path }}">Log in to vote</a>
+      {% endif %}
     </div>
 
     {% if severity_band %}
@@ -116,7 +123,7 @@
 
   <div id="comment-tree">
     {% for c in comments %}
-      {% include "core/partials/comment_row.html" with comment=c depth=0 only %}
+      {% include "core/partials/comment_row.html" with comment=c depth=0 request=request user=request.user only %}
     {% empty %}
       <p class="muted">No comments yet.</p>
     {% endfor %}
