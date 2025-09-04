@@ -127,6 +127,16 @@ def preview_markdown(request):
     return render(request, "core/partials/preview.html", {"html": mark_safe(clean)})
 
 
+@require_GET
+@ratelimit(key="user", rate="5/m", method=["GET"], block=False)
+def markdown_preview(request):
+    """Return sanitized HTML fragment for provided markdown text."""
+    text = request.GET.get("q", "").strip() or request.GET.get("text", "").strip()
+    html = markdown_renderer(text)
+    clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+    return HttpResponse(clean)
+
+
 def mission(request):
     return render(request, "core/mission.html")
 
