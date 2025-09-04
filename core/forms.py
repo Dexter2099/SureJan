@@ -40,7 +40,7 @@ class PostForm(forms.Form):
     body = forms.CharField(
         widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
     )
-    link = forms.URLField(required=False)
+    content_url = forms.URLField(required=False)
     class MultiFileInput(forms.ClearableFileInput):
         allow_multiple_selected = True
 
@@ -66,12 +66,19 @@ class PostForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
         title = (cleaned.get("title") or "").strip()
-        link = (cleaned.get("link") or "").strip()
+        content_url = (cleaned.get("content_url") or "").strip()
         post_type = cleaned.get("post_type")
         images = cleaned.get("images") or []
         body = cleaned.get("body") or ""
 
-        cleaned.update({"title": title, "link": link, "images": images, "body": body})
+        cleaned.update(
+            {
+                "title": title,
+                "content_url": content_url,
+                "images": images,
+                "body": body,
+            }
+        )
 
         if not title:
             self.add_error("title", "Title is required.")
@@ -80,10 +87,10 @@ class PostForm(forms.Form):
             if not body:
                 self.add_error("body", "Body is required for text posts.")
         elif post_type == "link":
-            if not link:
-                self.add_error("link", "Link is required for link posts.")
-            elif not check_url_safety(link):
-                self.add_error("link", "URL flagged as unsafe.")
+            if not content_url:
+                self.add_error("content_url", "Link is required for link posts.")
+            elif not check_url_safety(content_url):
+                self.add_error("content_url", "URL flagged as unsafe.")
         elif post_type == "images":
             if not images:
                 self.add_error("images", "At least one image is required.")
