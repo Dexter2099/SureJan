@@ -15,30 +15,30 @@
     {% if comment.body_html %}{{ comment.body_html|safe }}{% else %}{{ comment.body|linebreaks }}{% endif %}
   </div>
 
-  <div class="comment-actions">
-    <form hx-post="{% url 'vote_comment' comment.pk %}?v=1"
-          hx-target="#cscore-{{ comment.pk }}"
-          hx-swap="outerHTML"
-          method="post" class="inline">
-      {% csrf_token %}
-      <button type="submit" aria-label="Upvote">▲</button>
-    </form>
+    <div class="comment-actions">
+      <form hx-post="{% url 'vote_comment' comment.pk %}?v=1"
+            hx-target="#cscore-{{ comment.pk }}"
+            hx-swap="outerHTML"
+            method="post" class="inline">
+        {% csrf_token %}
+        <button type="submit" aria-label="Upvote">▲</button>
+      </form>
 
-    {% include "core/partials/comment_score.html" %}
+      <span id="cscore-{{ comment.pk }}" class="score">{{ comment.score }}</span>
 
-    <form hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
-          hx-target="#cscore-{{ comment.pk }}"
-          hx-swap="outerHTML"
-          method="post" class="inline">
-      {% csrf_token %}
-      <button type="submit" aria-label="Downvote">▼</button>
-    </form>
+      <form hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
+            hx-target="#cscore-{{ comment.pk }}"
+            hx-swap="outerHTML"
+            method="post" class="inline">
+        {% csrf_token %}
+        <button type="submit" aria-label="Downvote">▼</button>
+      </form>
 
-    <a class="reply"
-       hx-get="{% url 'comment_reply_form' comment.pk %}"
-       hx-target="#c{{ comment.pk }} .reply-target"
-       hx-swap="innerHTML">Reply</a>
-  </div>
+      <a class="reply"
+         hx-get="{% url 'comment_reply_form' comment.pk %}"
+         hx-target="#c{{ comment.pk }} .reply-target"
+         hx-swap="innerHTML">Reply</a>
+    </div>
 
   <div class="reply-target"></div>
 
