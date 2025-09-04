@@ -17,17 +17,17 @@
 
     <div class="comment-actions">
       <form hx-post="{% url 'vote_comment' comment.pk %}?v=1"
-            hx-target="#cscore-{{ comment.pk }}"
+            hx-target="#comment-score-{{ comment.pk }}"
             hx-swap="outerHTML"
             method="post" class="inline">
         {% csrf_token %}
         <button type="submit" aria-label="Upvote">▲</button>
       </form>
 
-      <span id="cscore-{{ comment.pk }}" class="score">{{ comment.score }}</span>
+      <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
 
       <form hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
-            hx-target="#cscore-{{ comment.pk }}"
+            hx-target="#comment-score-{{ comment.pk }}"
             hx-swap="outerHTML"
             method="post" class="inline">
         {% csrf_token %}
