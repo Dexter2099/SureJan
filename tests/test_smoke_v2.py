@@ -40,7 +40,7 @@ def test_signup_submit_sort_and_commands(client):
         'community': com.id,
         'post_type': 'link',
         'title': 'L1',
-        'link': 'https://example.com',
+        'content_url': 'https://example.com',
     }, follow=True)
     # submit image
     buf = BytesIO()

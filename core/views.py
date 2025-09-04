@@ -586,6 +586,8 @@ def post_submit(request):
         return HttpResponseForbidden("Account banned")
 
     initial = request.session.pop("post_data", None)
+    if initial and "link" in initial:
+        initial["content_url"] = initial.pop("link")
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if is_new_user(request.user):
@@ -599,7 +601,7 @@ def post_submit(request):
             return render(request, "core/submit.html", {"form": form}, status=429)
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
-            link = form.cleaned_data.get("link", "")
+            content_url = form.cleaned_data.get("content_url", "")
             images = form.cleaned_data.get("images", [])
             body = form.cleaned_data.get("body", "")
 
@@ -609,7 +611,7 @@ def post_submit(request):
                 post_type="image" if post_type == "images" else post_type,
                 title=form.cleaned_data["title"],
                 body=body,
-                content_url=link if post_type == "link" else "",
+                content_url=content_url if post_type == "link" else "",
             )
             if post_type == "images" and images:
                 post.image = images[0]

@@ -57,7 +57,7 @@ class PostFormValidationTests(TestCase):
             data={
                 "community": self.community.id,
                 "title": "T",
-                "link": "http://example.com",
+                "content_url": "http://example.com",
                 "post_type": "link",
             }
         )

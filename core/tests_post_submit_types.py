@@ -48,7 +48,7 @@ class PostSubmitTests(TestCase):
                 "community": self.community.id,
                 "post_type": "link",
                 "title": "YT",
-                "link": link,
+                "content_url": link,
             },
             follow=True,
         )
