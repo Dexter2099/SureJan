@@ -49,7 +49,7 @@ urlpatterns = [
 
     # Comments & voting
     path("comment/<int:post_id>/reply/", core_views.comment_reply, name="comment_reply"),
-    path("comment/<int:post_id>/reply-form/", core_views.comment_reply_form, name="comment_reply_form"),
+    path("comment/<int:pk>/reply-form/", core_views.comment_reply_form, name="comment_reply_form"),
     path("comment/<int:pk>/delete/", core_views.comment_delete, name="comment_delete"),
     path("comment/<int:pk>/edit/", core_views.comment_edit, name="comment_edit"),
     path("comments/new", core_views.comment_new, name="comment_new"),
