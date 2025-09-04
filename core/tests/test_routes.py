@@ -120,7 +120,7 @@ class RouteTests(TestCase):
     def test_vote_comment_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_comment", args=[self.comment.pk])
-        resp = self.client.post(f"{url}?v=0", HTTP_HX_REQUEST="true")
+        resp = self.client.post(url, {"v": 0}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
 
     def test_vote_comment_htmx_with_csrf(self):
@@ -130,7 +130,10 @@ class RouteTests(TestCase):
         token = client.cookies["csrftoken"].value
         url = reverse("vote_comment", args=[self.comment.pk])
         resp = client.post(
-            f"{url}?v=1", HTTP_HX_REQUEST="true", HTTP_X_CSRFTOKEN=token
+            url,
+            {"v": 1},
+            HTTP_HX_REQUEST="true",
+            HTTP_X_CSRFTOKEN=token,
         )
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
