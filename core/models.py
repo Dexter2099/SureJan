@@ -13,9 +13,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from datetime import timedelta
 from django.utils import timezone
-from django.utils.text import slugify
+from django.utils.text import slugify, Truncator
+from django.utils.html import strip_tags
 from urllib.parse import urlparse
 import logging
+import re
 
 from PIL import Image
 from io import BytesIO
@@ -152,6 +154,17 @@ class Post(models.Model):
     @property
     def slug(self):
         return slugify(self.title)
+
+    @property
+    def excerpt(self):
+        if self.body:
+            text = strip_tags(self.body)
+        elif self.link_domain:
+            text = self.link_domain
+        else:
+            return ""
+        text = re.sub(r"\s+", " ", text).strip()
+        return Truncator(text).chars(180)
 
     def get_absolute_url(self):
         return reverse("post_detail", args=[self.community.slug, self.pk, self.slug])
