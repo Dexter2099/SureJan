@@ -39,7 +39,7 @@
         <button type="submit" aria-label="Upvote">▲</button>
       </form>
 
-      <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
+      {% include "partials/score_span.html" with id="post-score-"|add:post.pk score=post.score %}
 
       <form hx-post="{% url 'vote_post' post.pk %}?v=-1"
             hx-target="#post-score-{{ post.pk }}"
