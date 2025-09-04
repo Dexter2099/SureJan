@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import Comment, Community, Post
@@ -82,3 +82,18 @@ class RouteTests(TestCase):
         url = reverse("vote_comment", args=[self.comment.pk])
         resp = self.client.post(f"{url}?v=0", HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
+
+    def test_vote_comment_htmx_with_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.login(username="tester", password="pwd")
+        client.get(reverse("home"))
+        token = client.cookies["csrftoken"].value
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = client.post(
+            f"{url}?v=1", HTTP_HX_REQUEST="true", HTTP_X_CSRFTOKEN=token
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertHTMLEqual(
+            resp.content.decode(),
+            f'<span id="cscore-{self.comment.pk}" class="score">1</span>',
+        )
