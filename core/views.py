@@ -56,6 +56,7 @@ from .services.votes import (
 from .oembed import fetch_oembed
 from .utils.embeds import build_embed_html
 from . import mod
+from .http import login_required_htmx
 
 
 def _is_banned(user):
@@ -1300,15 +1301,14 @@ def comment_delete(request, pk):
     )
 
 
-@login_required
 @require_POST
+@login_required_htmx
 def vote_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
 
-    raw = request.POST.get("v")
     try:
-        want = int(raw)
-    except (TypeError, ValueError):
+        want = int(request.POST["v"])
+    except (KeyError, TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
     if want not in (1, -1):
         return HttpResponseBadRequest("Invalid vote")
@@ -1321,15 +1321,14 @@ def vote_post(request, pk):
     return render(request, "core/partials/post_score.html", {"post": post})
 
 
-@login_required
 @require_POST
+@login_required_htmx
 def vote_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
 
-    raw = request.POST.get("v")
     try:
-        want = int(raw)
-    except (TypeError, ValueError):
+        want = int(request.POST["v"])
+    except (KeyError, TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
     if want not in (1, -1):
         return HttpResponseBadRequest("Invalid vote")
