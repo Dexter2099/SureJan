@@ -340,3 +340,27 @@ body.layout-root {
 
 /* If your vote buttons are inside <form>, keep forms inline */
 .post-actions .vote form{ display: inline; margin: 0; }
+
+/* Comment tree */
+.comment{ position:relative; padding:10px 0 10px calc(16px * var(--depth, 0)); }
+.comment-children{ margin-top:6px; }
+
+/* vertical guide for nested levels */
+.comment::before{
+  content:"";
+  position:absolute;
+  left: calc(16px * max(var(--depth, 0) - 0.5, 0));
+  top:0; bottom:0; width:1px;
+  background: var(--color-border, #e5e7eb);
+  opacity:.6;
+}
+.comment[style*="--depth: 0"]::before{ display:none; }
+
+/* Meta + actions */
+.comment-meta{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:#666; }
+.comment-meta .author{ font-weight:600; color:inherit; text-decoration:none; }
+.comment-meta .dot{ opacity:.6; }
+.comment-actions{ display:flex; align-items:center; gap:8px; margin-top:6px; }
+.comment .score{ min-width:1.5ch; text-align:center; }
+.astro-chip{ min-width:28px; height:18px; padding:0 6px; border-radius:9px; font-size:11px; line-height:18px; color:#fff; font-weight:600; }
+.astro-chip.green{ background:#16a34a; } .astro-chip.amber{ background:#f59e0b; } .astro-chip.red{ background:#dc2626; }
