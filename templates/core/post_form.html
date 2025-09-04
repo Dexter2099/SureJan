@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Create Post</h1>
-<form method="post" action="{% url 'post_submit' %}" class="post-form" hx-boost="false" hx-swap="none">
+<form method="post" action="{% url 'post_submit' %}" class="post-form">
   {% csrf_token %}
   <div class="draft-pill" hidden></div>
   {{ form.non_field_errors }}
@@ -34,7 +34,7 @@
         <button type="button" class="tab tab-write active">Write</button>
         <button type="button"
                 class="tab tab-preview"
-                hx-post="{% url 'preview_markdown' %}"
+                hx-get="{% url 'preview_markdown' %}"
                 hx-vals="js:{body: this.closest('.editor-container').querySelector('textarea').value}"
                 hx-target="#post-preview"
                 hx-swap="innerHTML">Preview</button>
