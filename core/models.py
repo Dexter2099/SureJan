@@ -293,14 +293,8 @@ class Vote(models.Model):
                 name="vote_valid_target_type",
             ),
             models.UniqueConstraint(
-                fields=["user", "target_id"],
-                condition=Q(target_type="post"),
-                name="uniq_vote_post_user",
-            ),
-            models.UniqueConstraint(
-                fields=["user", "target_id"],
-                condition=Q(target_type="comment"),
-                name="uniq_vote_comment_user",
+                fields=["user", "target_type", "target_id"],
+                name="uniq_vote_user_target",
             ),
         ]
 
