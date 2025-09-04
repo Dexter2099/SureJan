@@ -30,31 +30,7 @@
   <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
   {% endif %}
   <div class="post-actions">
-    <div class="vote post-vote" id="post-{{ post.pk }}-vote"{% if user.is_authenticated %}
-         hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
-      {% if user.is_authenticated %}
-      <button
-        hx-post="{% url 'vote_post' post.pk %}"
-        hx-vals='{"v":1}'
-        hx-target="#post-score-{{ post.pk }}"
-        hx-swap="outerHTML"
-        aria-label="Upvote">▲</button>
-
-      {% include "core/partials/post_score.html" with post=post only %}
-
-      <button
-        hx-post="{% url 'vote_post' post.pk %}"
-        hx-vals='{"v":-1}'
-        hx-target="#post-score-{{ post.pk }}"
-        hx-swap="outerHTML"
-        aria-label="Downvote">▼</button>
-      {% else %}
-      <button disabled aria-label="Upvote">▲</button>
-      {% include "core/partials/post_score.html" with post=post only %}
-      <button disabled aria-label="Downvote">▼</button>
-      <a href="{% url 'login' %}?next={{ request.path }}">Log in to vote</a>
-      {% endif %}
-    </div>
+    {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
     <details class="astro-why">
