@@ -117,11 +117,11 @@ def oembed_preview(request):
     return HttpResponse(html)
 
 
-@require_POST
-@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
+@require_GET
+@ratelimit(key="user", rate="5/m", method=["GET"], block=False)
 def preview_markdown(request):
     """Render sanitized markdown for body or caption preview."""
-    text = request.POST.get("body", "").strip() or request.POST.get("caption", "").strip()
+    text = request.GET.get("body", "").strip() or request.GET.get("caption", "").strip()
     html = markdown_renderer(text)
     clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
     return render(request, "core/partials/preview.html", {"html": mark_safe(clean)})

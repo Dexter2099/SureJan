@@ -6,7 +6,7 @@
   <a href="{% url 'home' %}">← Back to feed</a>
   <h1>Submit Post</h1>
   <p class="form-helper">Title is required. Include body <strong>or</strong> media.</p>
-  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false" class="submit-form" data-testid="submit-form">
+  <form id="post-form" method="post" enctype="multipart/form-data" class="submit-form" data-testid="submit-form">
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">
@@ -38,7 +38,8 @@
       <a href="{% url 'home' %}" class="button secondary">Cancel</a>
     </div>
   </form>
-  <div id="preview" aria-live="polite"></div>
+  <div id="link-preview" data-preview-url="{% url 'oembed_preview' %}"></div>
+  <div id="md-preview" data-markdown-url="{% url 'markdown_preview' %}"></div>
 </div>
 <div class="sticky-bar mobile-actions">
   <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled>Post</button>
@@ -49,4 +50,5 @@
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
 <script src="{% static 'js/post_submit_validate.js' %}" defer></script>
+<script src="{% static 'js/post_submit_preview.js' %}" defer></script>
 {% endblock %}
