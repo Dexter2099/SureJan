@@ -1,7 +1,7 @@
 .PHONY: bootstrap migrate seed recompute test astro
 
 bootstrap:
-	pip install -r requirements.txt
+	pip install -r requirements.txt -r requirements-dev.txt
 
 migrate:
 	python manage.py makemigrations && python manage.py migrate
@@ -10,7 +10,7 @@ seed:
 	python manage.py seed_demo
 
 recompute:
-        python manage.py recompute_ranks
+	python manage.py recompute_ranks
 
 test:
 	python manage.py test
