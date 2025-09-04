@@ -16,8 +16,8 @@
       {% else %}[deleted]{% endif %} · {{ post.created_at|timesince }} ago
     </div>
     <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
-    {% if post.body %}
-    <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
+    {% if post.excerpt %}
+    <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
     <div class="post-actions">
       {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
