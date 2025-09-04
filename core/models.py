@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Q
 from django.db.models.functions import Lower
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
@@ -287,10 +287,20 @@ class Vote(models.Model):
 
     class Meta:
         constraints = [
+            models.CheckConstraint(
+                check=Q(target_type__in=["post", "comment"]),
+                name="vote_valid_target_type",
+            ),
             models.UniqueConstraint(
-                fields=["user", "target_type", "target_id"],
-                name="uniq_vote_target_user",
-            )
+                fields=["user", "target_id"],
+                condition=Q(target_type="post"),
+                name="uniq_vote_post_user",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "target_id"],
+                condition=Q(target_type="comment"),
+                name="uniq_vote_comment_user",
+            ),
         ]
 
 
