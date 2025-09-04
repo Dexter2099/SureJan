@@ -32,7 +32,7 @@
       <button disabled aria-label="Upvote">▲</button>
       {% include "core/partials/comment_score.html" %}
       <button disabled aria-label="Downvote">▼</button>
-      <a href="{% url 'login' %}?next={{ request.path }}">Log in to vote</a>
+      <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to vote</a>
       {% endif %}
     </span>
     <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
