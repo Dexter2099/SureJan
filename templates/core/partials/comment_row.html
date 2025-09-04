@@ -1,10 +1,47 @@
-{% comment %}Row for displaying a single comment in user profile views{% endcomment %}
-<div class="comment-row">
-  <p>{{ comment.body }}</p>
-  <small>
-    in <a href="{% url 'community' comment.post.community.slug %}">r/{{ comment.post.community.slug }}</a>
-    on <a href="{% url 'post_detail' comment.post.community.slug comment.post.pk comment.post.slug %}">{{ comment.post.title }}</a>
-    · <time datetime="{{ comment.created_at|date:'c' }}" data-ts="{{ comment.created_at|date:'U' }}" title="{{ comment.created_at|date:'Y-m-d H:i' }}">{{ comment.created_at|timesince }} ago</time>
-  </small>
-</div>
+<article class="comment" id="c{{ comment.pk }}" style="--depth: {{ depth|default:'0' }}">
+  <header class="comment-meta">
+    <a class="author" href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>
+    <span class="dot">•</span>
+    <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }} ago</time>
+    <span class="dot">•</span>
+    <span id="cscore-{{ comment.pk }}" class="score">{{ comment.score }}</span>
+    {% if comment.astro_band %}
+      <span class="astro-chip {{ comment.astro_band }}" title="Astro severity">
+        {{ comment.astro_severity|default:0|floatformat:0 }}
+      </span>
+    {% endif %}
+  </header>
 
+  <div class="comment-body">
+    {% if comment.body_html %}{{ comment.body_html|safe }}{% else %}{{ comment.body|linebreaks }}{% endif %}
+  </div>
+
+  <div class="comment-actions">
+    <button class="up"
+            hx-post="{% url 'vote_comment' comment.pk %}?v=1"
+            hx-target="#cscore-{{ comment.pk }}"
+            hx-swap="outerHTML"
+            aria-label="Upvote">▲</button>
+    <button class="down"
+            hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
+            hx-target="#cscore-{{ comment.pk }}"
+            hx-swap="outerHTML"
+            aria-label="Downvote">▼</button>
+    <a class="reply"
+       hx-get="{% url 'comment_reply_form' comment.pk %}"
+       hx-target="#c{{ comment.pk }} .reply-target"
+       hx-swap="innerHTML">Reply</a>
+  </div>
+
+  <div class="reply-target"></div>
+
+  {% with kids=children|default:comment.children.all %}
+    {% if kids %}
+      <div class="comment-children">
+        {% for child in kids %}
+          {% include "core/partials/comment_row.html" with comment=child depth=depth|add:1 only %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+</article>

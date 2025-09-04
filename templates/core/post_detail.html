@@ -101,7 +101,11 @@
   </div>
 
   <div id="comment-tree">
-    {% include "core/partials/comment.html" with post=post comments=comments only %}
+    {% for c in comments %}
+      {% include "core/partials/comment_row.html" with comment=c depth=0 only %}
+    {% empty %}
+      <p class="muted">No comments yet.</p>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}

@@ -726,7 +726,11 @@ def post_detail(request, community, pk, slug):
     if c_sort not in {"best", "top", "new", "controversial"}:
         c_sort = "best"
 
-    comments = post.comments.select_related("author")
+    comments = (
+        post.comments.filter(parent__isnull=True)
+        .select_related("author")
+        .prefetch_related("children__author")
+    )
     if q:
         comments = comments.filter(body__icontains=q)
 
@@ -788,7 +792,11 @@ def post_detail_id(request, pk):
     if c_sort not in {"best", "top", "new", "controversial"}:
         c_sort = "best"
 
-    comments = post.comments.select_related("author")
+    comments = (
+        post.comments.filter(parent__isnull=True)
+        .select_related("author")
+        .prefetch_related("children__author")
+    )
     if q:
         comments = comments.filter(body__icontains=q)
 
