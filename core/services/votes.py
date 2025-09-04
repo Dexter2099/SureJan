@@ -1,7 +1,8 @@
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, F
 
-from ..models import Vote, Post, Comment
+from ..models import Vote, Post, Comment, UserProfile
+from ..ranking import recompute_post_ranks
 
 
 class AlreadyVoted(Exception):
@@ -37,13 +38,19 @@ def _cast_vote_once(user, *, post=None, comment=None, want: int) -> int:
         row.value = want
         row.save(update_fields=["value"])
 
-        total = (
-            Vote.objects.filter(target_type=target_type, target_id=target_id)
-            .aggregate(t=Sum("value"))["t"]
-            or 0
-        )
+        qs = Vote.objects.filter(target_type=target_type, target_id=target_id)
+        total = qs.aggregate(t=Sum("value"))["t"] or 0
         target.score = total
         target.save(update_fields=["score"])
+
+        if target_type == "post":
+            up = qs.filter(value=1).count()
+            down = qs.filter(value=-1).count()
+            recompute_post_ranks(target, up, down)
+
+        UserProfile.objects.filter(user=target.author_id).update(
+            points_cached=F("points_cached") + want
+        )
 
     try:  # Anti-AstroTurf hook; non-blocking
         from core import anti_astroturf as aa

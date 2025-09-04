@@ -15,6 +15,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.utils.text import slugify
 from urllib.parse import urlparse
+import logging
 
 from PIL import Image
 from io import BytesIO
@@ -452,29 +453,16 @@ def _store_old_vote_value(sender, instance, **kwargs):
 
 
 def _apply_vote_delta(instance, delta):
-    """Apply the vote delta to the target object and author points."""
+    """Log vote deltas without mutating scores."""
     if delta == 0:
         return
-    if instance.target_type == "post":
-        Post.objects.filter(pk=instance.target_id).update(score=F("score") + delta)
-        post = Post.objects.get(pk=instance.target_id)
-        # recompute ranking based on current vote counts
-        up = Vote.objects.filter(
-            target_type="post", target_id=instance.target_id, value=1
-        ).count()
-        down = Vote.objects.filter(
-            target_type="post", target_id=instance.target_id, value=-1
-        ).count()
-        recompute_post_ranks(post, up, down)
-        UserProfile.objects.filter(user=post.author_id).update(
-            points_cached=F("points_cached") + delta
-        )
-    else:
-        Comment.objects.filter(pk=instance.target_id).update(score=F("score") + delta)
-        comment = Comment.objects.get(pk=instance.target_id)
-        UserProfile.objects.filter(user=comment.author_id).update(
-            points_cached=F("points_cached") + delta
-        )
+    logging.getLogger(__name__).info(
+        "Vote delta %s on %s %s by %s",
+        delta,
+        instance.target_type,
+        instance.target_id,
+        instance.user_id,
+    )
 
 
 @receiver(post_save, sender=Vote)
