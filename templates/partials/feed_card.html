@@ -30,26 +30,22 @@
   <p class="post-excerpt">{{ post.body|truncatechars:180 }}</p>
   {% endif %}
   <div class="post-actions">
-    <div class="vote">
-      <form hx-post="{% url 'vote_post' post.pk %}"
-            hx-vals='{"v":1}'
-            hx-target="#post-score-{{ post.pk }}"
-            hx-swap="outerHTML"
-            method="post" class="inline">
-        {% csrf_token %}
-        <button type="submit" aria-label="Upvote">▲</button>
-      </form>
+    <div class="vote" id="post-{{ post.pk }}-vote">
+      <button
+        hx-post="{% url 'vote_post' post.pk %}"
+        hx-vals='{"v":1}'
+        hx-target="#post-{{ post.pk }}-score"
+        hx-swap="outerHTML"
+        aria-label="Upvote">▲</button>
 
-      {% include "partials/score_span.html" with id="post-score-"|add:post.pk score=post.score %}
+      {% include "core/partials/post_score.html" with post=post only %}
 
-      <form hx-post="{% url 'vote_post' post.pk %}"
-            hx-vals='{"v":-1}'
-            hx-target="#post-score-{{ post.pk }}"
-            hx-swap="outerHTML"
-            method="post" class="inline">
-        {% csrf_token %}
-        <button type="submit" aria-label="Downvote">▼</button>
-      </form>
+      <button
+        hx-post="{% url 'vote_post' post.pk %}"
+        hx-vals='{"v":-1}'
+        hx-target="#post-{{ post.pk }}-score"
+        hx-swap="outerHTML"
+        aria-label="Downvote">▼</button>
     </div>
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}

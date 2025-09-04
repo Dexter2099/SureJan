@@ -30,7 +30,7 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db.models import F
+from django.db.models import F, Sum
 from django import forms
 from django.core.paginator import Paginator
 from django.core.files.storage import default_storage
@@ -44,7 +44,7 @@ from django.urls import reverse
 from urllib.parse import urlparse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report
+from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report, Vote
 from .votes import apply_vote
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
@@ -1299,30 +1299,34 @@ def comment_delete(request, pk):
 @login_required
 @require_POST
 def vote_post(request, pk):
-    try:
-        raw = request.GET.get("v") or request.POST.get("v")
-        v = int(raw)
-    except (TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid vote")
-    if v not in (-1, 1):
-        return HttpResponseBadRequest("Invalid vote")
     post = get_object_or_404(Post, pk=pk)
-    from .votes import apply_vote
+
+    raw = request.POST.get("v")
     try:
-        apply_vote(request.user, "post", post.pk, v)
-    except ValueError:
-        return HttpResponseBadRequest("Invalid vote")
-    try:
-        post.refresh_from_db(fields=["score"])
+        value = int(raw)
+        if value not in (-1, 0, 1):
+            raise ValueError
     except Exception:
-        post.refresh_from_db()
-    if request.headers.get("HX-Request") == "true":
-        html = render_to_string(
-            "partials/score_span.html",
-            {"id": f"post-score-{post.pk}", "score": post.score},
-        )
-        return HttpResponse(html, content_type="text/html")
-    return redirect(post.get_absolute_url())
+        return HttpResponseBadRequest("Invalid vote")
+
+    Vote.objects.update_or_create(
+        user=request.user,
+        target_type="post",
+        target_id=post.pk,
+        defaults={"value": value},
+    )
+
+    post.refresh_from_db()
+    score = (
+        Vote.objects.filter(target_type="post", target_id=post.pk)
+        .aggregate(total=Sum("value"))
+        ["total"]
+        or 0
+    )
+    post.score = score
+    post.save(update_fields=["score"])
+
+    return render(request, "core/partials/post_score.html", {"post": post})
 
 
 @login_required
