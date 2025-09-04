@@ -54,7 +54,7 @@
               hx-post="{% url 'preview_markdown' %}"
               hx-include="[name='body']"
               hx-target="#preview" hx-swap="innerHTML">Preview</button>
-      <button type="submit" class="button primary" id="post-btn" disabled aria-label="Submit post">Post</button>
+      <button type="submit" class="button primary" id="post-btn" aria-label="Submit post">Post</button>
       <button type="submit" name="save_draft" value="1" class="button secondary" aria-label="Save draft">Save draft</button>
       <a href="{% url 'home' %}" class="button secondary" aria-label="Cancel and return">Cancel</a>
     </div>
@@ -67,7 +67,7 @@
   <label><input type="checkbox" id="live-preview-toggle-mobile"> Live preview</label>
   <button type="button" class="button secondary" hx-post="{% url 'preview_markdown' %}"
           hx-include="[name='body']" hx-target="#preview" hx-swap="innerHTML" aria-label="Preview post">Preview</button>
-  <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" disabled aria-label="Submit post">Post</button>
+  <button type="submit" form="post-form" class="button primary" id="post-btn-mobile" aria-label="Submit post">Post</button>
 </div>
 {% endblock %}
 
