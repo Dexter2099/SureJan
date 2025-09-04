@@ -1,24 +1,9 @@
-<div style="margin-left: {% widthratio parent.depth|add:'1' 1 20 %}px" hx-on="htmx:afterRequest:this.remove()">
-        <form hx-post="{% url 'comment_reply' post.pk %}"
-          hx-target="#comment-{{ parent.pk }}"
-          hx-swap="afterend">
-        {% csrf_token %}
-        <div class="form-error" role="alert" style="display:none"></div>
-        <div class="editor-container">
-            <div class="editor-tabs">
-                <button type="button" class="tab tab-write active">Write</button>
-                <button type="button"
-                        class="tab tab-preview"
-                        hx-post="{% url 'preview_markdown' %}"
-                        hx-vals="js:{body: this.closest('.editor-container').querySelector('textarea').value}"
-                        hx-target="#preview-{{ parent.pk }}"
-                        hx-swap="innerHTML">Preview</button>
-            </div>
-            {% include "core/partials/editor_toolbar.html" %}
-            {{ form.body }}
-            <div id="preview-{{ parent.pk }}" class="preview" style="display:none"></div>
-        </div>
-        <input type="hidden" name="parent_id" value="{{ parent.pk }}">
-        <button type="submit">Reply<span class="spinner" hidden aria-hidden="true"></span></button>
-        </form>
-    </div>
+<form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comment-tree" hx-swap="beforeend" method="post">
+  {% csrf_token %}
+  <textarea name="body" rows="3" required></textarea>
+  <input type="hidden" name="parent_id" value="{{ parent_id }}">
+  <div class="form-actions">
+    <button type="reset">Cancel</button>
+    <button type="submit">Comment</button>
+  </div>
+</form>

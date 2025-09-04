@@ -938,10 +938,12 @@ def comment_reply(request, post_id):
     Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
 
     if request.headers.get("HX-Request") == "true":
-        html = render_to_string(
-            "core/partials/comment.html", {"comment": comment}, request=request
+        depth = comment.path.count("/")
+        return render(
+            request,
+            "core/partials/comment_row.html",
+            {"comment": comment, "depth": depth},
         )
-        return HttpResponse(html)
 
     return redirect(
         "post_detail",
@@ -1085,30 +1087,14 @@ def comment_create(request):
     )
 
 
-@login_required
-@require_http_methods(["GET"])
-def comment_reply_form(request, post_id):
-    """Render the comment reply form via HTMX."""
-
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
-    if request.headers.get("HX-Request") != "true":
-        return HttpResponseBadRequest("Invalid request")
-
-    post = get_object_or_404(Post, pk=post_id)
-    if post.is_locked:
-        return HttpResponseForbidden("Comments locked")
-    parent_id = request.GET.get("parent_id")
-    if not parent_id:
-        return HttpResponseBadRequest("Missing parent_id")
-    parent = get_object_or_404(Comment, pk=parent_id, post=post)
-    form = CommentForm()
-    html = render_to_string(
+@require_GET
+def comment_reply_form(request, pk):
+    parent = get_object_or_404(Comment, pk=pk)
+    return render(
+        request,
         "core/partials/reply_form.html",
-        {"form": form, "parent": parent, "post": post},
-        request=request,
+        {"parent_id": parent.pk, "post": parent.post},
     )
-    return HttpResponse(html)
 
 
 @login_required
@@ -1363,6 +1349,10 @@ def vote_comment(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     comment = Comment.objects.get(pk=pk)
+    if request.headers.get("HX-Target", "").startswith("cscore-"):
+        return render(
+            request, "core/partials/comment_score.html", {"comment": comment}
+        )
     score = comment.score
     up_pressed = "true" if new_value == 1 else "false"
     down_pressed = "true" if new_value == -1 else "false"
