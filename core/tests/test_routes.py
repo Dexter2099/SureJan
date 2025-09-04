@@ -62,20 +62,40 @@ class RouteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
             resp.content.decode(),
-            f'<span id="post-score-{self.post.pk}" class="score">1</span>',
+            f'<span id="post-{self.post.pk}-score" class="score">1</span>',
         )
 
-    def test_vote_post_non_htmx_redirects(self):
+    def test_vote_post_non_htmx_returns_span(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(url, {"v": 1})
-        self.assertRedirects(resp, self.post.get_absolute_url())
+        self.assertEqual(resp.status_code, 200)
+        self.assertHTMLEqual(
+            resp.content.decode(),
+            f'<span id="post-{self.post.pk}-score" class="score">1</span>',
+        )
 
     def test_vote_post_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(url, {"v": 2}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
+
+    def test_vote_post_get_not_allowed(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 405)
+
+    def test_vote_post_updates_score(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_post", args=[self.post.pk])
+        self.client.post(url, {"v": 1})
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 1)
+        self.client.post(url, {"v": 0})
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.score, 0)
 
     def test_vote_comment_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")
