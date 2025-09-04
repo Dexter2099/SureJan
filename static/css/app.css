@@ -316,3 +316,27 @@ body.layout-root {
 .astro-chip.amber{ background:#f59e0b; }   /* amber-500 */
 .astro-chip.red{   background:#dc2626; }   /* red-600 */
 .astro-label{ font-size:12px; color:#6b7280; }
+/* Actions row: single horizontal line */
+.post-actions{
+  display: flex;
+  align-items: center;
+  gap: 12px;            /* space between vote and astro chip */
+}
+
+/* Vote controls inline: ▲  score  ▼ */
+.post-actions .vote{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.post-actions .score{
+  display: inline-block;
+  min-width: 1.5ch;
+  text-align: center;
+  margin: 0 2px;
+}
+
+/* If your vote buttons are inside <form>, keep forms inline */
+.post-actions .vote form{ display: inline; margin: 0; }
