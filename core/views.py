@@ -745,6 +745,27 @@ def post_detail(request, community, pk, slug):
     show_embed = bool(post.content_url) and not (has_gallery or has_upload)
     embed_html = build_embed_html(post.content_url) if show_embed else ""
 
+    severity = None
+    band = None
+    try:
+        severity = getattr(getattr(post, "astro_score", None), "severity", None)
+    except Exception:
+        severity = None
+    if severity is None:
+        try:
+            metrics = compute_post_signals(post.pk)
+            severity = metrics.get("severity")
+        except Exception:
+            severity = None
+
+    if isinstance(severity, (int, float)):
+        if severity < 40:
+            band = "green"
+        elif severity < 70:
+            band = "amber"
+        else:
+            band = "red"
+
     context = {
         "post": post,
         "comments": comments,
@@ -752,6 +773,8 @@ def post_detail(request, community, pk, slug):
         "images": images,
         "c_sort": c_sort,
         "q": q,
+        "severity": severity,
+        "severity_band": band,
     }
     return render(request, "core/post_detail.html", context)
 
@@ -784,6 +807,27 @@ def post_detail_id(request, pk):
     show_embed = bool(post.content_url) and not (has_gallery or has_upload)
     embed_html = build_embed_html(post.content_url) if show_embed else ""
 
+    severity = None
+    band = None
+    try:
+        severity = getattr(getattr(post, "astro_score", None), "severity", None)
+    except Exception:
+        severity = None
+    if severity is None:
+        try:
+            metrics = compute_post_signals(post.pk)
+            severity = metrics.get("severity")
+        except Exception:
+            severity = None
+
+    if isinstance(severity, (int, float)):
+        if severity < 40:
+            band = "green"
+        elif severity < 70:
+            band = "amber"
+        else:
+            band = "red"
+
     context = {
         "post": post,
         "comments": comments,
@@ -791,6 +835,8 @@ def post_detail_id(request, pk):
         "images": images,
         "c_sort": c_sort,
         "q": q,
+        "severity": severity,
+        "severity_band": band,
     }
     return render(request, "core/post_detail.html", context)
 
