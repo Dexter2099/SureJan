@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community, Post
+from core.models import Comment, Community, Post
 
 
 class RouteTests(TestCase):
@@ -17,6 +17,9 @@ class RouteTests(TestCase):
             author=self.user,
             post_type="text",
             title="Hello",
+        )
+        self.comment = Comment.objects.create(
+            post=self.post, author=self.user, body="Hi", path="0001"
         )
 
     def test_home(self):
@@ -67,3 +70,15 @@ class RouteTests(TestCase):
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(f"{url}?v=1")
         self.assertRedirects(resp, self.post.get_absolute_url())
+
+    def test_vote_post_invalid_value_returns_400(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_post", args=[self.post.pk])
+        resp = self.client.post(f"{url}?v=2", HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 400)
+
+    def test_vote_comment_invalid_value_returns_400(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(f"{url}?v=0", HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 400)
