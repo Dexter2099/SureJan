@@ -90,13 +90,32 @@ class RouteTests(TestCase):
     def test_vote_post_updates_score(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
-        self.client.post(url, {"v": 1})
+        resp = self.client.post(url, {"v": 1})
+        self.assertEqual(resp.status_code, 200)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
         resp = self.client.post(url, {"v": 1})
         self.assertEqual(resp.status_code, 409)
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
+
+    def test_vote_comment_updates_score(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": 1})
+        self.assertEqual(resp.status_code, 200)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 1)
+        resp = self.client.post(url, {"v": 1})
+        self.assertEqual(resp.status_code, 409)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.score, 1)
+
+    def test_vote_comment_get_not_allowed(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 405)
 
     def test_vote_comment_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")
