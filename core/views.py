@@ -1299,10 +1299,18 @@ def comment_delete(request, pk):
 @login_required
 @require_POST
 def vote_post(request, pk):
-    v = int(request.GET.get("v", "0") or 0)
+    try:
+        v = int(request.GET.get("v", "0"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+    if v not in (-1, 1):
+        return HttpResponseBadRequest("Invalid vote")
     post = get_object_or_404(Post, pk=pk)
     from .votes import apply_vote
-    apply_vote(request.user, "post", post.pk, v)
+    try:
+        apply_vote(request.user, "post", post.pk, v)
+    except ValueError:
+        return HttpResponseBadRequest("Invalid vote")
     try:
         post.refresh_from_db(fields=["score"])
     except Exception:
@@ -1316,10 +1324,18 @@ def vote_post(request, pk):
 @login_required
 @require_POST
 def vote_comment(request, pk):
-    v = int(request.GET.get("v", "0") or 0)
+    try:
+        v = int(request.GET.get("v", "0"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+    if v not in (-1, 1):
+        return HttpResponseBadRequest("Invalid vote")
     cmt = get_object_or_404(Comment, pk=pk)
     from .votes import apply_vote
-    apply_vote(request.user, "comment", cmt.pk, v)
+    try:
+        apply_vote(request.user, "comment", cmt.pk, v)
+    except ValueError:
+        return HttpResponseBadRequest("Invalid vote")
     try:
         cmt.refresh_from_db(fields=["score"])
     except Exception:
