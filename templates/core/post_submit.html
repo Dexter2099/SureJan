@@ -5,7 +5,7 @@
 <div class="submit-wrapper">
   <a href="{% url 'home' %}">← Back to feed</a>
   <h1>Submit Post</h1>
-  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false" data-testid="submit-form">
+  <form id="post-form" method="post" enctype="multipart/form-data" hx-boost="false" data-testid="submit-form" data-preview-url="{% url 'preview_markdown' %}">
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">
@@ -74,57 +74,5 @@
 {% block scripts %}
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
-<script>
-function collectImages(){
-  const inputs=document.querySelectorAll('.image-url-input');
-  const urls=Array.from(inputs).map(i=>i.value.trim()).filter(Boolean);
-  document.getElementById('id_image_urls').value=urls.join('\n');
-  return urls;
-}
-
-function validatePost(){
-  const title=document.getElementById('id_title').value.trim();
-  const body=document.getElementById('id_body').value.trim();
-  const link=document.getElementById('id_link').value.trim();
-  const images=collectImages();
-  const buttons=document.querySelectorAll('#post-btn,#post-btn-mobile');
-  const valid=title && (body || link || images.length);
-  buttons.forEach(btn=>btn.disabled=!valid);
-}
-document.addEventListener('input', validatePost);
-
-function updateType(){
-  const type=document.querySelector('input[name="post_type"]:checked').value;
-  document.getElementById('link-row').style.display=type==='link'?'':'none';
-  document.getElementById('images-row').style.display=type==='images'?'':'none';
-  validatePost();
-}
-document.querySelectorAll('input[name="post_type"]').forEach(r=>r.addEventListener('change', updateType));
-updateType();
-document.getElementById('post-form').addEventListener('submit', collectImages);
-
-const liveToggle=document.getElementById('live-preview-toggle');
-const liveToggleMobile=document.getElementById('live-preview-toggle-mobile');
-const previewUrl="{% url 'preview_markdown' %}";
-function updateLivePreview(){
-  const enabled=liveToggle.checked || liveToggleMobile.checked;
-  const fields=[document.getElementById('id_body')];
-  fields.forEach(f=>{
-    if(enabled){
-      f.setAttribute('hx-post', previewUrl);
-      f.setAttribute('hx-trigger', 'input delay:500ms');
-      f.setAttribute('hx-target', '#preview');
-      f.setAttribute('hx-swap', 'innerHTML');
-    }else{
-      f.removeAttribute('hx-post');
-      f.removeAttribute('hx-trigger');
-      f.removeAttribute('hx-target');
-      f.removeAttribute('hx-swap');
-    }
-  });
-}
-liveToggle.addEventListener('change', updateLivePreview);
-liveToggleMobile.addEventListener('change', updateLivePreview);
-updateLivePreview();
-</script>
+<script src="{% static 'js/post_submit.js' %}" defer></script>
 {% endblock %}
