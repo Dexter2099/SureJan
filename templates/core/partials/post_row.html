@@ -24,7 +24,7 @@
         <button
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":1}'
-          hx-target="#post-{{ post.pk }}-score"
+          hx-target="#post-score-{{ post.pk }}"
           hx-swap="outerHTML"
           aria-label="Upvote">▲</button>
 
@@ -33,7 +33,7 @@
         <button
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":-1}'
-          hx-target="#post-{{ post.pk }}-score"
+          hx-target="#post-score-{{ post.pk }}"
           hx-swap="outerHTML"
           aria-label="Downvote">▼</button>
       </div>

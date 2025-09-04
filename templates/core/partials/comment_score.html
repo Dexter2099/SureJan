@@ -1,1 +1,1 @@
-{% include "partials/score_span.html" with id="cscore-"|add:comment.pk score=comment.score %}
+<span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
