@@ -1,62 +1,170 @@
-Change control: If flows change, update this file in the same PR.
+# SureJan V3 — UI Flow Map
 
-# SureJan V2 — UI Flow Map
+*A living, persistent map of how a user moves through the forum UI. Use this to align code, tests, and copy.*
 
-## Legend
-Start → Step (screen/state) → Exit; auth gates marked 🔒; rate-limit 429 marked ⏱️.
+---
 
-## Flow A — Landing → Browse → Detail
-```mermaid
-flowchart TD
-  A[Anon lands /] --> B[Header: Logo · Communities ▾ · Hot/New/Top]
-  B -->|Hot/New/Top| C[Feed cards]
-  C --> D[Click card]
-  D --> E[Post detail]
-```
-**Entry:** `/`
-**Screens:** Header, Feed (`.post-card`), Detail
-**Exit:** Back to feed
-**Selectors:** `data-testid="header-bar"`, `id="sort-tabs"`, `data-testid="post-card"`
-**Accept:** `/` 200; at least one `.post-card` or empty-state.
+## Legend & conventions
 
-## Flow B — Submit (Text | Link | Images≤5)
+* **Screens** are bolded; **routes** are inline code.
+* **Params** show accepted query keys so we can keep links stable.
+*
 
-```mermaid
-flowchart TD
-  A[/Submit Post/] -->|🔒 if anon| L[Login/Signup] --> A
-  A --> F[Form: Title, Body/URL/Images≤5]
-  F -->|Validate| G[Create] --> H[Detail]
-  F -->|⏱️ 429| F
-```
+---
 
-**Validation:** title ≤300; images ≤5, each ≤4MB.
-**Selectors:** `data-testid="submit-form"`, `data-testid="sidebar-submit"`
+## Primary screens & routes
 
-## Flow C — Top + Time filter
+### 1) **Home feed**
+
+**Route:** `/`
+**Query:** `sort=hot|new|top` · `t=24h|7d|all` (only when `sort=top`) · `page=n`
+
+**Key UI:**
+
+* Header logo (home), centered sort tabs (Hot · New · Top)
+* Post cards: community link, author link, timeago, image preview (thumb → image), title, excerpt, vote snippet, comments count
+
+### 2) **Community feed**
+
+**Route:** `/r/<slug>/`
+**Query:** `sort=hot|new|top` · `t=24h|7d|all` · `page=n`
+
+**Key UI:**
+
+* H1 community title, same sort tabs semantics as home
+* Post cards (same as home)
+
+### 3) **Post detail**
+
+**Route:** `/r/<community>/comments/<id>/<slug>/` *(canonical)* · **Alt:** `/p/<id>/`
+**Query (comments):** `c_sort=best|top|new|controversial` · `q=<search>`
+
+**Key UI:**
+
+* Title (H1)
+* Meta: **by** {username} **in** {community} · {timeago}
+* **Media priority:** gallery → uploaded image → embed preview (YouTube/Rumble/X) → plain link
+* Body (optional; require media **or** body)
+* **Actions row:** ▲ score ▼ · **Astro chip** (green/amber/red)
+* **Comment composer:** empty box + Cancel/Comment buttons (auth-gated)
+* **Comment thread:** Reddit-like tree; each row has meta (author · timeago · score · optional astro chip), body, and inline actions (▲ ▼ Reply)
+
+### 4) **Submit post**
+
+**Route:** `/submit/`
+**Fields:** Title · Body (optional) · Link URL (optional) · Images (≤5)
+**Rule:** must have **either** media **or** body
+
+### 5) **Auth**
+
+**Routes:** `/accounts/login/` · `/accounts/signup/` · `/accounts/logout/`
+
+### 6) **Moderation & transparency**
+
+**Routes:** `/mod/astro/` (moderator list) · `/methods/` (public write-up) · `/transparency/posts`
+
+---
+
+## User journeys (happy paths)
+
+### A) Browsing as a guest
+
+1. **Home feed** → click a **community** (e.g., `r/brisbane`) → **Community feed**
+2. Click a **post title/thumb** → **Post detail**
+3. Attempt to **comment** → redirect to **Login** → back to **Post detail** after auth
+
+### B) Engaging as an authenticated user
+
+1. **Home**/**Community** → vote on cards; click to **Post detail**
+2. In **Post detail**: media shows at top; body below; actions row includes astro chip
+3. **Comment:** write + submit; thread updates; reply at any depth
+
+### C) Submitting content
+
+1. From right sidebar (or header on mobile) → **Submit post**
+2. Provide **media or body** (required rule); submit → redirect to **Post detail**
+
+---
+
+## Flow diagrams (Mermaid)
 
 ```mermaid
 flowchart LR
-  T[Top tab] --> Chips{t: 24h | 7d | all}
-  Chips --> Feed
+  A[Home /] -->|click community| B[Community /r/<slug>/]
+  B -->|click post| C[Post detail /r/<c>/comments/<id>/<slug>/]
+  C -->|comment (guest)| D[Login /accounts/login/]
+  D -->|success| C
+  C -->|submit comment| C
+  A -->|submit post| E[Submit /submit/]
+  E -->|success| C
 ```
-
-**Rule:** default `sort=hot`; `sort=top` with `t` unset → `t=all`; ignore `t` otherwise.
-
-## Flow D — Communities
 
 ```mermaid
-flowchart LR
-  A[Header: Communities ▾] --> R[/r directory/]
-  R --> N[news] & B[brisbane] & P[politics] & S[social]
+flowchart TB
+  subgraph PostDetail
+    P1[Title + meta]
+    P2[Media: gallery→image→embed]
+    P3[Body (optional)]
+    P4[Actions: ▲ score ▼ + Astro chip]
+    P5[Composer]
+    P6[Thread: nested comments]
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6
+  end
 ```
 
-## Flow E — Safety & Moderation
+---
 
-* Consent gates for embeds (YouTube-nocookie/Rumble/X); no third-party JS pre-consent.
-* Actions: Remove(soft), Lock, Slowmode(manual), Domain-throttle(−50%, 7d).
-* Author self-delete ≤15m: hard if no comments; else "[deleted] by author."
+## Comment tree contract (UI)
 
-## Empty/Error/Permission (exact copy)
+* **Row meta:** author link · timeago · score · (optional) astro chip
+* **Body:** rendered HTML or linebreaks; safe
+* **Actions:** ▲ ▼ Reply (one line)
+* **Nesting:** recursive include with `depth` (indent each level); children container appears after actions
 
-* “No posts yet.” · “Nothing here yet.” · “Something went wrong.” · “You need to sign in.”
+---
+
+## Image preview contract (feeds)
+
+* **Preview:** if `image_thumb` present, show that; **else** show `image`
+* **If neither:** (optional) use first `PostImageLink` if available
+* **Thumb framing:** `aspect-ratio: 16/9; object-fit: cover; border-radius: 12px`
+* **Click:** opens **Post detail** via `post.get_absolute_url` (fallback to `/p/<id>/`)
+
+---
+
+## Route & params reference
+
+* `/` → `sort`, `t` (only for `sort=top`), `page`
+* `/r/<slug>/` → same as home
+* `/r/<c>/comments/<id>/<slug>/` → `c_sort`, `q`
+* `/p/<id>/` → no query required
+* `/submit/` → none
+* `/accounts/login|signup/` → none
+* `/mod/astro/` → none; staff only
+* `/methods/` → none
+
+---
+
+## Test hooks (recommended selectors)
+
+* Header bar: `data-testid="header-bar"`
+* Post card: `data-testid="post-card"`
+* Sidebar CTA: `data-testid="sidebar-submit"`
+* Astro chip: `.astro-chip` with classes `green|amber|red`
+* Comment composer exists on detail when authed; absent for guests
+
+---
+
+## Open items / iteration notes
+
+* Decide canonical community prefix (`/r/` vs `/c/`) and update all URL tags accordingly
+* Confirm comment sort/search query names (`c_sort`, `q`)
+* Decide whether to fall back to first `PostImageLink` in feeds when no upload/thumbnail exists
+
+---
+
+## Changelog
+
+* v3.0 (today): initial sitemap, flows, comment contract, preview contract, routes & selectors
+* (append entries as flows change)
 
