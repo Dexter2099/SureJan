@@ -6,7 +6,7 @@
   <a href="{% url 'home' %}">← Back to feed</a>
   <h1>Submit Post</h1>
   <p class="form-helper">Title is required. Include body <strong>or</strong> media.</p>
-  <form id="post-form" method="post" enctype="multipart/form-data" class="submit-form" data-testid="submit-form">
+  <form id="post-form" method="post" action="{% url 'post_submit' %}" enctype="multipart/form-data" class="submit-form" data-testid="submit-form">
     {% csrf_token %}
     <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
     <div class="form-row">

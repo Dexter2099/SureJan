@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         try {
-          const params = new URLSearchParams({ body: value });
+          const params = new URLSearchParams({ q: value });
           const resp = await fetch(`${markdownUrl}?${params.toString()}`);
           if (!resp.ok) {
             mdPreview.innerHTML = '';
