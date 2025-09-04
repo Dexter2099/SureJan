@@ -56,12 +56,20 @@
 
   <div class="post-actions">
     <div class="vote">
-      <form hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+      <form hx-post="{% url 'vote_post' post.pk %}?v=1"
+            hx-target="#post-score-{{ post.pk }}"
+            hx-swap="outerHTML"
+            method="post" class="inline">
         {% csrf_token %}
         <button type="submit" aria-label="Upvote">▲</button>
       </form>
+
       <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
-      <form hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+
+      <form hx-post="{% url 'vote_post' post.pk %}?v=-1"
+            hx-target="#post-score-{{ post.pk }}"
+            hx-swap="outerHTML"
+            method="post" class="inline">
         {% csrf_token %}
         <button type="submit" aria-label="Downvote">▼</button>
       </form>

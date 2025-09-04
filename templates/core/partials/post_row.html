@@ -21,11 +21,25 @@
     {% endif %}
     <div class="post-actions">
       <div class="vote">
-        <button class="up" hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Upvote">▲</button>
-        <span id="score-{{ post.pk }}" class="score">{{ post.score }}</span>
-        <button class="down" hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#score-{{ post.pk }}" hx-swap="outerHTML" aria-label="Downvote">▼</button>
+        <form hx-post="{% url 'vote_post' post.pk %}?v=1"
+              hx-target="#post-score-{{ post.pk }}"
+              hx-swap="outerHTML"
+              method="post" class="inline">
+          {% csrf_token %}
+          <button type="submit" aria-label="Upvote">▲</button>
+        </form>
+
+        <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
+
+        <form hx-post="{% url 'vote_post' post.pk %}?v=-1"
+              hx-target="#post-score-{{ post.pk }}"
+              hx-swap="outerHTML"
+              method="post" class="inline">
+          {% csrf_token %}
+          <button type="submit" aria-label="Downvote">▼</button>
+        </form>
       </div>
-      <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
+      <a href="{{ post.get_absolute_url }}#comments">{{ post.comments.count }} comments</a>
     </div>
   {% endwith %}
 </article>
