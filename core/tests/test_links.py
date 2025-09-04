@@ -87,3 +87,8 @@ class PostLinkTests(TestCase):
         html = render_to_string("core/partials/post_row.html", {"post": self.post})
         self.assertEqual(html.count(f'href="{url}"'), 2)
         self.assertIn(f'href="{url}#comments"', html)
+
+    def test_post_row_links_author(self):
+        user_url = reverse("user_overview", args=[self.user.username])
+        html = render_to_string("core/partials/post_row.html", {"post": self.post})
+        self.assertIn(f'href="{user_url}"', html)
