@@ -30,7 +30,7 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db.models import F, Sum
+from django.db.models import F
 from django import forms
 from django.core.paginator import Paginator
 from django.core.files.storage import default_storage
@@ -44,11 +44,15 @@ from django.urls import reverse
 from urllib.parse import urlparse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report, Vote
-from .votes import apply_vote
+from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
+from .services.votes import (
+    AlreadyVoted,
+    cast_vote_comment_once,
+    cast_vote_post_once,
+)
 from .oembed import fetch_oembed
 from .utils.embeds import build_embed_html
 from . import mod
@@ -1303,28 +1307,16 @@ def vote_post(request, pk):
 
     raw = request.POST.get("v")
     try:
-        value = int(raw)
-        if value not in (-1, 0, 1):
-            raise ValueError
-    except Exception:
+        want = int(raw)
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Invalid vote")
+    if want not in (1, -1):
         return HttpResponseBadRequest("Invalid vote")
 
-    Vote.objects.update_or_create(
-        user=request.user,
-        target_type="post",
-        target_id=post.pk,
-        defaults={"value": value},
-    )
-
-    post.refresh_from_db()
-    score = (
-        Vote.objects.filter(target_type="post", target_id=post.pk)
-        .aggregate(total=Sum("value"))
-        ["total"]
-        or 0
-    )
-    post.score = score
-    post.save(update_fields=["score"])
+    try:
+        cast_vote_post_once(request.user, post, want)
+    except AlreadyVoted:
+        return HttpResponse(status=409)
 
     return render(request, "core/partials/post_score.html", {"post": post})
 
@@ -1332,29 +1324,22 @@ def vote_post(request, pk):
 @login_required
 @require_POST
 def vote_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+
+    raw = request.POST.get("v")
     try:
-        v = int(request.GET.get("v", "0"))
+        want = int(raw)
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
-    if v not in (-1, 1):
+    if want not in (1, -1):
         return HttpResponseBadRequest("Invalid vote")
-    cmt = get_object_or_404(Comment, pk=pk)
-    from .votes import apply_vote
+
     try:
-        apply_vote(request.user, "comment", cmt.pk, v)
-    except ValueError:
-        return HttpResponseBadRequest("Invalid vote")
-    try:
-        cmt.refresh_from_db(fields=["score"])
-    except Exception:
-        cmt.refresh_from_db()
-    if request.headers.get("HX-Request") == "true":
-        html = render_to_string(
-            "partials/score_span.html",
-            {"id": f"cscore-{cmt.pk}", "score": cmt.score},
-        )
-        return HttpResponse(html, content_type="text/html")
-    return redirect(cmt.post.get_absolute_url())
+        cast_vote_comment_once(request.user, comment, want)
+    except AlreadyVoted:
+        return HttpResponse(status=409)
+
+    return render(request, "core/partials/comment_score.html", {"comment": comment})
 
 
 @login_required
