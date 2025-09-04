@@ -38,6 +38,12 @@ def _cast_vote_once(user, *, post=None, comment=None, want: int) -> int:
         row.value = want
         row.save(update_fields=["value"])
 
+        # Lock the target row to prevent concurrent score updates
+        if target_type == "post":
+            target = Post.objects.select_for_update().get(pk=target_id)
+        else:
+            target = Comment.objects.select_for_update().get(pk=target_id)
+
         qs = Vote.objects.filter(target_type=target_type, target_id=target_id)
         total = qs.aggregate(t=Sum("value"))["t"] or 0
         target.score = total
