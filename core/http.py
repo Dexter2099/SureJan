@@ -1,6 +1,7 @@
 """HTTP helper utilities."""
 
 from functools import wraps
+from urllib.parse import quote
 
 from django.http import HttpResponse
 from django.urls import reverse
@@ -23,7 +24,7 @@ def login_required_htmx(view):
 
         if request.headers.get("HX-Request") == "true":
             resp = HttpResponse(status=401)
-            login_url = reverse("login") + "?next=" + request.get_full_path()
+            login_url = reverse("login") + "?next=" + quote(request.get_full_path())
             resp["HX-Redirect"] = login_url
             return resp
 

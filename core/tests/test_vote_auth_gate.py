@@ -1,6 +1,7 @@
 import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from urllib.parse import quote
 
 from core.models import Community, Post, Comment
 
@@ -29,6 +30,17 @@ def test_htmx_requires_login(client, content, kind):
     resp = client.post(url, {"v": "1"}, HTTP_HX_REQUEST="true")
     assert resp.status_code == 401
     assert resp.headers["HX-Redirect"] == reverse("login") + f"?next={url}"
+
+
+@pytest.mark.django_db
+def test_htmx_redirect_with_query_string(client, content):
+    target = content["post"]
+    base_url = reverse("vote_post", args=[target.pk])
+    url = base_url + "?foo=bar"
+    resp = client.post(url, {"v": "1"}, HTTP_HX_REQUEST="true")
+    assert resp.status_code == 401
+    expected = reverse("login") + "?next=" + quote(url)
+    assert resp.headers["HX-Redirect"] == expected
 
 
 @pytest.mark.django_db
