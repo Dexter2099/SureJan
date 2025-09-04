@@ -100,10 +100,10 @@ ALLOWED_TAGS = [
 ALLOWED_ATTRIBUTES = {"a": ["href"]}
 
 
-@require_POST
-@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
+@require_GET
+@ratelimit(key="user", rate="5/m", method=["GET"], block=False)
 def oembed_preview(request):
-    url = request.POST.get("url", "").strip()
+    url = request.GET.get("url", "").strip()
     if not url:
         return HttpResponse("")
     try:

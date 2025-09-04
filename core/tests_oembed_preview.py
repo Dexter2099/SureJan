@@ -7,6 +7,7 @@ from django.test import Client
 import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+os.environ.setdefault("DJANGO_COLLECTSTATIC", "1")
 django.setup()
 
 from core.views import fetch_oembed
@@ -46,7 +47,13 @@ def test_fetch_oembed_falls_back_to_link_card():
 def test_oembed_preview_view_uses_helper():
     client = Client()
     with patch("core.views.fetch_oembed", return_value={"type": "link", "domain": "example.com", "favicon": "f", "url": "https://example.com", "title": "Example"}) as mock_fetch:
-        resp = client.post(reverse("oembed_preview"), {"url": "https://example.com"}, HTTP_HOST="localhost")
+        resp = client.get(reverse("oembed_preview"), {"url": "https://example.com"}, HTTP_HOST="localhost")
     assert resp.status_code == 200
     assert "example.com" in resp.content.decode()
     mock_fetch.assert_called_once()
+
+
+def test_oembed_preview_rejects_post():
+    client = Client()
+    resp = client.post(reverse("oembed_preview"), {"url": "https://example.com"}, HTTP_HOST="localhost")
+    assert resp.status_code == 405

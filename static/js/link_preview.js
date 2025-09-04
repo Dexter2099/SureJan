@@ -43,7 +43,7 @@
       return;
     }
     try {
-      const resp = await fetch(`/oembed/preview?url=${encodeURIComponent(url)}`);
+      const resp = await fetch(`/oembed/preview/?url=${encodeURIComponent(url)}`);
       if (!resp.ok) {
         preview.innerHTML = '';
         return;
