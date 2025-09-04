@@ -12,7 +12,7 @@
     <h1>{{ post.title }}</h1>
     <div class="meta">
       by <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
-      in <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a>
+      in <a href="{% url 'community' post.community.slug %}">c/{{ post.community.slug }}</a>
       • <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} ago</time>
     </div>
   </header>
