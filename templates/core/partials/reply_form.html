@@ -1,4 +1,8 @@
-<form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comment-tree" hx-swap="beforeend" method="post">
+{% if request.user.is_authenticated %}
+<form hx-post="{% url 'comment_reply' post.pk %}"
+      hx-target="#comment-tree"
+      hx-swap="beforeend"
+      method="post">
   {% csrf_token %}
   <textarea name="body" rows="3" required></textarea>
   <input type="hidden" name="parent_id" value="{{ parent_id }}">
@@ -7,3 +11,6 @@
     <button type="submit">Comment</button>
   </div>
 </form>
+{% else %}
+<p class="muted">Log in to comment.</p>
+{% endif %}

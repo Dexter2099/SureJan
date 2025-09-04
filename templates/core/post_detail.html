@@ -89,16 +89,23 @@
     <input type="search" name="q" placeholder="search comments" value="{{ request.GET.q }}">
   </form>
 
-  <div class="comment-composer">
-    <form hx-post="{% url 'comment_reply' post.pk %}" hx-target="#comment-tree" hx-swap="beforeend" method="post">
-      {% csrf_token %}
-      <textarea name="body" rows="4" required></textarea>
-      <div class="form-actions">
-        <button type="reset">Cancel</button>
-        <button type="submit">Comment</button>
-      </div>
-    </form>
-  </div>
+    {% if request.user.is_authenticated %}
+    <div class="comment-composer">
+      <form hx-post="{% url 'comment_reply' post.pk %}"
+            hx-target="#comment-tree"
+            hx-swap="beforeend"
+            method="post">
+        {% csrf_token %}
+        <textarea name="body" rows="4" required></textarea>
+        <div class="form-actions">
+          <button type="reset">Cancel</button>
+          <button type="submit">Comment</button>
+        </div>
+      </form>
+    </div>
+    {% else %}
+    <p class="muted">Log in to comment.</p>
+    {% endif %}
 
   <div id="comment-tree">
     {% for c in comments %}
