@@ -1300,7 +1300,8 @@ def comment_delete(request, pk):
 @require_POST
 def vote_post(request, pk):
     try:
-        v = int(request.GET.get("v", "0"))
+        raw = request.GET.get("v") or request.POST.get("v")
+        v = int(raw)
     except (TypeError, ValueError):
         return HttpResponseBadRequest("Invalid vote")
     if v not in (-1, 1):

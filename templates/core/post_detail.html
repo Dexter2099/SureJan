@@ -56,7 +56,8 @@
 
   <div class="post-actions">
     <div class="vote">
-      <form hx-post="{% url 'vote_post' post.pk %}?v=1"
+      <form hx-post="{% url 'vote_post' post.pk %}"
+            hx-vals='{"v":1}'
             hx-target="#post-score-{{ post.pk }}"
             hx-swap="outerHTML"
             method="post" class="inline">
@@ -66,7 +67,8 @@
 
       {% include "partials/score_span.html" with id="post-score-"|add:post.pk score=post.score %}
 
-      <form hx-post="{% url 'vote_post' post.pk %}?v=-1"
+      <form hx-post="{% url 'vote_post' post.pk %}"
+            hx-vals='{"v":-1}'
             hx-target="#post-score-{{ post.pk }}"
             hx-swap="outerHTML"
             method="post" class="inline">

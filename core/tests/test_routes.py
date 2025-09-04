@@ -58,7 +58,7 @@ class RouteTests(TestCase):
     def test_vote_post_htmx_returns_span(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(f"{url}?v=1", HTTP_HX_REQUEST="true")
+        resp = self.client.post(url, {"v": 1}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
             resp.content.decode(),
@@ -68,13 +68,13 @@ class RouteTests(TestCase):
     def test_vote_post_non_htmx_redirects(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(f"{url}?v=1")
+        resp = self.client.post(url, {"v": 1})
         self.assertRedirects(resp, self.post.get_absolute_url())
 
     def test_vote_post_invalid_value_returns_400(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
-        resp = self.client.post(f"{url}?v=2", HTTP_HX_REQUEST="true")
+        resp = self.client.post(url, {"v": 2}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
 
     def test_vote_comment_invalid_value_returns_400(self):
