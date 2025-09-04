@@ -10,24 +10,23 @@
     {% if comment.edited_at %}
       <span class="edited" title="Edited {{ comment.edited_at|date:'Y-m-d H:i' }}">edited</span>
     {% endif %}
-    <span class="vote">
-      <form hx-post="{% url 'vote_comment' comment.pk %}?v=1"
-            hx-target="#comment-score-{{ comment.pk }}"
-            hx-swap="outerHTML"
-            method="post" class="inline">
-        {% csrf_token %}
-        <button type="submit" aria-label="Upvote">▲</button>
-      </form>
+    <span class="vote comment-vote" id="comment-{{ comment.pk }}-vote"
+          hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)">
+      <button
+        hx-post="{% url 'vote_comment' comment.pk %}"
+        hx-vals='{"v":1}'
+        hx-target="#comment-score-{{ comment.pk }}"
+        hx-swap="outerHTML"
+        aria-label="Upvote">▲</button>
 
       {% include "core/partials/comment_score.html" %}
 
-      <form hx-post="{% url 'vote_comment' comment.pk %}?v=-1"
-            hx-target="#comment-score-{{ comment.pk }}"
-            hx-swap="outerHTML"
-            method="post" class="inline">
-        {% csrf_token %}
-        <button type="submit" aria-label="Downvote">▼</button>
-      </form>
+      <button
+        hx-post="{% url 'vote_comment' comment.pk %}"
+        hx-vals='{"v":-1}'
+        hx-target="#comment-score-{{ comment.pk }}"
+        hx-swap="outerHTML"
+        aria-label="Downvote">▼</button>
     </span>
     <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
             hx-target="#comment-{{ comment.pk }} > .children" hx-swap="beforeend">Reply</button>
