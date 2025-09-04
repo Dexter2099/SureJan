@@ -55,15 +55,26 @@
   {% endif %}
 
   <div class="post-actions">
-    <form hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
-      {% csrf_token %}
-      <button type="submit" aria-label="Upvote">▲</button>
-    </form>
-    <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
-    <form hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
-      {% csrf_token %}
-      <button type="submit" aria-label="Downvote">▼</button>
-    </form>
+    <div class="vote">
+      <form hx-post="{% url 'vote_post' post.pk %}?v=1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+        {% csrf_token %}
+        <button type="submit" aria-label="Upvote">▲</button>
+      </form>
+      <span id="post-score-{{ post.pk }}" class="score">{{ post.score }}</span>
+      <form hx-post="{% url 'vote_post' post.pk %}?v=-1" hx-target="#post-score-{{ post.pk }}" hx-swap="outerHTML" method="post">
+        {% csrf_token %}
+        <button type="submit" aria-label="Downvote">▼</button>
+      </form>
+    </div>
+
+    {% if severity_band %}
+      <div class="astro-meter" title="Astro severity: {{ severity|floatformat:0 }}/100">
+        <div class="astro-chip {{ severity_band }}">
+          {{ severity|floatformat:0 }}
+        </div>
+        <span class="astro-label">Astro</span>
+      </div>
+    {% endif %}
   </div>
 </article>
 
