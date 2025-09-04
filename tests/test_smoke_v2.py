@@ -80,7 +80,7 @@ def test_signup_submit_sort_and_commands(client):
     # astro_recompute should exit 0
     call_command('astro_recompute')
 
-    # ensure only allowed third-party JS (HTMX) before consent
+    # ensure no external third-party JS before consent
     html = client.get('/').content.decode()
     external_scripts = re.findall(r'src="(http[^"]+)"', html)
-    assert external_scripts == ["https://unpkg.com/htmx.org@1.9.12"]
+    assert external_scripts == []
