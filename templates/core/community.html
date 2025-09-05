@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-
+{% load static %}
 {% block header_center %}
 <nav id="sort-tabs" class="nav-tabs" aria-label="Sort">
   <a href="?sort=hot"{% if request.GET.sort|default:'hot' == 'hot' %} aria-current="page"{% endif %}>Hot</a>
@@ -16,4 +16,9 @@
   {% if not posts %}
     <div class="empty-community">No posts here</div>
   {% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/embeds.js' %}" defer></script>
 {% endblock %}

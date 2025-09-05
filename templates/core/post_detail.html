@@ -40,7 +40,7 @@
       onerror="this.onerror=null; this.closest('figure').remove()"
     >
   </figure>
-{% elif post.content_url %}
+{% elif embed_html %}
   {{ embed_html|safe }}
 {% endif %}
 
