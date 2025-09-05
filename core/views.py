@@ -526,7 +526,8 @@ def feed_list(request):
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
-        qs = feed_queryset(sort, t).filter(is_deleted=False)
+        base_qs = Post.objects.filter(is_deleted=False).select_related("community", "author")
+        qs = feed_queryset(sort, t, base_qs=base_qs)
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         ctx = {
@@ -556,7 +557,8 @@ def home(request):
         t = "all"
 
     page = int(request.GET.get("page", "1") or 1)
-    qs = feed_queryset(sort, t).filter(is_deleted=False)
+    base_qs = Post.objects.filter(is_deleted=False).select_related("community", "author")
+    qs = feed_queryset(sort, t, base_qs=base_qs)
     offset = (page - 1) * PAGE_SIZE
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
