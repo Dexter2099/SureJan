@@ -1173,7 +1173,7 @@ def post_delete_owner(request, pk):
     post.soft_delete(request.user)
 
     if request.headers.get("HX-Request") == "true":
-        return HttpResponse(status=204)
+        return HttpResponse("", content_type="text/html")
     return redirect("community", slug=post.community.slug)
 
 
