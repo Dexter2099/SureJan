@@ -33,7 +33,6 @@ from django.utils import timezone
 from django.db.models import F
 from django import forms
 from django.core.paginator import Paginator
-from django.core.files.storage import default_storage
 
 from django.core.cache import cache
 from django.utils.cache import patch_cache_control
@@ -44,7 +43,7 @@ from django.urls import reverse
 from urllib.parse import urlparse
 
 from .forms import CommentForm, PostForm, CommunityCreateForm
-from .models import Comment, Community, Post, PostImageLink, RecoveryCode, Report
+from .models import Comment, Community, Post, RecoveryCode, Report
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
@@ -612,36 +611,20 @@ def post_submit(request):
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
 
-            if post_type == "images":
-                images = form.cleaned_data["images"]
-                post = Post(
-                    community=form.cleaned_data["community"],
-                    author=request.user,
-                    post_type="image",
-                    title=form.cleaned_data["title"],
-                    body=form.cleaned_data.get("body", ""),
-                    content_url="",
-                )
-                if images:
-                    post.image = images[0]
-                post.save()
-                for extra in images[1:]:
-                    filename = default_storage.save(f"posts/{extra.name}", extra)
-                    url = default_storage.url(filename)
-                    PostImageLink.objects.create(post=post, url=url)
-            else:
-                post = Post(
-                    community=form.cleaned_data["community"],
-                    author=request.user,
-                    post_type=post_type,
-                    title=form.cleaned_data["title"],
-                    body=form.cleaned_data.get("body", ""),
-                    content_url=
-                        form.cleaned_data.get("content_url", "")
-                        if post_type == "link"
-                        else "",
-                )
-                post.save()
+            post = Post(
+                community=form.cleaned_data["community"],
+                author=request.user,
+                post_type=post_type,
+                title=form.cleaned_data["title"],
+                body=form.cleaned_data.get("body", ""),
+                content_url=
+                    form.cleaned_data.get("content_url", "")
+                    if post_type == "link"
+                    else "",
+            )
+            if post_type == "image":
+                post.image = form.cleaned_data.get("image")
+            post.save()
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",

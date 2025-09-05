@@ -180,7 +180,12 @@ class Post(models.Model):
 
     def clean(self):
         super().clean()
-        if not self.is_deleted and not self.body and not self.content_url:
+        if (
+            not self.is_deleted
+            and self.post_type != "image"
+            and not self.body
+            and not self.content_url
+        ):
             raise ValidationError("Either body or content_url is required.")
 
     def save(self, *args, **kwargs):
