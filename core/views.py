@@ -611,26 +611,37 @@ def post_submit(request):
             return render(request, "core/submit.html", {"form": form}, status=429)
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
-            content_url = form.cleaned_data.get("content_url", "")
-            images = form.cleaned_data.get("images", [])
-            body = form.cleaned_data.get("body", "")
 
-            post = Post(
-                community=form.cleaned_data["community"],
-                author=request.user,
-                post_type="image" if post_type == "images" else post_type,
-                title=form.cleaned_data["title"],
-                body=body,
-                content_url=content_url if post_type == "link" else "",
-            )
-            if post_type == "images" and images:
-                post.image = images[0]
-            post.save()
-            if post_type == "images" and images:
+            if post_type == "images":
+                images = form.cleaned_data["images"]
+                post = Post(
+                    community=form.cleaned_data["community"],
+                    author=request.user,
+                    post_type="image",
+                    title=form.cleaned_data["title"],
+                    body=form.cleaned_data.get("body", ""),
+                    content_url="",
+                )
+                if images:
+                    post.image = images[0]
+                post.save()
                 for extra in images[1:]:
                     filename = default_storage.save(f"posts/{extra.name}", extra)
                     url = default_storage.url(filename)
                     PostImageLink.objects.create(post=post, url=url)
+            else:
+                post = Post(
+                    community=form.cleaned_data["community"],
+                    author=request.user,
+                    post_type=post_type,
+                    title=form.cleaned_data["title"],
+                    body=form.cleaned_data.get("body", ""),
+                    content_url=
+                        form.cleaned_data.get("content_url", "")
+                        if post_type == "link"
+                        else "",
+                )
+                post.save()
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
