@@ -240,6 +240,8 @@ class Post(models.Model):
         if self.image_thumb:
             self.image_thumb.delete(save=False)
             self.image_thumb = None
+        # Votes and anti-astroturf metrics are intentionally preserved; no
+        # Vote rows are removed and aggregate metrics are left untouched.
         self.save(
             update_fields=[
                 "is_deleted",
@@ -315,6 +317,8 @@ class Comment(models.Model):
         self.deleted_at = timezone.now()
         self.deleted_by = by_user
         self.body = ""
+        # Votes and AA metrics remain unchanged; we keep vote records and do not
+        # recompute any aggregate analytics.
         self.save(update_fields=["is_deleted", "deleted_at", "deleted_by", "body"])
 
 
