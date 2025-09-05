@@ -117,7 +117,6 @@ class Post(models.Model):
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
     content_url = models.URLField(blank=True)
-    embed_html = models.TextField(null=True, blank=True, default="")
     embed = models.ForeignKey(
         "Embed", null=True, blank=True, on_delete=models.SET_NULL, related_name="posts"
     )
