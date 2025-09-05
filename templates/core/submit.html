@@ -26,7 +26,8 @@
       {{ form.content_url.errors }}
     </div>
     <div class="form-row">
-      {{ form.images.label_tag }} {{ form.images }}
+      {{ form.images.label_tag }}
+      <input type="file" name="images" id="id_images" multiple>
       {{ form.images.errors }}
     </div>
     <div class="form-row">
@@ -38,7 +39,7 @@
       {{ form.body.errors }}
     </div>
     <div class="form-actions">
-      <button type="submit" class="button primary" id="post-btn" disabled>Post</button>
+      <button type="submit" class="button primary" id="post-btn">Post</button>
       <a href="{% url 'home' %}" class="button secondary">Cancel</a>
     </div>
   </form>
@@ -50,6 +51,5 @@
 {% block scripts %}
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
-<script src="{% static 'js/post_submit_validate.js' %}" defer></script>
 <script src="{% static 'js/post_submit_preview.js' %}" defer></script>
 {% endblock %}
