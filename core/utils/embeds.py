@@ -36,6 +36,7 @@ def build_embed_html(url: str) -> str:
     html = data.get("html", "")
 
     thumb = data.get("thumbnail_url") or fetch_og_image(url)
+    thumb_alt = "Preview image unavailable"
 
     src = ""
     placeholder_label = "Preview"
@@ -98,8 +99,11 @@ def build_embed_html(url: str) -> str:
         )
     if not thumb and "youtube" in domain and vid:
         thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+        thumb_alt = placeholder_label
     if not thumb:
-        thumb = svg_placeholder(placeholder_label)
+        thumb, thumb_alt = svg_placeholder(placeholder_label, placeholder_label)
+    else:
+        thumb_alt = placeholder_label
     if thumb.startswith("http://"):
         thumb = "https://" + thumb[len("http://") :]
 
@@ -108,7 +112,7 @@ def build_embed_html(url: str) -> str:
         'style="position:relative;padding-top:56.25%;overflow:hidden;">'
         f'<a href="{escape(url)}" rel="noopener nofollow" '
         'style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">'
-        f'<img src="{escape(thumb)}" alt="" loading="lazy" decoding="async" '
+        f'<img src="{escape(thumb)}" alt="{escape(thumb_alt)}" loading="lazy" decoding="async" '
         'referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">'
         '</a></div>'
     )
