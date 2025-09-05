@@ -30,7 +30,11 @@
   <p class="post-excerpt">{{ post.excerpt }}</p>
   {% endif %}
   <div class="post-actions">
-    {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
+    {% if show_vote_widget is not False %}
+      {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
+    {% else %}
+      <span id="post-{{ post.pk }}-score-card" class="score">{{ post.score }}</span>
+    {% endif %}
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
     <details class="astro-why">

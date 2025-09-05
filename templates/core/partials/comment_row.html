@@ -16,7 +16,11 @@
   </div>
 
     <div class="comment-actions">
-        {% include "core/partials/vote_widget.html" with comment=comment user=user request=request tag='div' only %}
+        {% if show_vote_widget is not False %}
+          {% include "core/partials/vote_widget.html" with comment=comment user=user request=request tag='div' only %}
+        {% else %}
+          <span id="comment-{{ comment.pk }}-score-row" class="score">{{ comment.score }}</span>
+        {% endif %}
 
       <a class="reply"
          hx-get="{% url 'comment_reply_form' comment.pk %}"
@@ -30,7 +34,7 @@
     {% if kids %}
       <div class="comment-children">
         {% for child in kids %}
-          {% include "core/partials/comment_row.html" with comment=child depth=depth|add:1 request=request user=user only %}
+          {% include "core/partials/comment_row.html" with comment=child depth=depth|add:1 request=request user=user show_vote_widget=show_vote_widget only %}
         {% endfor %}
       </div>
     {% endif %}

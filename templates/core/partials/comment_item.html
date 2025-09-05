@@ -10,7 +10,11 @@
     {% if comment.edited_at %}
       <span class="edited" title="Edited {{ comment.edited_at|date:'Y-m-d H:i' }}">edited</span>
     {% endif %}
-      {% include "core/partials/vote_widget.html" with comment=comment user=user request=request only %}
+      {% if show_vote_widget is not False %}
+        {% include "core/partials/vote_widget.html" with comment=comment user=user request=request only %}
+      {% else %}
+        <span id="comment-{{ comment.pk }}-score-item" class="score">{{ comment.score }}</span>
+      {% endif %}
     <button hx-get="/comments/new?parent={{ comment.pk }}&post={{ comment.post.pk }}"
             hx-target="#comment-{{ comment.pk }} > .children" hx-swap="beforeend">Reply</button>
     {% if comment|can_edit_comment:request.user %}
