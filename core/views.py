@@ -694,10 +694,6 @@ def post_detail(request, community, pk, slug):
         comments = comments.order_by("-score", "path")
 
     images = list(post.image_links.all())
-    has_gallery = bool(images)
-    has_upload = bool(post.image)
-    show_embed = bool(post.content_url) and not (has_gallery or has_upload)
-    embed_html = build_embed_html(post.content_url) if show_embed else ""
 
     severity = None
     band = None
@@ -723,7 +719,6 @@ def post_detail(request, community, pk, slug):
     context = {
         "post": post,
         "comments": comments,
-        "embed_html": embed_html,
         "images": images,
         "c_sort": c_sort,
         "q": q,
@@ -763,10 +758,6 @@ def post_detail_id(request, pk):
         comments = comments.order_by("-score", "path")
 
     images = list(post.image_links.all())
-    has_gallery = bool(images)
-    has_upload = bool(post.image)
-    show_embed = bool(post.content_url) and not (has_gallery or has_upload)
-    embed_html = build_embed_html(post.content_url) if show_embed else ""
 
     severity = None
     band = None
@@ -792,7 +783,6 @@ def post_detail_id(request, pk):
     context = {
         "post": post,
         "comments": comments,
-        "embed_html": embed_html,
         "images": images,
         "c_sort": c_sort,
         "q": q,
@@ -817,10 +807,8 @@ def post_edit(request, pk):
             post = form.save(commit=False)
             if post.content_url:
                 post.link_domain = urlparse(post.content_url).netloc
-                post.embed_html = build_embed_html(post.content_url)
             else:
                 post.link_domain = ""
-                post.embed_html = ""
             post.save()
             messages.success(request, "Post updated")
             return redirect(

@@ -24,11 +24,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="post",
-            name="embed_html",
-            field=models.TextField(blank=True),
-        ),
-        migrations.AddField(
-            model_name="post",
             name="heading",
             field=models.CharField(blank=True, max_length=500),
         ),

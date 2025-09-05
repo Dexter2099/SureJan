@@ -68,14 +68,13 @@ class PostAdmin(admin.ModelAdmin):
         "heading",
         "body",
         "content_url",
-        "embed_html",
         "link_domain",
         "score",
         "hot_rank",
         "created_at",
     )
     list_filter = ("post_type", "community")
-    search_fields = ("title", "heading", "body", "content_url", "embed_html", "link_domain")
+    search_fields = ("title", "heading", "body", "content_url", "link_domain")
     readonly_fields = (
         "score",
         "hot_rank",
