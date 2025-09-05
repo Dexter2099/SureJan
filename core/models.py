@@ -86,9 +86,7 @@ class Community(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                Lower("name"), name="uniq_community_name_ci"
-            ),
+            models.UniqueConstraint(Lower("name"), name="uniq_community_name_ci"),
         ]
 
     def __str__(self) -> str:
@@ -127,9 +125,7 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
     )
-    image_thumb = models.ImageField(
-        upload_to="posts/thumbs/", blank=True, null=True
-    )
+    image_thumb = models.ImageField(upload_to="posts/thumbs/", blank=True, null=True)
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)
@@ -172,7 +168,9 @@ class Post(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["community", "-created_at", "-id"]),
-            models.Index(fields=["community", "-created_at"], name="post_comm_created_idx"),
+            models.Index(
+                fields=["community", "-created_at"], name="post_comm_created_idx"
+            ),
             models.Index(fields=["-hot_rank", "-created_at"]),
             models.Index(fields=["-score", "-created_at"]),
             models.Index(fields=["-controversy", "-created_at"]),
@@ -196,6 +194,7 @@ class Post(models.Model):
 
         # Apply domain throttling weight on every save
         from .mod import domain_weight  # avoid circular import at module load
+
         if self.link_domain:
             self.domain_weight = domain_weight(self.link_domain)
         else:
@@ -212,9 +211,7 @@ class Post(models.Model):
             self.recompute_hot()
 
     def recompute_hot(self):
-        up = Vote.objects.filter(
-            target_type="post", target_id=self.pk, value=1
-        ).count()
+        up = Vote.objects.filter(target_type="post", target_id=self.pk, value=1).count()
         down = Vote.objects.filter(
             target_type="post", target_id=self.pk, value=-1
         ).count()
@@ -231,27 +228,34 @@ class Post(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.deleted_by = by_user
-        if hasattr(self, "title"):
-            self.title = "[deleted]"
-        if hasattr(self, "heading"):
-            self.heading = ""
-        if hasattr(self, "body"):
-            self.body = ""
-        if hasattr(self, "link"):
-            self.link = ""
-        if hasattr(self, "content_url"):
-            self.content_url = ""
-        if hasattr(self, "embed_html"):
-            self.embed_html = ""
-        if hasattr(self, "link_domain"):
-            self.link_domain = ""
-        if hasattr(self, "image") and self.image:
+        self.title = "[deleted]"
+        self.heading = ""
+        self.body = ""
+        self.content_url = ""
+        self.embed_html = ""
+        self.link_domain = ""
+        if self.image:
             self.image.delete(save=False)
             self.image = None
-        if hasattr(self, "image_thumb") and self.image_thumb:
+        if self.image_thumb:
             self.image_thumb.delete(save=False)
             self.image_thumb = None
-        self.save()
+        self.save(
+            update_fields=[
+                "is_deleted",
+                "deleted_at",
+                "deleted_by",
+                "title",
+                "heading",
+                "body",
+                "content_url",
+                "embed_html",
+                "link_domain",
+                "image",
+                "image_thumb",
+            ],
+            recompute_hot=False,
+        )
 
 
 class PostImageLink(models.Model):
@@ -296,7 +300,9 @@ class Comment(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["post", "path"]),
-            models.Index(fields=["post", "-created_at"], name="comment_post_created_idx"),
+            models.Index(
+                fields=["post", "-created_at"], name="comment_post_created_idx"
+            ),
         ]
 
     @property
@@ -309,9 +315,7 @@ class Comment(models.Model):
         self.deleted_at = timezone.now()
         self.deleted_by = by_user
         self.body = ""
-        self.save(
-            update_fields=["is_deleted", "deleted_at", "deleted_by", "body"]
-        )
+        self.save(update_fields=["is_deleted", "deleted_at", "deleted_by", "body"])
 
 
 class Vote(models.Model):
@@ -337,7 +341,9 @@ class Vote(models.Model):
 
 class RecoveryCode(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="recovery_codes"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="recovery_codes",
     )
     code_hash = models.CharField(max_length=128)
     used_at = models.DateTimeField(null=True, blank=True)
@@ -361,7 +367,9 @@ def create_user_profile(sender, instance, created, **kwargs):
 def get_points(user):
     if hasattr(user, "points_cached"):
         return user.points_cached
-    return getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0
+    return (
+        getattr(user, "profile", None).points_cached if hasattr(user, "profile") else 0
+    )
 
 
 class RateLimitCounter(models.Model):
@@ -505,5 +513,3 @@ def _update_scores_on_vote_save(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Vote)
 def _update_scores_on_vote_delete(sender, instance, **kwargs):
     _apply_vote_delta(instance, -instance.value)
-
-
