@@ -50,6 +50,7 @@
 
 {% block scripts %}
 {{ block.super }}
-<script src="{% static 'js/editor.js' %}" defer></script>
-<script src="{% static 'js/post_submit_preview.js' %}" defer></script>
-{% endblock %}
+  <script src="{% static 'js/editor.js' %}" defer></script>
+  <script src="{% static 'js/post_submit_preview.js' %}" defer></script>
+  <script src="{% static 'js/post_submit_validate.js' %}" defer></script>
+  {% endblock %}
