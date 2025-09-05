@@ -59,6 +59,50 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'href="https://rumble.com/vxyz-test.html"')
         self.assertContains(resp, 'src="https://thumb.jpg"')
 
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_rumble_embed_handles_single_quotes_in_iframe(self, mock_oembed):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": "<iframe src='https://rumble.com/embed/vxyz/?pub=4'></iframe>",
+            "thumbnail_url": None,
+        }
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Rumble SQ",
+            content_url="https://rumble.com/vxyz-test.html",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'data-src="https://rumble.com/embed/vxyz/?pub=4"')
+        self.assertContains(resp, 'href="https://rumble.com/vxyz-test.html"')
+        # With missing thumbnail_url, we should still render an <img> (data: URL fallback)
+        self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
+
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_rumble_embed_falls_back_when_no_iframe_html(self, mock_oembed):
+        # oEmbed returns no iframe; builder derives /embed/<id>/ from page URL /vxyz-...
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": "<div>no iframe here</div>",
+            "thumbnail_url": None,
+        }
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Rumble Fallback",
+            content_url="https://rumble.com/vxyz-interesting-video.html",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'data-src="https://rumble.com/embed/vxyz/"')
+        self.assertContains(resp, 'href="https://rumble.com/vxyz-interesting-video.html"')
+        self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
+
     def test_image_slideshow_renders(self):
         post = Post.objects.create(
             community=self.community,
