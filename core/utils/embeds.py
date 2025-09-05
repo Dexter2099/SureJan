@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.html import escape
 
 from core.oembed import fetch_oembed
+from core.utils.thumbnails import svg_placeholder
 
 
 def build_embed_html(url: str) -> str:
@@ -81,17 +82,7 @@ def build_embed_html(url: str) -> str:
         # 3) Thumbnail fallback: when oEmbed misses it, use a tiny inline SVG
         #    (keeps CSP-friendly, no external host needed)
         if not thumb:
-            svg = (
-                "data:image/svg+xml;utf8,"
-                "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'>"
-                "<rect width='1200' height='675' fill='%23e5e5e5'/>"
-                "<circle cx='600' cy='337' r='120' fill='%23999'/>"
-                "<polygon points='560,277 560,397 660,337' fill='white'/>"
-                "<text x='50%' y='90%' dominant-baseline='middle' text-anchor='middle' "
-                "font-family='system-ui, sans-serif' font-size='40' fill='%23666'>Rumble preview</text>"
-                "</svg>"
-            )
-            thumb = svg
+            thumb = svg_placeholder("Rumble preview")
 
         return (
             f'<div class="post-embed" data-src="{escape(src)}" '
