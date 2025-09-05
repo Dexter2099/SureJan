@@ -65,6 +65,7 @@ urlpatterns = [
         core_views.post_delete_owner,
         name="post_delete_owner",
     ),
+    # Hard delete (admin-only; not linked from templates)
     path("post/<int:pk>/delete/", core_views.post_delete, name="post_delete"),
     path("post/<int:pk>/remove/", core_views.post_remove, name="post_remove"),
     path("post/<int:pk>/lock/", core_views.post_lock, name="post_lock"),
