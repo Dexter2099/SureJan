@@ -16,6 +16,12 @@ chips and block transparency pages; related endpoints will return 404.
 
 Set `ENABLE_TWITTER_EMBEDS=True` via Fly secrets or environment variables to allow tweet embeds to render properly.
 
+```bash
+fly secrets set ENABLE_TWITTER_EMBEDS=True
+```
+
+`fly.toml` includes this flag in the `[env]` section so tweets render in production.
+
 ### Moderation
 
 Staff can remove posts without deleting them, lock conversations, or
