@@ -35,6 +35,8 @@ def build_embed_html(url: str) -> str:
 
     html = data.get("html", "")
 
+    thumb = data.get("thumbnail_url") or fetch_og_image(url)
+
     src = ""
     placeholder_label = "Preview"
     vid = None
@@ -94,7 +96,6 @@ def build_embed_html(url: str) -> str:
             f'<div class="link-card"><a href="{escape(url)}" '
             f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
         )
-    thumb = data.get("thumbnail_url") or fetch_og_image(url)
     if not thumb and "youtube" in domain and vid:
         thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
     if not thumb:
