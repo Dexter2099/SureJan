@@ -14,9 +14,9 @@
 {% include "core/partials/user_tab_bar.html" %}
 {% for item in activity %}
   {% if item.type == 'post' %}
-    {% include "core/partials/post_row.html" with post=item.obj %}
+    {% include "core/partials/post_row.html" with post=item.obj show_vote_widget=False %}
   {% else %}
-    {% include "core/partials/comment_row.html" with comment=item.obj %}
+    {% include "core/partials/comment_row.html" with comment=item.obj show_vote_widget=False %}
   {% endif %}
 {% empty %}
   <p>No activity yet.</p>
