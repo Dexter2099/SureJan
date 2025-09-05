@@ -38,6 +38,29 @@ class PostDetailMediaTests(TestCase):
             resp, 'src="https://img.youtube.com/vi/abc/hqdefault.jpg"'
         )
 
+    @patch("core.utils.embeds.fetch_og_image")
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_embed_uses_og_image_when_no_thumbnail(
+        self, mock_oembed, mock_fetch_og_image
+    ):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": '<iframe src="https://www.youtube.com/embed/abc"></iframe>',
+            "thumbnail_url": None,
+        }
+        mock_fetch_og_image.return_value = "https://cdn.example/og.jpg"
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Video OG",
+            content_url="https://www.youtube.com/watch?v=abc",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'src="https://cdn.example/og.jpg"')
+
     @patch("core.utils.embeds.fetch_oembed")
     def test_rumble_embed_has_placeholder(self, mock_oembed):
         mock_oembed.return_value = {

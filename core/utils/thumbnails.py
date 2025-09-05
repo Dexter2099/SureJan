@@ -23,6 +23,15 @@ def scrape_og_image(url: str) -> Optional[str]:
     return None
 
 
+def fetch_og_image(url: str) -> Optional[str]:
+    """Fetch the OpenGraph image for ``url``.
+
+    A light wrapper around :func:`scrape_og_image` that is easier to mock in
+    tests. Returns ``None`` when no OG image is available or fetching fails.
+    """
+    return scrape_og_image(url)
+
+
 def svg_placeholder(label: str) -> str:
     """Return a small inline SVG placeholder data URI with ``label`` text."""
     text = html.escape(label or "")
