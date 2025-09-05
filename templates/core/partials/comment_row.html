@@ -1,4 +1,5 @@
-<article class="comment" id="c{{ comment.pk }}" style="--depth: {{ depth|default:'0' }}">
+<article class="comment" id="comment-{{ comment.pk }}" style="--depth: {{ depth|default:'0' }}">
+  <a id="c{{ comment.pk }}"></a>
   <header class="comment-meta">
     <a class="author" href="{% url 'user_overview' comment.author.username %}">{{ comment.author.username }}</a>
     <span class="dot">•</span>
@@ -24,11 +25,11 @@
 
       <a class="reply"
          hx-get="{% url 'comment_reply_form' comment.pk %}"
-         hx-target="#c{{ comment.pk }} .reply-target"
+         hx-target="#comment-{{ comment.pk }} .reply-target"
          hx-swap="innerHTML">Reply</a>
       {% if request.user == comment.author or request.user.is_staff %}
         <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
-              hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#c{{ comment.pk }}" hx-swap="outerHTML">
+              hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">
           {% csrf_token %}
           <button type="submit" class="btn-delete" aria-label="Delete comment">&times;</button>
         </form>

@@ -16,7 +16,7 @@
   {% if item.type == 'post' %}
     {% include "core/partials/post_row.html" with post=item.obj show_vote_widget=False %}
   {% else %}
-    {% include "core/partials/comment_row.html" with comment=item.obj show_vote_widget=False %}
+    {% include "core/partials/comment_row.html" with comment=item.obj request=request user=request.user show_vote_widget=False %}
   {% endif %}
 {% empty %}
   <p>No activity yet.</p>
