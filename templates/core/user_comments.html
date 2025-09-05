@@ -3,7 +3,7 @@
 <h1>u/{{ profile_user.username }}</h1>
 {% include "core/partials/user_tab_bar.html" %}
 {% for comment in comments %}
-  {% include "core/partials/comment_row.html" %}
+  {% include "core/partials/comment_row.html" with comment=comment request=request user=request.user %}
 {% empty %}
   <p>No comments yet.</p>
 {% endfor %}
