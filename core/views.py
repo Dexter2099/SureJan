@@ -625,11 +625,6 @@ def post_submit(request):
             )
             if post_type == "images" and images:
                 post.image = images[0]
-            if request.POST.get("save_draft"):
-                post.is_draft = True
-                post.save()
-                messages.success(request, "Draft saved")
-                return redirect("post_submit")
             post.save()
             if post_type == "images" and images:
                 for extra in images[1:]:

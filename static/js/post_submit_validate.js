@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bodyEl = document.querySelector('#id_body');
   const contentUrlEl = document.querySelector('#id_content_url');
   const imagesEl = document.querySelector('#id_images');
+  const communityEl = document.querySelector('#id_community');
   const postTypeEls = document.querySelectorAll('input[name="post_type"]');
 
   function update() {
@@ -11,24 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = titleEl?.value.trim();
     const body = bodyEl?.value.trim();
     const contentUrl = contentUrlEl?.value.trim();
-    const imagesHasValue = !!(
-      imagesEl && ((imagesEl.files && imagesEl.files.length > 0) || imagesEl.value)
-    );
+    const community = communityEl?.value;
+    const imagesCount = imagesEl?.files?.length || 0;
 
     let ok = false;
-    if (title) {
+    if (community && title) {
       if (postType === 'text') ok = !!body;
       else if (postType === 'link') ok = !!contentUrl;
-      else if (postType === 'images') ok = imagesHasValue;
+      else if (postType === 'images') ok = imagesCount > 0;
     }
 
     const postBtn = document.querySelector('#post-btn');
     if (postBtn) postBtn.disabled = !ok;
   }
 
-  [titleEl, bodyEl, contentUrlEl, imagesEl].forEach(el => {
+  [titleEl, bodyEl, contentUrlEl].forEach(el => {
     if (el) el.addEventListener('input', update);
   });
+  if (communityEl) communityEl.addEventListener('change', update);
+  if (imagesEl) imagesEl.addEventListener('change', update);
   postTypeEls.forEach(el => el.addEventListener('change', update));
 
   update();
