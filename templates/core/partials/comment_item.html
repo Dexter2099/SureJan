@@ -22,11 +22,11 @@
               hx-target="#comment-body-{{ comment.pk }}"
               hx-swap="outerHTML">Edit</button>
     {% endif %}
-    {% if request.user.id == comment.author_id or request.user.is_staff %}
+    {% if (request.user == comment.author or request.user.is_staff) and not comment.is_deleted %}
       <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
             hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">
         {% csrf_token %}
-        <button type="submit" class="linklike" aria-label="Delete comment">delete</button>
+        <button type="submit" class="btn-delete" aria-label="Delete comment">&times;</button>
       </form>
     {% endif %}
   </div>
