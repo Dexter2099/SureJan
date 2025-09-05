@@ -120,8 +120,9 @@ if not DEBUG:
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": (
                 "'self'",
-                "https://i.ytimg.com",
+                "https:",
                 "https://*.twimg.com",
+                "https://i.ytimg.com",
                 "https://*.rumble.com",
                 "https://*.rumblecdn.com",
                 "data:",
