@@ -85,8 +85,6 @@ ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
 
 EMBED_WHITELIST = [
     "https://www.youtube.com",
-    "https://www.youtube-nocookie.com",
-    "https://rumble.com",
 ]
 if ENABLE_TWITTER_EMBEDS:
     EMBED_WHITELIST.append("https://platform.twitter.com")
@@ -119,7 +117,8 @@ if not DEBUG:
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": ("'self'", "https:", "data:"),
+            "img-src": ("'self'", "https://i.ytimg.com", "https://*.twimg.com",
+                        "https://*.rumble.com", "data:"),
             "connect-src": ("'self'",),
             "frame-src": tuple(["'self'"] + EMBED_WHITELIST),
             "frame-ancestors": ("'self'",),
