@@ -1315,11 +1315,11 @@ def vote_post(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     try:
-        cast_vote_post_once(request.user, post, want)
+        new_score = cast_vote_post_once(request.user, post, want)
     except AlreadyVoted:
         return HttpResponse(status=409)
 
-    return HttpResponse(f"<span id='post-{post.pk}-score'>{post.score}</span>")
+    return HttpResponse(f"<span id='post-{post.pk}-score'>{new_score}</span>")
 
 
 @require_POST
@@ -1335,11 +1335,11 @@ def vote_comment(request, pk):
         return HttpResponseBadRequest("Invalid vote")
 
     try:
-        cast_vote_comment_once(request.user, comment, want)
+        new_score = cast_vote_comment_once(request.user, comment, want)
     except AlreadyVoted:
         return HttpResponse(status=409)
 
-    return HttpResponse(f"<span id='comment-{comment.pk}-score'>{comment.score}</span>")
+    return HttpResponse(f"<span id='comment-{comment.pk}-score'>{new_score}</span>")
 
 
 @login_required

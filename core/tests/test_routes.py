@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.template.loader import render_to_string
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 from core.models import Comment, Community, Post
@@ -122,6 +123,39 @@ class RouteTests(TestCase):
         url = reverse("vote_comment", args=[self.comment.pk])
         resp = self.client.post(url, {"v": 0}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
+
+    def test_vote_comment_htmx_returns_span(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": 1}, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        self.assertHTMLEqual(
+            resp.content.decode(),
+            f'<span id="comment-{self.comment.pk}-score">1</span>',
+        )
+
+    def test_comment_row_uses_score_id_contract_without_widget(self):
+        rf = RequestFactory()
+        request = rf.get("/")
+        html = render_to_string(
+            "core/partials/comment_row.html",
+            {"comment": self.comment, "show_vote_widget": False},
+            request=request,
+        )
+        self.assertIn(
+            f'id="comment-{self.comment.pk}-score"',
+            html,
+        )
+
+    def test_vote_comment_non_htmx_returns_span(self):
+        self.client.login(username="tester", password="pwd")
+        url = reverse("vote_comment", args=[self.comment.pk])
+        resp = self.client.post(url, {"v": 1})
+        self.assertEqual(resp.status_code, 200)
+        self.assertHTMLEqual(
+            resp.content.decode(),
+            f'<span id="comment-{self.comment.pk}-score">1</span>',
+        )
 
     def test_vote_comment_htmx_with_csrf(self):
         client = Client(enforce_csrf_checks=True)
