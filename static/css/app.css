@@ -331,6 +331,10 @@ body.layout-root {
   flex-wrap: nowrap;
 }
 
+.vote.voted button{
+  opacity: 0.5;
+}
+
 .post-actions .score{
   display: inline-block;
   min-width: 1.5ch;

@@ -47,7 +47,6 @@
     }
     if (status === 409) {
       showToast("You've already voted");
-      reenableVoteButtons(evt.detail.target);
       evt.detail.shouldSwap = false;
     }
     if (status >= 500 && status < 600) {

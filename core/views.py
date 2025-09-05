@@ -1319,7 +1319,7 @@ def vote_post(request, pk):
     except AlreadyVoted:
         return HttpResponse(status=409)
 
-    return render(request, "core/partials/post_score.html", {"post": post})
+    return HttpResponse(f"<span id='post-score-{post.pk}'>{post.score}</span>")
 
 
 @require_POST
@@ -1339,7 +1339,7 @@ def vote_comment(request, pk):
     except AlreadyVoted:
         return HttpResponse(status=409)
 
-    return render(request, "core/partials/comment_score.html", {"comment": comment})
+    return HttpResponse(f"<span id='comment-score-{comment.pk}'>{comment.score}</span>")
 
 
 @login_required
