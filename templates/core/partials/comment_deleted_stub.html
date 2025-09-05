@@ -1,12 +1,6 @@
 <div id="comment-{{ comment.pk }}" class="comment deleted" data-comment-id="{{ comment.pk }}" data-depth="{{ comment.depth }}" hx-swap="outerHTML">
   <div class="meta">
-    <em>
-      {% if comment.deleted_by and comment.deleted_by.is_staff %}
-        Removed by moderators.
-      {% else %}
-        [deleted]
-      {% endif %}
-    </em>
+    <em class="muted">[comment deleted by user]</em>
   </div>
   {% if comment.depth < 5 %}
   <div class="children">
