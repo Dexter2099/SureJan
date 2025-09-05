@@ -709,6 +709,8 @@ def post_detail(request, community, pk, slug):
         else:
             band = "red"
 
+    embed_html = build_embed_html(post.content_url or "")
+
     context = {
         "post": post,
         "comments": comments,
@@ -717,6 +719,7 @@ def post_detail(request, community, pk, slug):
         "q": q,
         "severity": severity,
         "severity_band": band,
+        "embed_html": embed_html,
     }
     return render(request, "core/post_detail.html", context)
 
@@ -773,6 +776,8 @@ def post_detail_id(request, pk):
         else:
             band = "red"
 
+    embed_html = build_embed_html(post.content_url or "")
+
     context = {
         "post": post,
         "comments": comments,
@@ -781,6 +786,7 @@ def post_detail_id(request, pk):
         "q": q,
         "severity": severity,
         "severity_band": band,
+        "embed_html": embed_html,
     }
     return render(request, "core/post_detail.html", context)
 
