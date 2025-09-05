@@ -1,9 +1,18 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block content %}
 {% include "core/partials/feed_controls.html" %}
-<div id="feed-list" hx-get="{% url 'feed_list' %}?tab={{ tab }}{% if t and t != 'all' %}&t={{ t }}{% endif %}" hx-trigger="load" hx-swap="innerHTML">
+<div id="feed-list"
+     hx-get="{% url 'feed_list' %}?tab={{ tab }}{% if t and t != 'all' %}&t={{ t }}{% endif %}"
+     hx-trigger="load" hx-swap="innerHTML"
+     hx-on="htmx:afterSwap:window.initEmbeds && window.initEmbeds(this)">
   <div class="skeleton" style="height:80px;margin-bottom:1rem;"></div>
   <div class="skeleton" style="height:80px;"></div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="{% static 'js/embeds.js' %}" defer></script>
 {% endblock %}
