@@ -39,16 +39,16 @@ class PostFormValidationTests(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-    def test_images_with_caption_allowed(self):
+    def test_image_with_caption_allowed(self):
         image = make_image()
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
                 "body": "C",
-                "post_type": "images",
+                "post_type": "image",
             },
-            files={"images": [image]},
+            files={"image": image},
         )
         self.assertTrue(form.is_valid())
 
@@ -63,26 +63,28 @@ class PostFormValidationTests(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-    def test_image_limit(self):
-        files = [make_image() for _ in range(6)]
+    def test_multiple_files_rejected(self):
+        files = [make_image(), make_image()]
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
-                "post_type": "images",
+                "post_type": "image",
             },
-            files={"images": files},
+            files={"image": files},
         )
         self.assertFalse(form.is_valid())
 
     def test_size_limit(self):
-        big = SimpleUploadedFile("big.jpg", b"0" * (4 * 1024 * 1024 + 1), content_type="image/jpeg")
+        big = SimpleUploadedFile(
+            "big.jpg", b"0" * (4 * 1024 * 1024 + 1), content_type="image/jpeg"
+        )
         form = PostForm(
             data={
                 "community": self.community.id,
                 "title": "T",
-                "post_type": "images",
+                "post_type": "image",
             },
-            files={"images": [big]},
+            files={"image": big},
         )
         self.assertFalse(form.is_valid())

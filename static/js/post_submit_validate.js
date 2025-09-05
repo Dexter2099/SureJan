@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const title = form.querySelector('#id_title');
   const body = form.querySelector('#id_body');
   const contentUrl = form.querySelector('#id_content_url');
-  const images = form.querySelector('#id_images');
+  const image = form.querySelector('#id_image');
   const postBtn = document.querySelector('#post-btn');
   const postTypeRadios = form.querySelectorAll('input[name="post_type"]');
 
@@ -18,21 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const titleVal = title?.value.trim();
     const bodyVal = body?.value.trim();
     const urlVal = contentUrl?.value.trim();
-    const filesLen = images?.files?.length || 0;
+    const filesLen = image?.files?.length || 0;
 
     let ok = false;
     if (type === 'text') {
       ok = !!(titleVal && bodyVal);
     } else if (type === 'link') {
       ok = !!(titleVal && urlVal);
-    } else if (type === 'images') {
-      ok = !!(titleVal && filesLen > 0);
+    } else if (type === 'image') {
+      ok = !!(titleVal && filesLen === 1);
     }
 
     if (postBtn) postBtn.disabled = !ok;
   };
 
-  [title, body, contentUrl, images].forEach((el) => {
+  [title, body, contentUrl, image].forEach((el) => {
     el?.addEventListener('input', validate);
     el?.addEventListener('change', validate);
   });

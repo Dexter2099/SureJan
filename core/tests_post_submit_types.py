@@ -58,25 +58,25 @@ class PostSubmitTests(TestCase):
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "YT")
 
-    def test_three_image_post(self):
-        imgs = [make_image(f"i{i}.jpg") for i in range(3)]
+    def test_image_post(self):
+        img = make_image()
         resp = self.client.post(
             reverse("post_submit"),
             {
                 "community": self.community.id,
-                "post_type": "images",
-                "title": "Pics",
+                "post_type": "image",
+                "title": "Pic",
                 "body": "Caption",
-                "images": imgs,
+                "image": img,
             },
             follow=True,
         )
         self.assertEqual(resp.status_code, 200)
-        post = Post.objects.get(title="Pics")
+        post = Post.objects.get(title="Pic")
         self.assertIsNotNone(post.image)
-        self.assertEqual(post.image_links.count(), 2)
+        self.assertEqual(post.image_links.count(), 0)
         feed = self.client.get(reverse("home"))
-        self.assertContains(feed, "Pics")
+        self.assertContains(feed, "Pic")
 
     def test_large_upload_rejected(self):
         big = SimpleUploadedFile(
@@ -86,9 +86,9 @@ class PostSubmitTests(TestCase):
             reverse("post_submit"),
             {
                 "community": self.community.id,
-                "post_type": "images",
+                "post_type": "image",
                 "title": "Big",
-                "images": [big],
+                "image": big,
             },
         )
         self.assertEqual(resp.status_code, 200)

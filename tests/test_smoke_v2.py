@@ -48,10 +48,10 @@ def test_signup_submit_sort_and_commands(client):
     img = SimpleUploadedFile('a.jpg', buf.getvalue(), content_type='image/jpeg')
     resp = client.post(reverse('post_submit'), {
         'community': com.id,
-        'post_type': 'images',
+        'post_type': 'image',
         'title': 'I1',
         'body': 'caption',
-        'images': img,
+        'image': img,
     }, follow=True)
     assert Post.objects.filter(title='T1').exists()
     assert Post.objects.filter(title='L1').exists()
@@ -70,9 +70,9 @@ def test_signup_submit_sort_and_commands(client):
     big = SimpleUploadedFile('big.png', big_buf.getvalue(), content_type='image/png')
     resp = client.post(reverse('post_submit'), {
         'community': com.id,
-        'post_type': 'images',
+        'post_type': 'image',
         'title': 'big',
-        'images': big,
+        'image': big,
     })
     assert resp.status_code == 200
     assert Post.objects.count() == prev

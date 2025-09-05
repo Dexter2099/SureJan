@@ -71,6 +71,5 @@ class PostDetailMediaTests(TestCase):
         resp = self.client.get(
             reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
         )
-        self.assertContains(resp, 'class="post-images"')
-        self.assertContains(resp, 'href="#img1"')
+        self.assertContains(resp, 'class="post-gallery"')
         self.assertContains(resp, 'src="https://example.com/0.jpg"')

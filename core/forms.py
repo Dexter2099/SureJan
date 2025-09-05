@@ -32,7 +32,7 @@ ALLOWED_ATTRIBUTES = {"a": ["href"]}
 class PostForm(forms.Form):
     """Form for submitting a post."""
 
-    POST_TYPES = [("text", "Text"), ("link", "Link"), ("images", "Images")]
+    POST_TYPES = [("text", "Text"), ("link", "Link"), ("image", "Image")]
 
     community = forms.ModelChoiceField(queryset=Community.objects.all(), required=True)
     post_type = forms.ChoiceField(choices=POST_TYPES, widget=forms.RadioSelect)
@@ -41,10 +41,7 @@ class PostForm(forms.Form):
         widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
     )
     content_url = forms.URLField(required=False)
-    class MultiFileInput(forms.ClearableFileInput):
-        allow_multiple_selected = True
-
-    images = forms.FileField(required=False, widget=MultiFileInput)
+    image = forms.FileField(required=False)
 
     def clean_body(self):
         body = (self.cleaned_data.get("body") or "").strip()
@@ -53,29 +50,31 @@ class PostForm(forms.Form):
         html = markdown_renderer(body)
         return bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
 
-    def clean_images(self):
-        files = self.files.getlist("images")
-        if len(files) > 5:
-            raise forms.ValidationError("You can upload up to 5 images.")
-        for f in files:
+    def clean_image(self):
+        files = self.files.getlist("image")
+        if len(files) > 1:
+            raise forms.ValidationError("Only one image is allowed.")
+        if files:
+            f = files[0]
             if f.size > 4 * 1024 * 1024:
                 raise forms.ValidationError("Image too large (max 4MB).")
             validate_image_file(f)
-        return files
+            return f
+        return None
 
     def clean(self):
         cleaned = super().clean()
         title = (cleaned.get("title") or "").strip()
         content_url = (cleaned.get("content_url") or "").strip()
         post_type = cleaned.get("post_type")
-        images = cleaned.get("images") or []
+        image = cleaned.get("image")
         body = cleaned.get("body") or ""
 
         cleaned.update(
             {
                 "title": title,
                 "content_url": content_url,
-                "images": images,
+                "image": image,
                 "body": body,
             }
         )
@@ -91,9 +90,9 @@ class PostForm(forms.Form):
                 self.add_error("content_url", "Link is required for link posts.")
             elif not check_url_safety(content_url):
                 self.add_error("content_url", "URL flagged as unsafe.")
-        elif post_type == "images":
-            if not images:
-                self.add_error("images", "At least one image is required.")
+        elif post_type == "image":
+            if not image:
+                self.add_error("image", "Image is required.")
         else:
             self.add_error("post_type", "Invalid post type.")
 
