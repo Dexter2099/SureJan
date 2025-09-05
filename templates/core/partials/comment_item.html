@@ -1,5 +1,8 @@
 {% load permissions %}
 {% url 'post_detail' comment.post.community.slug comment.post.pk comment.post.slug as post_url %}
+{% if comment.is_deleted %}
+  {% include "core/partials/comment_deleted_stub.html" with comment=comment %}
+{% else %}
 <div id="comment-{{ comment.pk }}" class="comment" data-comment-id="{{ comment.pk }}" data-depth="{{ comment.depth }}">
   <a id="c{{ comment.pk }}"></a>
   <div class="meta">
@@ -22,7 +25,7 @@
               hx-target="#comment-body-{{ comment.pk }}"
               hx-swap="outerHTML">Edit</button>
     {% endif %}
-    {% if (request.user == comment.author or request.user.is_staff) and not comment.is_deleted %}
+    {% if request.user == comment.author or request.user.is_staff %}
       <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
             hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">
         {% csrf_token %}
@@ -53,4 +56,4 @@
     {% endwith %}
   {% endif %}
 </div>
-
+{% endif %}
