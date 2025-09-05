@@ -319,6 +319,7 @@ class Comment(models.Model):
         self.body = ""
         # Votes and AA metrics remain unchanged; we keep vote records and do not
         # recompute any aggregate analytics.
+        # Saving with update_fields ensures post_save signals detect the deletion.
         self.save(update_fields=["is_deleted", "deleted_at", "deleted_by", "body"])
 
 
