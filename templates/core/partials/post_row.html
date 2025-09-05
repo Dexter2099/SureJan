@@ -1,4 +1,4 @@
-<article class="post-card" data-testid="post-card">
+<article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   {% with detail_url=post.get_absolute_url %}
     {% if post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb">
@@ -26,6 +26,13 @@
         <span id="post-{{ post.pk }}-score" class="score">{{ post.score }}</span>
       {% endif %}
       <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
+      {% if (request.user == post.author or request.user.is_staff) and not post.is_deleted %}
+      <form method="post" action="{% url 'post_delete_owner' post.pk %}" style="display:inline"
+            hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
+      </form>
+      {% endif %}
     </div>
   {% endwith %}
 </article>

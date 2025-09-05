@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<article class="post-detail">
+<article id="post-{{ post.pk }}" class="post-detail">
   <header class="post-header">
     <h1>{{ post.title }}</h1>
     <div class="meta">
@@ -64,6 +64,14 @@
         </div>
         <span class="astro-label">Astro</span>
       </div>
+    {% endif %}
+
+    {% if (request.user == post.author or request.user.is_staff) and not post.is_deleted %}
+    <form method="post" action="{% url 'post_delete_owner' post.pk %}"
+          hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
+    </form>
     {% endif %}
   </div>
 </article>
