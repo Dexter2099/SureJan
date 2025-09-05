@@ -113,7 +113,7 @@ def vote_post(request, pk):
   <button aria-label="Upvote"
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":1}'
-          hx-target="#post-{{ post.pk }}-score"
+          hx-target="#post-{{ post.pk }}-vote"
           hx-swap="outerHTML"
           hx-on::after-request="this.closest('.post-vote').querySelectorAll('button').forEach(b=>b.disabled=true)">▲</button>
 
@@ -122,7 +122,7 @@ def vote_post(request, pk):
   <button aria-label="Downvote"
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":-1}'
-          hx-target="#post-{{ post.pk }}-score"
+          hx-target="#post-{{ post.pk }}-vote"
           hx-swap="outerHTML"
           hx-on::after-request="this.closest('.post-vote').querySelectorAll('button').forEach(b=>b.disabled=true)">▼</button>
 </div>

@@ -38,8 +38,8 @@ def test_authenticated_shows_vote_buttons(client, content):
     resp = client.get(post.get_absolute_url())
     html = resp.content.decode()
     assert "hx-post" in html
-    assert f'hx-target="#post-{post.pk}-score"' in html
-    assert f'hx-target="#comment-{comment.pk}-score"' in html
+    assert f'hx-target="#post-{post.pk}-vote"' in html
+    assert f'hx-target="#comment-{comment.pk}-vote"' in html
 
 
 @pytest.mark.django_db
