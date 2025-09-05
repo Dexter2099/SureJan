@@ -123,7 +123,7 @@ if not DEBUG:
                 "https://i.ytimg.com",
                 "https://*.twimg.com",
                 "https://*.rumble.com",
-                "https://rumblecdn.com",
+                "https://*.rumblecdn.com",
                 "data:",
             ),
             "connect-src": ("'self'",),
