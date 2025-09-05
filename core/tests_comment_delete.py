@@ -25,50 +25,42 @@ class CommentDeleteTests(TestCase):
         self.comment = Comment.objects.create(
             post=self.post, author=self.user, body="Hi", path="0001"
         )
-        self.post.comment_count = 1
-        self.post.save(update_fields=["comment_count"])
         self.url = reverse("comment_delete", args=[self.comment.pk])
         self.client.login(username="alice", password="pwd")
 
-    def test_delete_own_comment(self):
+    def test_delete_own_comment_htmx(self):
         resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
-        self.assertFalse(Comment.objects.filter(pk=self.comment.pk).exists())
-        self.post.refresh_from_db()
-        self.assertEqual(self.post.comment_count, 0)
+        self.assertIn(b'hx-swap="outerHTML"', resp.content)
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+        self.assertEqual(self.comment.body, "")
+
+    def test_delete_own_comment_redirect(self):
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 302)
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
 
     def test_staff_can_delete(self):
         self.client.logout()
         self.client.login(username="mod", password="pwd")
         resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
-        self.assertFalse(Comment.objects.filter(pk=self.comment.pk).exists())
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+        self.assertIn(b"Removed by moderators", resp.content)
 
     def test_cannot_delete_others_comment(self):
         self.client.logout()
         self.client.login(username="bob", password="pwd")
         resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 403)
-        self.assertTrue(Comment.objects.filter(pk=self.comment.pk).exists())
+        self.comment.refresh_from_db()
+        self.assertFalse(self.comment.is_deleted)
 
     def test_requires_login(self):
         self.client.logout()
         resp = self.client.post(self.url)
         self.assertEqual(resp.status_code, 302)
-
-    def test_delete_subtree_decrements_count(self):
-        child = Comment.objects.create(
-            post=self.post,
-            author=self.user,
-            parent=self.comment,
-            body="child",
-            path="0001/0001",
-        )
-        self.post.comment_count = 2
-        self.post.save(update_fields=["comment_count"])
-        resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Comment.objects.count(), 0)
-        self.post.refresh_from_db()
-        self.assertEqual(self.post.comment_count, 0)
 

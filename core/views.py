@@ -1156,38 +1156,20 @@ def comment_edit(request, pk):
 
 @login_required
 @require_POST
-@ratelimit(key="user", rate="10/m", block=False)
+@csrf_protect
 def post_delete_owner(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
 
-    allowed = post.can_author_delete(request.user, minutes=15)
-    if not allowed:
-        return HttpResponseForbidden("Delete window expired or not author.")
-    if getattr(request, "limited", False):
-        return HttpResponse("Too many requests", status=429)
+    if request.user != post.author and not request.user.is_staff:
+        return HttpResponseForbidden("Forbidden")
 
-    has_comments = Comment.objects.filter(post=post).exists()
-    if has_comments:
-        post_slug = post.slug
-        post.soft_delete(request.user)
-        # HTMX: swap the row to a deleted stub in feeds
-        if request.headers.get("HX-Request") == "true":
-            html = render_to_string("core/partials/post_deleted_stub.html", {"post": post})
-            return HttpResponse(html)
-        return redirect(
-            "post_detail",
-            community=post.community.slug,
-            pk=post.id,
-            slug=post_slug,
-        )
-    else:
-        community_slug = post.community.slug
-        post.delete()
-        if request.headers.get("HX-Request") == "true":
-            return HttpResponse("")  # hx-swap="outerHTML" removes the row
-        return redirect("community", slug=community_slug)
+    post.soft_delete(request.user)
+
+    if request.headers.get("HX-Request") == "true":
+        return HttpResponse(status=204)
+    return redirect("community", slug=post.community.slug)
 
 
 @require_POST
@@ -1285,20 +1267,19 @@ def comment_delete(request, pk):
     if request.user != comment.author and not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
 
-    post = comment.post
-    # number of comments to remove including any descendants
-    count = Comment.objects.filter(post=post, path__startswith=comment.path).count()
-    comment.delete()
-    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") - count)
+    comment.soft_delete(request.user)
 
     if request.headers.get("HX-Request") == "true":
-        return HttpResponse("")
+        html = render_to_string(
+            "core/partials/comment_deleted_stub.html", {"comment": comment}, request=request
+        )
+        return HttpResponse(html)
 
     return redirect(
         "post_detail",
-        community=post.community.slug,
-        pk=post.pk,
-        slug=post.slug,
+        community=comment.post.community.slug,
+        pk=comment.post.pk,
+        slug=comment.post.slug,
     )
 
 
