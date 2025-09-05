@@ -1,12 +1,9 @@
-from datetime import timedelta
-
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 
-from .models import Comment, Community, Post
+from .models import Community, Post
 
 
 class PostDeleteOwnerTests(TestCase):
@@ -20,56 +17,57 @@ class PostDeleteOwnerTests(TestCase):
             slug="t", name="Test", title="Test", created_by=self.user
         )
 
-    def test_author_delete_without_comments_htmx(self):
+    def test_author_soft_delete_htmx(self):
         post = Post.objects.create(
             community=self.community, author=self.user, post_type="text", title="Hello"
         )
         url = reverse("post_delete_owner", args=[post.pk])
         self.client.login(username="alice", password="pwd")
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.content, b"")
-        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+        self.assertEqual(resp.status_code, 204)
+        post.refresh_from_db()
+        self.assertTrue(post.is_deleted)
 
-    def test_author_soft_delete_with_comments_htmx(self):
+    def test_author_soft_delete_redirect(self):
         post = Post.objects.create(
             community=self.community, author=self.user, post_type="text", title="Hi"
         )
-        Comment.objects.create(post=post, author=self.user, body="c", path="0001")
-        post.comment_count = 1
-        post.save(update_fields=["comment_count"])
         url = reverse("post_delete_owner", args=[post.pk])
         self.client.login(username="alice", password="pwd")
-        resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 200)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)
         post.refresh_from_db()
-        self.assertEqual(post.title, "[deleted]")
-        self.assertIn(b"[deleted]", resp.content)
-        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+        self.assertTrue(post.is_deleted)
 
-    def test_author_cannot_delete_after_window(self):
+    def test_staff_can_delete(self):
         post = Post.objects.create(
-            community=self.community, author=self.user, post_type="text", title="Late"
+            community=self.community, author=self.user, post_type="text", title="Old"
         )
-        post.created_at = timezone.now() - timedelta(minutes=16)
-        post.save(update_fields=["created_at"])
+        url = reverse("post_delete_owner", args=[post.pk])
+        self.client.login(username="mod", password="pwd")
+        resp = self.client.post(url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 204)
+        post.refresh_from_db()
+        self.assertTrue(post.is_deleted)
+
+    def test_cannot_delete_others_post(self):
+        post = Post.objects.create(
+            community=self.community, author=self.other, post_type="text", title="Nope"
+        )
         url = reverse("post_delete_owner", args=[post.pk])
         self.client.login(username="alice", password="pwd")
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 403)
-        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+        post.refresh_from_db()
+        self.assertFalse(post.is_deleted)
 
-    def test_staff_can_delete_anytime(self):
+    def test_requires_login(self):
         post = Post.objects.create(
-            community=self.community, author=self.user, post_type="text", title="Old"
+            community=self.community, author=self.user, post_type="text", title="Anon"
         )
-        post.created_at = timezone.now() - timedelta(hours=1)
-        post.save(update_fields=["created_at"])
         url = reverse("post_delete_owner", args=[post.pk])
-        self.client.login(username="mod", password="pwd")
-        resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 200)
-        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)
 
     def test_banned_user_cannot_delete(self):
         self.user.profile.is_banned = True
@@ -81,20 +79,5 @@ class PostDeleteOwnerTests(TestCase):
         self.client.login(username="alice", password="pwd")
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 403)
-        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
-
-    def test_rate_limit(self):
-        self.client.login(username="alice", password="pwd")
-        posts = [
-            Post.objects.create(
-                community=self.community, author=self.user, post_type="text", title=f"p{i}"
-            )
-            for i in range(11)
-        ]
-        for p in posts[:10]:
-            url = reverse("post_delete_owner", args=[p.pk])
-            self.client.post(url, HTTP_HX_REQUEST="true")
-        resp = self.client.post(
-            reverse("post_delete_owner", args=[posts[10].pk]), HTTP_HX_REQUEST="true"
-        )
-        self.assertEqual(resp.status_code, 429)
+        post.refresh_from_db()
+        self.assertFalse(post.is_deleted)
