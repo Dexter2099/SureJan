@@ -10,7 +10,7 @@ def test_csp_header_includes_rumble_hosts(client):
                 "https://i.ytimg.com",
                 "https://*.twimg.com",
                 "https://*.rumble.com",
-                "https://rumblecdn.com",
+                "https://*.rumblecdn.com",
                 "data:",
             )
         }
@@ -19,4 +19,4 @@ def test_csp_header_includes_rumble_hosts(client):
         resp = client.get("/healthz")
     csp_header = resp["Content-Security-Policy"]
     assert "https://*.rumble.com" in csp_header
-    assert "https://rumblecdn.com" in csp_header
+    assert "https://*.rumblecdn.com" in csp_header
