@@ -54,26 +54,30 @@
   </div>
   {% endif %}
 
-  <div class="post-actions">
-    {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
+  {% if not post.is_deleted %}
+    <div class="post-actions">
+      {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
 
-    {% if severity_band %}
-      <div class="astro-meter" title="Astro severity: {{ severity|floatformat:0 }}/100">
-        <div class="astro-chip {{ severity_band }}">
-          {{ severity|floatformat:0 }}
+      {% if severity_band %}
+        <div class="astro-meter" title="Astro severity: {{ severity|floatformat:0 }}/100">
+          <div class="astro-chip {{ severity_band }}">
+            {{ severity|floatformat:0 }}
+          </div>
+          <span class="astro-label">Astro</span>
         </div>
-        <span class="astro-label">Astro</span>
-      </div>
-    {% endif %}
+      {% endif %}
 
-    {% if (request.user == post.author or request.user.is_staff) and not post.is_deleted %}
-    <form method="post" action="{% url 'post_delete_owner' post.pk %}"
-          hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML" style="display:inline">
-      {% csrf_token %}
-      <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
-    </form>
-    {% endif %}
-  </div>
+      {% if request.user == post.author or request.user.is_staff %}
+        <form method="post" action="{% url 'post_delete_owner' post.pk %}"
+              hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
+        </form>
+      {% endif %}
+    </div>
+  {% else %}
+    <em>[deleted by author]</em>
+  {% endif %}
 </article>
 
 <section id="comments">
