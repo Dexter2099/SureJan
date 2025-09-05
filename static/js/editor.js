@@ -233,9 +233,6 @@ function handleSubmit(e) {
   const form = e.target;
   const button = form.querySelector('button[type="submit"]');
   const spinner = button?.querySelector('.spinner');
-  if (button) {
-    button.disabled = true;
-  }
   if (spinner) {
     spinner.hidden = false;
   }
@@ -251,7 +248,6 @@ function handleAfterRequest(e) {
   if (!form || !form.isConnected) return;
   const button = form.querySelector('button[type="submit"]');
   const spinner = button?.querySelector('.spinner');
-  if (button) button.disabled = false;
   if (spinner) spinner.hidden = true;
 }
 
@@ -260,7 +256,6 @@ function handleError(e) {
   if (!form) return;
   const button = form.querySelector('button[type="submit"]');
   const spinner = button?.querySelector('.spinner');
-  if (button) button.disabled = false;
   if (spinner) spinner.hidden = true;
   const err = form.querySelector('.form-error');
   if (err) {
