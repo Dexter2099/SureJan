@@ -20,12 +20,8 @@
 
   function initEmbeds(root){
     root = root || document;
-    root.querySelectorAll('.post-embed[data-src]').forEach(function(wrapper){
+    root.querySelectorAll('[data-src]').forEach(function(wrapper){
       attach(wrapper, wrapper.dataset.src, wrapper.querySelector('a'));
-    });
-    root.querySelectorAll('[data-embed-src]').forEach(function(wrapper){
-      var link = wrapper.querySelector('a') || wrapper;
-      attach(wrapper, wrapper.dataset.embedSrc, link);
     });
   }
 
