@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Community, Post, PostImageLink
@@ -102,6 +102,31 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'data-src="https://rumble.com/embed/vxyz/"')
         self.assertContains(resp, 'href="https://rumble.com/vxyz-interesting-video.html"')
         self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
+
+    @override_settings(ENABLE_TWITTER_EMBEDS=True)
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_twitter_embed_has_placeholder(self, mock_oembed):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": "<blockquote></blockquote>",
+            "thumbnail_url": "http://pbs.twimg.com/thumb.jpg",
+        }
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Tweet",
+            content_url="https://x.com/user/status/123",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(
+            resp,
+            'data-src="https://platform.twitter.com/embed/Tweet.html?id=123"',
+        )
+        self.assertContains(resp, 'href="https://x.com/user/status/123"')
+        self.assertContains(resp, 'src="http://pbs.twimg.com/thumb.jpg"')
 
     def test_image_slideshow_renders(self):
         post = Post.objects.create(
