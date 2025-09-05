@@ -42,7 +42,7 @@ class PostDeleteOwnerTests(TestCase):
         resp = self.client.post(url, {"from": "detail"}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
-            resp.headers.get("HX-Redirect"),
+            resp.headers["HX-Redirect"],
             reverse("community", args=[self.community.slug]),
         )
         post.refresh_from_db()
@@ -68,6 +68,7 @@ class PostDeleteOwnerTests(TestCase):
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"")
+        self.assertNotIn("HX-Redirect", resp.headers)
         post.refresh_from_db()
         self.assertTrue(post.is_deleted)
 
@@ -114,6 +115,7 @@ class PostDeleteOwnerTests(TestCase):
             resp = self.client.post(url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"")
+        self.assertNotIn("HX-Redirect", resp.headers)
         mock_recompute.assert_not_called()
         post.refresh_from_db()
         self.assertTrue(post.is_deleted)
