@@ -181,7 +181,7 @@ def transparency_posts(request):
         raise Http404
     since = timezone.now() - timedelta(hours=24)
     posts = (
-        Post.objects.filter(created_at__gte=since)
+        Post.objects.filter(created_at__gte=since, is_deleted=False)
         .select_related("community", "author")
     )
     rows = []
@@ -526,7 +526,7 @@ def feed_list(request):
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
-        qs = feed_queryset(sort, t)
+        qs = feed_queryset(sort, t).filter(is_deleted=False)
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         ctx = {
@@ -556,7 +556,7 @@ def home(request):
         t = "all"
 
     page = int(request.GET.get("page", "1") or 1)
-    qs = feed_queryset(sort, t)
+    qs = feed_queryset(sort, t).filter(is_deleted=False)
     offset = (page - 1) * PAGE_SIZE
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
@@ -690,7 +690,7 @@ def community(request, slug):
 
     page = int(request.GET.get("page", "1") or 1)
 
-    base_qs = community.posts.select_related("author")
+    base_qs = community.posts.filter(is_deleted=False).select_related("author")
     qs = feed_queryset(sort, t, base_qs=base_qs)
 
     offset = (page - 1) * PAGE_SIZE
@@ -725,7 +725,9 @@ def post_detail(request, community, pk, slug):
     """Display a single post and its comments."""
 
     post = get_object_or_404(
-        Post.objects.prefetch_related("image_links"), pk=pk, community__slug=community
+        Post.objects.filter(is_deleted=False).prefetch_related("image_links"),
+        pk=pk,
+        community__slug=community,
     )
     c_sort = request.GET.get("c_sort", "best")
     q = request.GET.get("q", "").strip()
@@ -792,7 +794,10 @@ def post_detail(request, community, pk, slug):
 def post_detail_id(request, pk):
     """Simpler post detail view addressed by ID only."""
 
-    post = get_object_or_404(Post.objects.prefetch_related("image_links"), pk=pk)
+    post = get_object_or_404(
+        Post.objects.filter(is_deleted=False).prefetch_related("image_links"),
+        pk=pk,
+    )
     c_sort = request.GET.get("c_sort", "best")
     q = request.GET.get("q", "").strip()
     if c_sort not in {"best", "top", "new", "controversial"}:
@@ -858,7 +863,7 @@ def post_detail_id(request, pk):
 @login_required
 @require_http_methods(["GET", "POST"])
 def post_edit(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
     if request.user != post.author and not request.user.is_staff:
@@ -900,7 +905,7 @@ def comment_reply(request, post_id):
     """Create a new comment on a post or comment."""
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=post_id)
     if post.is_locked:
         return HttpResponseForbidden("Comments locked")
     if post.slowmode:
@@ -1008,7 +1013,7 @@ def comment_new(request):
     parent_id = request.GET.get("parent")
     if not post_id:
         return HttpResponseBadRequest("Missing post")
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=post_id)
     if post.is_locked:
         return HttpResponseForbidden("Comments locked")
     parent = None
@@ -1033,7 +1038,7 @@ def comment_create(request):
     post_id = request.POST.get("post")
     if not post_id:
         return HttpResponseBadRequest("Missing post")
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=post_id)
     if post.is_locked:
         return HttpResponseForbidden("Comments locked")
     if post.slowmode:
@@ -1158,7 +1163,7 @@ def comment_edit(request, pk):
 @require_POST
 @csrf_protect
 def post_delete_owner(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     if _is_banned(request.user):
         return HttpResponseForbidden("Account banned")
 
@@ -1178,7 +1183,7 @@ def post_delete(request, pk):
     """Delete a post; only staff members may perform this action."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     slug = post.community.slug
     post.delete()
     return redirect("community", slug=slug)
@@ -1191,7 +1196,7 @@ def post_remove(request, pk):
     """Soft delete a post (moderator remove)."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     mod.remove_post(post, request.user)
     if request.headers.get("HX-Request") == "true":
         html = render_to_string("core/partials/post_deleted_stub.html", {"post": post})
@@ -1211,7 +1216,7 @@ def post_lock(request, pk):
     """Lock or unlock a post's comments."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     state = request.POST.get("state")
     mod.lock_post(post, state == "1")
     html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
@@ -1225,7 +1230,7 @@ def post_slowmode(request, pk):
     """Adjust per-post slowmode comment rate."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     try:
         seconds = int(request.POST.get("seconds", 0))
     except (TypeError, ValueError):
@@ -1245,7 +1250,7 @@ def post_domain_throttle(request, pk):
     """Toggle domain throttling (-50% weight) for a post."""
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     state = request.POST.get("state")
     if state not in {"0", "1"}:
         return HttpResponseBadRequest("Invalid value")
@@ -1286,7 +1291,7 @@ def comment_delete(request, pk):
 @require_POST
 @login_required_htmx
 def vote_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
 
     try:
         want = int(request.POST["v"])
@@ -1369,7 +1374,8 @@ def report(request):
         return HttpResponseBadRequest("Invalid object id")
 
     model = Post if target_type == "post" else Comment
-    target = get_object_or_404(model, pk=object_id)
+    target_qs = model.objects.filter(is_deleted=False) if model is Post else model.objects.all()
+    target = get_object_or_404(target_qs, pk=object_id)
 
     if request.method == "POST":
         reason = request.POST.get("reason", "")
@@ -1417,7 +1423,7 @@ def user_overview(request, username):
 
     profile_user = _get_profile_user(username)
     posts = list(
-        Post.objects.filter(author=profile_user)
+        Post.objects.filter(author=profile_user, is_deleted=False)
         .select_related("community")
         .order_by("-created_at")[:10]
     )
@@ -1468,7 +1474,7 @@ def user_submitted(request, username):
 
     profile_user = _get_profile_user(username)
     posts = (
-        Post.objects.filter(author=profile_user)
+        Post.objects.filter(author=profile_user, is_deleted=False)
         .select_related("community")
         .order_by("-created_at")
     )
