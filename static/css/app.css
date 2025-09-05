@@ -360,20 +360,12 @@ body.layout-root {
 
 /* Delete button */
 .btn-delete{
-  background:#dc2626;
-  color:#fff;
-  border:none;
-  border-radius:50%;
-  width:32px;
-  height:32px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:16px;
-  line-height:1;
+    border-radius:9999px;
+    background:#fecaca;
+    color:#7f1d1d;
+    padding:2px 10px;
+    font-weight:600;
 }
-.btn-delete:hover{ background:#b91c1c; }
 
 /* Comment tree */
 .comment{ position:relative; padding:10px 0 10px calc(16px * var(--depth, 0)); }
