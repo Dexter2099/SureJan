@@ -1180,7 +1180,11 @@ def post_delete_owner(request, pk):
 @require_POST
 @csrf_protect
 def post_delete(request, pk):
-    """Delete a post; only staff members may perform this action."""
+    """Hard delete a post.
+
+    This view is intended for administrative use only and isn't linked from the
+    standard user interface. Only staff members may perform this action.
+    """
     if not request.user.is_staff:
         return HttpResponseForbidden("Forbidden")
     post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
