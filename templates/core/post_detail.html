@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load permissions static embeds %}
+{% load permissions static %}
 {% url 'post_detail' post.community.slug post.pk post.slug as post_url %}
 
 {% block head_extra %}
@@ -41,7 +41,7 @@
     >
   </figure>
 {% elif post.content_url %}
-  {{ post.content_url|build_embed_html|safe }}
+  {{ embed_html|safe }}
 {% endif %}
 
   {% if post.body %}
