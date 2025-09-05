@@ -162,7 +162,7 @@ class PostDetailMediaTests(TestCase):
             "html": "<blockquote></blockquote>",
             "thumbnail_url": None,
         }
-        mock_fetch_og_image.return_value = "https://cdn.example/og.jpg"
+        mock_fetch_og_image.return_value = "https://pbs.twimg.com/og.jpg"
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -170,10 +170,12 @@ class PostDetailMediaTests(TestCase):
             title="Tweet OG",
             content_url="https://x.com/user/status/123",
         )
+        resp = self.client.get(reverse("home"))
+        self.assertContains(resp, '<img src="https://pbs.twimg.com/og.jpg"')
         resp = self.client.get(
             reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
         )
-        self.assertContains(resp, 'src="https://cdn.example/og.jpg"')
+        self.assertContains(resp, '<img src="https://pbs.twimg.com/og.jpg"')
 
     def test_image_slideshow_renders(self):
         post = Post.objects.create(
@@ -189,6 +191,31 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'class="post-gallery"')
         self.assertContains(resp, 'src="https://example.com/0.jpg"')
+
+    @patch("core.utils.embeds.fetch_og_image")
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_rumble_embed_uses_og_image_on_feed_and_detail(
+        self, mock_oembed, mock_fetch_og_image
+    ):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
+            "thumbnail_url": None,
+        }
+        mock_fetch_og_image.return_value = "https://c.rumblecdn.com/og.jpg"
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Rumble OG",
+            content_url="https://rumble.com/vxyz-test.html",
+        )
+        resp = self.client.get(reverse("home"))
+        self.assertContains(resp, '<img src="https://c.rumblecdn.com/og.jpg"')
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, '<img src="https://c.rumblecdn.com/og.jpg"')
 
     @patch("core.utils.embeds.fetch_og_image")
     @patch("core.utils.embeds.fetch_oembed")
