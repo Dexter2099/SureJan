@@ -26,6 +26,13 @@
          hx-get="{% url 'comment_reply_form' comment.pk %}"
          hx-target="#c{{ comment.pk }} .reply-target"
          hx-swap="innerHTML">Reply</a>
+      {% if request.user == comment.author or request.user.is_staff %}
+        <form method="post" action="{% url 'comment_delete' comment.pk %}" style="display:inline"
+              hx-post="{% url 'comment_delete' comment.pk %}" hx-target="#c{{ comment.pk }}" hx-swap="outerHTML">
+          {% csrf_token %}
+          <button type="submit" class="btn-delete" aria-label="Delete comment">&times;</button>
+        </form>
+      {% endif %}
     </div>
 
   <div class="reply-target"></div>
