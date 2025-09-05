@@ -68,9 +68,9 @@
       {% endif %}
 
       {% if request.user == post.author or request.user.is_staff %}
-        <form method="post" action="{% url 'post_delete_owner' post.pk %}"
-              hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML" style="display:inline">
+        <form method="post" action="{% url 'post_delete_owner' post.pk %}" hx-post="{% url 'post_delete_owner' post.pk %}" style="display:inline">
           {% csrf_token %}
+          <input type="hidden" name="from" value="detail">
           <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
         </form>
       {% endif %}

@@ -20,14 +20,31 @@ class PostDeleteOwnerTests(TestCase):
             slug="t", name="Test", title="Test", created_by=self.user
         )
 
-    def test_author_soft_delete_htmx(self):
+    def test_author_soft_delete_htmx_feed(self):
         post = Post.objects.create(
             community=self.community, author=self.user, post_type="text", title="Hello"
         )
         url = reverse("post_delete_owner", args=[post.pk])
         self.client.login(username="alice", password="pwd")
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"")
+        self.assertNotIn("HX-Redirect", resp.headers)
+        post.refresh_from_db()
+        self.assertTrue(post.is_deleted)
+
+    def test_author_soft_delete_htmx_detail_redirect(self):
+        post = Post.objects.create(
+            community=self.community, author=self.user, post_type="text", title="Hi"
+        )
+        url = reverse("post_delete_owner", args=[post.pk])
+        self.client.login(username="alice", password="pwd")
+        resp = self.client.post(url, {"from": "detail"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.headers.get("HX-Redirect"),
+            reverse("community", args=[self.community.slug]),
+        )
         post.refresh_from_db()
         self.assertTrue(post.is_deleted)
 
@@ -49,7 +66,8 @@ class PostDeleteOwnerTests(TestCase):
         url = reverse("post_delete_owner", args=[post.pk])
         self.client.login(username="mod", password="pwd")
         resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"")
         post.refresh_from_db()
         self.assertTrue(post.is_deleted)
 
@@ -94,7 +112,8 @@ class PostDeleteOwnerTests(TestCase):
         self.client.login(username="alice", password="pwd")
         with patch("core.models.Post.recompute_hot") as mock_recompute:
             resp = self.client.post(url, HTTP_HX_REQUEST="true")
-        self.assertEqual(resp.status_code, 204)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"")
         mock_recompute.assert_not_called()
         post.refresh_from_db()
         self.assertTrue(post.is_deleted)
