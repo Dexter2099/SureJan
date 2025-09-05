@@ -10,9 +10,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="post",
-            name="embed_html",
-            field=models.TextField(blank=True, default="", null=True),
-        ),
+        migrations.RunSQL(
+            sql="ALTER TABLE core_post ADD COLUMN IF NOT EXISTS embed_html text",
+            reverse_sql="ALTER TABLE core_post DROP COLUMN IF EXISTS embed_html",
+            state_operations=[
+                migrations.AddField(
+                    model_name="post",
+                    name="embed_html",
+                    field=models.TextField(blank=True, default="", null=True),
+                ),
+            ],
+        ),  # IF NOT EXISTS/IF EXISTS make this migration idempotent
     ]
