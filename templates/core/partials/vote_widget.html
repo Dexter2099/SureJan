@@ -5,7 +5,8 @@
 {% endcomment %}
 {% if post %}
   {% with wrapper=tag|default:"div" %}
-<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote" hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}">
+<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote"{% if user.is_authenticated %} hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}"{% endif %}>
+  {% if user.is_authenticated %}
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":1}'
@@ -20,11 +21,18 @@
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
   <span class="vote-status" aria-live="polite"></span>
+  {% else %}
+  <button disabled aria-label="Upvote">▲</button>
+  <span id="post-{{ post.pk }}-score">{{ post.score }}</span>
+  <button disabled aria-label="Downvote">▼</button>
+  <a href="{% url 'login' %}?next={{ request.get_full_path }}">Log in to vote</a>
+  {% endif %}
 </{{ wrapper }}>
   {% endwith %}
 {% elif comment %}
   {% with wrapper=tag|default:"span" %}
-<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote" hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}">
+<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote"{% if user.is_authenticated %} hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}"{% endif %}>
+  {% if user.is_authenticated %}
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":1}'
@@ -39,6 +47,12 @@
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
   <span class="vote-status" aria-live="polite"></span>
+  {% else %}
+  <button disabled aria-label="Upvote">▲</button>
+  <span id="comment-{{ comment.pk }}-score">{{ comment.score }}</span>
+  <button disabled aria-label="Downvote">▼</button>
+  <a href="{% url 'login' %}?next={{ request.get_full_path }}">Log in to vote</a>
+  {% endif %}
 </{{ wrapper }}>
   {% endwith %}
 {% endif %}
