@@ -32,7 +32,7 @@ def build_embed_html(url: str) -> str:
             f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
         )
 
-    thumb = data.get("thumbnail_url", "")
+    thumb = data.get("thumbnail_url") or ""
     # Prefer secure thumbnails when available
     if thumb.startswith("http://"):
         thumb = "https://" + thumb[len("http://") :]
@@ -41,7 +41,7 @@ def build_embed_html(url: str) -> str:
     src = ""
     if "youtube" in domain:
         vid = None
-        for pattern in [r"v=([\w-]{11})", r"be/([\w-]{11})", r"embed/([\w-]{11})"]:
+        for pattern in [r"v=([\w-]+)", r"be/([\w-]+)", r"embed/([\w-]+)"]:
             m = re.search(pattern, url)
             if m:
                 vid = m.group(1)

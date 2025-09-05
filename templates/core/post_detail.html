@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load permissions static %}
+{% load permissions static embeds %}
 {% url 'post_detail' post.community.slug post.pk post.slug as post_url %}
 
 {% block head_extra %}
@@ -40,12 +40,8 @@
       onerror="this.onerror=null; this.closest('figure').remove()"
     >
   </figure>
-{% elif embed_html %}
-  <div class="post-embed aspect-16-9">
-    <div class="embed-inner">{{ embed_html|safe }}</div>
-  </div>
 {% elif post.content_url %}
-  <p class="link-card"><a href="{{ post.content_url }}" rel="noopener nofollow">{{ post.content_url }}</a></p>
+  {{ post.content_url|build_embed_html|safe }}
 {% endif %}
 
   {% if post.body %}
@@ -77,6 +73,9 @@
     </div>
   {% else %}
     <em>[deleted by author]</em>
+  {% endif %}
+  {% if ASTROTURF_WATCH %}
+  <div hx-get="{% url 'post_signals_chips' post.pk %}" hx-trigger="load"></div>
   {% endif %}
 </article>
 

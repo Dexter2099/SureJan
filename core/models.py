@@ -117,7 +117,6 @@ class Post(models.Model):
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
     content_url = models.URLField(blank=True)
-    embed_html = models.TextField(blank=True)
     embed = models.ForeignKey(
         "Embed", null=True, blank=True, on_delete=models.SET_NULL, related_name="posts"
     )
@@ -232,7 +231,6 @@ class Post(models.Model):
         self.heading = ""
         self.body = ""
         self.content_url = ""
-        self.embed_html = ""
         self.link_domain = ""
         if self.image:
             self.image.delete(save=False)
@@ -251,7 +249,6 @@ class Post(models.Model):
                 "heading",
                 "body",
                 "content_url",
-                "embed_html",
                 "link_domain",
                 "image",
                 "image_thumb",
