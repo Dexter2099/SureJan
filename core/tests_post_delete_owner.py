@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from unittest.mock import patch
+
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Community, Post
+from .models import Community, Post, Vote
+from .services.votes import cast_vote_post_once
 
 
 class PostDeleteOwnerTests(TestCase):
@@ -81,3 +84,20 @@ class PostDeleteOwnerTests(TestCase):
         self.assertEqual(resp.status_code, 403)
         post.refresh_from_db()
         self.assertFalse(post.is_deleted)
+
+    def test_soft_delete_preserves_votes_and_metrics(self):
+        post = Post.objects.create(
+            community=self.community, author=self.user, post_type="text", title="Keep"
+        )
+        cast_vote_post_once(self.other, post, 1)
+        url = reverse("post_delete_owner", args=[post.pk])
+        self.client.login(username="alice", password="pwd")
+        with patch("core.models.Post.recompute_hot") as mock_recompute:
+            resp = self.client.post(url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 204)
+        mock_recompute.assert_not_called()
+        post.refresh_from_db()
+        self.assertTrue(post.is_deleted)
+        self.assertEqual(post.score, 1)
+        votes = Vote.objects.filter(target_type="post", target_id=post.pk).count()
+        self.assertEqual(votes, 1)

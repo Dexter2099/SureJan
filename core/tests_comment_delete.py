@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Comment, Community, Post
+from .models import Comment, Community, Post, Vote
+from .services.votes import cast_vote_comment_once
 
 
 class CommentDeleteTests(TestCase):
@@ -49,7 +52,7 @@ class CommentDeleteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.comment.refresh_from_db()
         self.assertTrue(self.comment.is_deleted)
-        self.assertIn(b"Removed by moderators", resp.content)
+        self.assertIn(b"comment deleted", resp.content)
 
     def test_cannot_delete_others_comment(self):
         self.client.logout()
@@ -63,4 +66,21 @@ class CommentDeleteTests(TestCase):
         self.client.logout()
         resp = self.client.post(self.url)
         self.assertEqual(resp.status_code, 302)
+
+    def test_delete_preserves_votes_and_skips_recompute(self):
+        cast_vote_comment_once(self.other, self.comment, 1)
+        votes_before = Vote.objects.filter(
+            target_type="comment", target_id=self.comment.pk
+        ).count()
+        with patch("core.models.Vote.objects.filter") as mock_filter:
+            resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        mock_filter.assert_not_called()
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+        self.assertEqual(self.comment.score, 1)
+        votes_after = Vote.objects.filter(
+            target_type="comment", target_id=self.comment.pk
+        ).count()
+        self.assertEqual(votes_before, votes_after)
 
