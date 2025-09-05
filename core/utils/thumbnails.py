@@ -12,7 +12,11 @@ OG_IMAGE_RE = re.compile(r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([
 def scrape_og_image(url: str) -> Optional[str]:
     """Return the first OpenGraph image URL for ``url`` if present."""
     try:
-        resp = requests.get(url, timeout=5)
+        resp = requests.get(
+            url,
+            timeout=5,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; SureJanBot/1.0)"},
+        )
         resp.raise_for_status()
     except Exception:
         return None
