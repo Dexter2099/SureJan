@@ -1319,6 +1319,14 @@ def vote_post(request, pk):
     except AlreadyVoted:
         return HttpResponse(status=409)
 
+    if request.headers.get("HX-Request") == "true":
+        post.refresh_from_db()
+        return render(
+            request,
+            "core/partials/vote_widget.html",
+            {"post": post, "voted": True},
+        )
+
     return HttpResponse(f"<span id='post-{post.pk}-score'>{new_score}</span>")
 
 
@@ -1338,6 +1346,14 @@ def vote_comment(request, pk):
         new_score = cast_vote_comment_once(request.user, comment, want)
     except AlreadyVoted:
         return HttpResponse(status=409)
+
+    if request.headers.get("HX-Request") == "true":
+        comment.refresh_from_db()
+        return render(
+            request,
+            "core/partials/vote_widget.html",
+            {"comment": comment, "voted": True},
+        )
 
     return HttpResponse(f"<span id='comment-{comment.pk}-score'>{new_score}</span>")
 

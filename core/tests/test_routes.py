@@ -71,15 +71,14 @@ class RouteTests(TestCase):
         self.assertIn("Log in to vote", html_comment)
         self.assertIn(f'id="comment-{self.comment.pk}-score"', html_comment)
 
-    def test_vote_post_htmx_returns_span(self):
+    def test_vote_post_htmx_returns_widget(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_post", args=[self.post.pk])
         resp = self.client.post(url, {"v": 1}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
-        self.assertHTMLEqual(
-            resp.content.decode(),
-            f'<span id="post-{self.post.pk}-score">1</span>',
-        )
+        html = resp.content.decode()
+        self.assertIn(f'id="post-{self.post.pk}-score"', html)
+        self.assertIn("disabled", html)
 
     def test_vote_post_non_htmx_returns_span(self):
         self.client.login(username="tester", password="pwd")
@@ -141,15 +140,14 @@ class RouteTests(TestCase):
         resp = self.client.post(url, {"v": 0}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)
 
-    def test_vote_comment_htmx_returns_span(self):
+    def test_vote_comment_htmx_returns_widget(self):
         self.client.login(username="tester", password="pwd")
         url = reverse("vote_comment", args=[self.comment.pk])
         resp = self.client.post(url, {"v": 1}, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
-        self.assertHTMLEqual(
-            resp.content.decode(),
-            f'<span id="comment-{self.comment.pk}-score">1</span>',
-        )
+        html = resp.content.decode()
+        self.assertIn(f'id="comment-{self.comment.pk}-score"', html)
+        self.assertIn("disabled", html)
 
     def test_comment_row_uses_score_id_contract_without_widget(self):
         rf = RequestFactory()
@@ -187,7 +185,6 @@ class RouteTests(TestCase):
             HTTP_X_CSRFTOKEN=token,
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertHTMLEqual(
-            resp.content.decode(),
-            f'<span id="comment-{self.comment.pk}-score">1</span>',
-        )
+        html = resp.content.decode()
+        self.assertIn(f'id="comment-{self.comment.pk}-score"', html)
+        self.assertIn("disabled", html)
