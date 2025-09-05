@@ -36,5 +36,5 @@ def test_authenticated_shows_vote_buttons(client, content):
     resp = client.get(post.get_absolute_url())
     html = resp.content.decode()
     assert "hx-post" in html
-    assert f'hx-target="#post-score-{post.pk}"' in html
-    assert f'hx-target="#comment-score-{comment.pk}"' in html
+    assert f'hx-target="#post-{post.pk}-score"' in html
+    assert f'hx-target="#comment-{comment.pk}-score"' in html

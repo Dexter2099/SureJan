@@ -9,14 +9,14 @@
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":1}'
-    hx-target="#post-score-{{ post.pk }}"
+    hx-target="#post-{{ post.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Upvote">▲</button>
-  <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
+  <span id="post-{{ post.pk }}-score">{{ post.score }}</span>
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":-1}'
-    hx-target="#post-score-{{ post.pk }}"
+    hx-target="#post-{{ post.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
 </{{ wrapper }}>
@@ -27,14 +27,14 @@
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":1}'
-    hx-target="#comment-score-{{ comment.pk }}"
+    hx-target="#comment-{{ comment.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Upvote">▲</button>
-  <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
+  <span id="comment-{{ comment.pk }}-score">{{ comment.score }}</span>
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":-1}'
-    hx-target="#comment-score-{{ comment.pk }}"
+    hx-target="#comment-{{ comment.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
 </{{ wrapper }}>

@@ -13,7 +13,7 @@
    * **No other transitions** allowed; repeat attempts return **409 Conflict** (or 200 with no‑op).
 3. **Single writer (Service Recompute):** Views call a service that writes the vote row **once** and then sets `score = SUM(value)` for that target. No model signals adjust score.
 4. **HTTP posture:** **POST‑only**; `v ∈ {+1, −1}` must be in **POST body**.
-5. **UI contract:** Each item has a single score span: `#post-score-{id}` / `#comment-score-{id}`. First successful vote may disable the buttons.
+5. **UI contract:** Each item has a single score span: `#post-{id}-score` / `#comment-{id}-score`. First successful vote may disable the buttons.
 6. **Concurrency:** Apply in `transaction.atomic()` with `select_for_update()` on the user’s vote row.
 7. **Prod safety:** Serve **local** HTMX; add CSRF header via static helper; **require Postgres** on Fly; ship a votes consistency check.
 
@@ -99,7 +99,7 @@ def vote_post(request, pk):
         cast_vote_post_once(request.user, post, want)
     except AlreadyVoted:
         return HttpResponse(status=409)  # immutable
-    return HttpResponse(f"<span id='post-score-{post.pk}'>{post.score}</span>")
+    return HttpResponse(f"<span id='post-{post.pk}-score'>{post.score}</span>")
 ```
 
 *(Add the analogous `vote_comment` that calls `cast_vote_comment_once`.)*
@@ -113,22 +113,22 @@ def vote_post(request, pk):
   <button aria-label="Upvote"
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":1}'
-          hx-target="#post-score-{{ post.pk }}"
+          hx-target="#post-{{ post.pk }}-score"
           hx-swap="outerHTML"
           hx-on::after-request="this.closest('.post-vote').querySelectorAll('button').forEach(b=>b.disabled=true)">▲</button>
 
-  <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
+  <span id="post-{{ post.pk }}-score">{{ post.score }}</span>
 
   <button aria-label="Downvote"
           hx-post="{% url 'vote_post' post.pk %}"
           hx-vals='{"v":-1}'
-          hx-target="#post-score-{{ post.pk }}"
+          hx-target="#post-{{ post.pk }}-score"
           hx-swap="outerHTML"
           hx-on::after-request="this.closest('.post-vote').querySelectorAll('button').forEach(b=>b.disabled=true)">▼</button>
 </div>
 ```
 
-*(Comments mirror the above with `vote_comment` and `#comment-score-…`.)*
+*(Comments mirror the above with `vote_comment` and `#comment-…-score`.)*
 
 ---
 

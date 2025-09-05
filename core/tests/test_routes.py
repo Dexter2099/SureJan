@@ -62,7 +62,7 @@ class RouteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
             resp.content.decode(),
-            f'<span id="post-score-{self.post.pk}">1</span>',
+            f'<span id="post-{self.post.pk}-score">1</span>',
         )
 
     def test_vote_post_non_htmx_returns_span(self):
@@ -72,7 +72,7 @@ class RouteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
             resp.content.decode(),
-            f'<span id="post-score-{self.post.pk}">1</span>',
+            f'<span id="post-{self.post.pk}-score">1</span>',
         )
 
     def test_vote_post_invalid_value_returns_400(self):
@@ -138,5 +138,5 @@ class RouteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertHTMLEqual(
             resp.content.decode(),
-            f'<span id="comment-score-{self.comment.pk}">1</span>',
+            f'<span id="comment-{self.comment.pk}-score">1</span>',
         )
