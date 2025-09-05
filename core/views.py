@@ -50,7 +50,6 @@ from .services.votes import (
     cast_vote_comment_once,
     cast_vote_post_once,
 )
-from .utils.embeds import build_embed_html
 from . import mod
 from .http import login_required_htmx
 
@@ -94,21 +93,6 @@ ALLOWED_TAGS = [
     "br",
 ]
 ALLOWED_ATTRIBUTES = {"a": ["href"]}
-
-
-@require_GET
-@ratelimit(key="user", rate="5/m", method=["GET"], block=False)
-def oembed_preview(request):
-    url = request.GET.get("url", "").strip()
-    if not url:
-        return HttpResponse("")
-    try:
-        html = build_embed_html(url)
-    except Exception:
-        html = ""
-    if not html:
-        return HttpResponse("<p role='alert'>Preview unavailable.</p>", status=400)
-    return HttpResponse(html)
 
 
 @require_GET
