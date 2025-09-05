@@ -14,6 +14,8 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
+Set `ENABLE_TWITTER_EMBEDS=True` via Fly secrets or environment variables to allow tweet embeds to render properly.
+
 ### Moderation
 
 Staff can remove posts without deleting them, lock conversations, or
