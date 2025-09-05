@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.html import escape
 
 from core.oembed import fetch_oembed
-from core.utils.thumbnails import svg_placeholder
+from core.utils.thumbnails import fetch_og_image, svg_placeholder
 
 
 def build_embed_html(url: str) -> str:
@@ -33,15 +33,12 @@ def build_embed_html(url: str) -> str:
             f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
         )
 
-    thumb = data.get("thumbnail_url") or ""
-    # Prefer secure thumbnails when available
-    if thumb.startswith("http://"):
-        thumb = "https://" + thumb[len("http://") :]
     html = data.get("html", "")
 
     src = ""
+    placeholder_label = "Preview"
+    vid = None
     if "youtube" in domain:
-        vid = None
         for pattern in [r"v=([\w-]+)", r"be/([\w-]+)", r"embed/([\w-]+)"]:
             m = re.search(pattern, url)
             if m:
@@ -56,9 +53,8 @@ def build_embed_html(url: str) -> str:
                 f'<div class="link-card"><a href="{escape(url)}" '
                 f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
             )
-        if not thumb:
-            thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
         src = f"https://www.youtube-nocookie.com/embed/{vid}"
+        placeholder_label = "YouTube preview"
     elif "rumble.com" in domain:
         # 1) Try to read iframe src from the provider HTML (support " and ' quotes)
         m = re.search(r"src=['\"]([^'\"]+)['\"]", html or "")
@@ -78,22 +74,7 @@ def build_embed_html(url: str) -> str:
                 f'<div class="link-card"><a href="{escape(url)}" '
                 f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
             )
-
-        # 3) Thumbnail fallback: when oEmbed misses it, use a tiny inline SVG
-        #    (keeps CSP-friendly, no external host needed)
-        if not thumb:
-            thumb = svg_placeholder("Rumble preview")
-
-        return (
-            f'<div class="post-embed" data-src="{escape(src)}" '
-            f'style="position:relative;padding-top:56.25%;overflow:hidden;">'
-            f'  <a href="{escape(url)}" rel="noopener nofollow" '
-            f'style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">'
-            f'    <img src="{escape(thumb)}" alt="" loading="lazy" decoding="async" '
-            f'referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">'
-            f'  </a>'
-            f'</div>'
-        )
+        placeholder_label = "Rumble preview"
     elif "twitter.com" in domain or "x.com" in domain:
         if not getattr(settings, "ENABLE_TWITTER_EMBEDS", False):
             return (
@@ -107,24 +88,26 @@ def build_embed_html(url: str) -> str:
                 f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
             )
         src = f"https://platform.twitter.com/embed/Tweet.html?id={m.group(1)}"
+        placeholder_label = "Tweet preview"
     else:
         return (
             f'<div class="link-card"><a href="{escape(url)}" '
             f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
         )
-
-    thumb_html = (
-        f'<img src="{escape(thumb)}" alt="" loading="lazy" decoding="async" '
-        'referrerpolicy="no-referrer" '
-        'style="width:100%;height:100%;object-fit:cover;">'
-        if thumb
-        else ""
-    )
+    thumb = data.get("thumbnail_url") or fetch_og_image(url)
+    if not thumb and "youtube" in domain and vid:
+        thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+    if not thumb:
+        thumb = svg_placeholder(placeholder_label)
+    if thumb.startswith("http://"):
+        thumb = "https://" + thumb[len("http://") :]
 
     return (
         f'<div class="post-embed" data-src="{escape(src)}" '
         'style="position:relative;padding-top:56.25%;overflow:hidden;">'
         f'<a href="{escape(url)}" rel="noopener nofollow" '
         'style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">'
-        f'{thumb_html}</a></div>'
+        f'<img src="{escape(thumb)}" alt="" loading="lazy" decoding="async" '
+        'referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">'
+        '</a></div>'
     )
