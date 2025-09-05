@@ -149,7 +149,7 @@ class PostDetailMediaTests(TestCase):
             'data-src="https://platform.twitter.com/embed/Tweet.html?id=123"',
         )
         self.assertContains(resp, 'href="https://x.com/user/status/123"')
-        self.assertContains(resp, 'src="http://pbs.twimg.com/thumb.jpg"')
+        self.assertContains(resp, 'src="https://pbs.twimg.com/thumb.jpg"')
 
     @override_settings(ENABLE_TWITTER_EMBEDS=True)
     @patch("core.utils.embeds.fetch_og_image")
@@ -189,3 +189,28 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'class="post-gallery"')
         self.assertContains(resp, 'src="https://example.com/0.jpg"')
+
+    @patch("core.utils.embeds.fetch_og_image")
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_missing_thumbnail_shows_on_feed_and_detail(
+        self, mock_oembed, mock_fetch_og_image
+    ):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
+            "thumbnail_url": None,
+        }
+        mock_fetch_og_image.return_value = None
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Rumble no thumb",
+            content_url="https://rumble.com/vxyz-test.html",
+        )
+        resp = self.client.get(reverse("home"))
+        self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
