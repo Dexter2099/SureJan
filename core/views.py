@@ -7,8 +7,6 @@ import hashlib
 import json
 from datetime import timedelta
 
-import re
-
 import bleach
 import mistune
 from django.utils.safestring import mark_safe
@@ -52,7 +50,6 @@ from .services.votes import (
     cast_vote_comment_once,
     cast_vote_post_once,
 )
-from .oembed import fetch_oembed
 from .utils.embeds import build_embed_html
 from . import mod
 from .http import login_required_htmx
@@ -106,13 +103,11 @@ def oembed_preview(request):
     if not url:
         return HttpResponse("")
     try:
-        embed, data = _build_embed(url)
-        ctx = {"type": "embed", **embed} if embed else data
+        html = build_embed_html(url)
     except Exception:
-        ctx = None
-    if not ctx:
+        html = ""
+    if not html:
         return HttpResponse("<p role='alert'>Preview unavailable.</p>", status=400)
-    html = render_to_string("core/partials/link_preview.html", ctx)
     return HttpResponse(html)
 
 
@@ -224,61 +219,6 @@ def _cached_post_signals(pk):
     return data
 
 
-def _build_embed(url):
-    """Return (embed_meta, data) for known providers.
-
-    Generates a click-to-play "safe" embed using a sandboxed iframe. Returns
-    ``(None, data)`` when the URL is unsupported.
-    """
-
-    if not url:
-        return None, None
-    parsed = urlparse(url)
-    domain = parsed.netloc.lower()
-    try:
-        data = fetch_oembed(url)
-    except Exception:
-        return None, None
-    if data.get("type") != "embed":
-        return None, data
-    thumb = data.get("thumbnail_url")
-
-    if "youtube" in domain:
-        vid = None
-        # Try to extract the 11-char video id from various URL formats
-        for pattern in [r"v=([\w-]{11})", r"be/([\w-]{11})", r"embed/([\w-]{11})"]:
-            m = re.search(pattern, url)
-            if m:
-                vid = m.group(1)
-                break
-        if not vid:
-            m = re.search(r"embed/([\w-]{11})", data.get("html", ""))
-            if m:
-                vid = m.group(1)
-        if not vid:
-            return None
-        if not thumb:
-            thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
-        src = f"https://www.youtube-nocookie.com/embed/{vid}"
-        return {"src": src, "thumb": thumb, "url": url}, data
-
-    if "rumble.com" in domain:
-        m = re.search(r'src="([^"]+)"', data.get("html", ""))
-        if not m:
-            return None
-        src = m.group(1)
-        return {"src": src, "thumb": thumb, "url": url}, data
-
-    if "twitter.com" in domain or "x.com" in domain:
-        if not settings.ENABLE_TWITTER_EMBEDS:
-            return None, data
-        m = re.search(r"status/(\d+)", url)
-        if not m:
-            return None, data
-        src = f"https://platform.twitter.com/embed/Tweet.html?id={m.group(1)}"
-        return {"src": src, "thumb": thumb, "url": url}, data
-
-    return None, data
 
 
 @require_GET
@@ -877,10 +817,7 @@ def post_edit(request, pk):
             post = form.save(commit=False)
             if post.content_url:
                 post.link_domain = urlparse(post.content_url).netloc
-                data = fetch_oembed(post.content_url)
-                post.embed_html = render_to_string(
-                    "core/partials/link_preview.html", data
-                )
+                post.embed_html = build_embed_html(post.content_url)
             else:
                 post.link_domain = ""
                 post.embed_html = ""
