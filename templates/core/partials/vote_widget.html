@@ -5,7 +5,7 @@
 {% endcomment %}
 {% if post %}
   {% with wrapper=tag|default:"div" %}
-<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote" hx-on::after-request="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true)}">
+<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote" hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}">
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":1}'
@@ -19,11 +19,12 @@
     hx-target="#post-{{ post.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
+  <span class="vote-status" aria-live="polite"></span>
 </{{ wrapper }}>
   {% endwith %}
 {% elif comment %}
   {% with wrapper=tag|default:"span" %}
-<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote" hx-on::after-request="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true)}">
+<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote" hx-on::after-swap="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true);this.querySelector('.vote-status').textContent='Vote saved'}">
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":1}'
@@ -37,6 +38,7 @@
     hx-target="#comment-{{ comment.pk }}-score"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
+  <span class="vote-status" aria-live="polite"></span>
 </{{ wrapper }}>
   {% endwith %}
 {% endif %}

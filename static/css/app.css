@@ -335,6 +335,19 @@ body.layout-root {
   opacity: 0.5;
 }
 
+/* Hide status text visually but keep it accessible to screen readers */
+.vote-status{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
+}
+
 .post-actions .score{
   display: inline-block;
   min-width: 1.5ch;
