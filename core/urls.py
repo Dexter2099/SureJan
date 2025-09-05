@@ -15,7 +15,6 @@ urlpatterns = [
     # Markdown preview endpoint
     path("preview", core_views.preview_markdown, name="preview_markdown"),
     path("markdown/preview/", core_views.markdown_preview, name="markdown_preview"),
-    path("oembed/preview/", core_views.oembed_preview, name="oembed_preview"),
     path("submit", core_views.post_submit, name="post_submit"),
 
     # Post signals
