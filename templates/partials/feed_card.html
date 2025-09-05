@@ -1,6 +1,6 @@
-{% load url_domain astro_filters %}
+{% load url_domain astro_filters embeds %}
 <article class="post-card" data-testid="post-card">
-{% with detail_url=post.get_absolute_url|default:None %}
+{% with detail_url=post.get_absolute_url|default:None embed_html=post.content_url|build_embed_html %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
 
   {% if post.image_thumb or post.image %}
@@ -31,9 +31,6 @@
   {% if post.is_draft %}<span class="state-badge">draft</span>{% endif %}
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
-    {% endif %}
-    {% if post.embed_html and not embed_html %}
-    {{ post.embed_html|safe }}
     {% endif %}
     <div class="post-actions">
     {% if show_vote_widget is not False %}
