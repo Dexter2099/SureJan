@@ -19,6 +19,9 @@
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
+    {% if post.embed_html %}
+    {{ post.embed_html|safe }}
+    {% endif %}
     <div class="post-actions">
       {% if show_vote_widget is not False %}
         {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
