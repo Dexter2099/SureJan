@@ -632,6 +632,8 @@ def community(request, slug):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
+    for post in posts:
+        post.embed_html = build_embed_html(getattr(post, "content_url", "") or "")
 
     sort_query = ""
     if sort and sort != "hot":
