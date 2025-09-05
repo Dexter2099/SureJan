@@ -99,7 +99,7 @@ def vote_post(request, pk):
         cast_vote_post_once(request.user, post, want)
     except AlreadyVoted:
         return HttpResponse(status=409)  # immutable
-    return render(request, "core/partials/post_score.html", {"post": post})
+    return HttpResponse(f"<span id='post-score-{post.pk}'>{post.score}</span>")
 ```
 
 *(Add the analogous `vote_comment` that calls `cast_vote_comment_once`.)*

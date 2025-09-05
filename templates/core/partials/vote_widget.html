@@ -5,56 +5,38 @@
 {% endcomment %}
 {% if post %}
   {% with wrapper=tag|default:"div" %}
-<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote"{% if user.is_authenticated %} hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
-  {% if user.is_authenticated %}
+<{{ wrapper }} class="vote post-vote" id="post-{{ post.pk }}-vote" hx-on::after-request="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true)}">
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":1}'
     hx-target="#post-score-{{ post.pk }}"
     hx-swap="outerHTML"
     aria-label="Upvote">▲</button>
-
-    {% include "core/partials/post_score.html" with post=post only %}
-
+  <span id="post-score-{{ post.pk }}">{{ post.score }}</span>
   <button
     hx-post="{% url 'vote_post' post.pk %}"
     hx-vals='{"v":-1}'
     hx-target="#post-score-{{ post.pk }}"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
-  {% else %}
-  <button disabled aria-label="Upvote">▲</button>
-    {% include "core/partials/post_score.html" with post=post only %}
-  <button disabled aria-label="Downvote">▼</button>
-  <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to vote</a>
-  {% endif %}
 </{{ wrapper }}>
   {% endwith %}
 {% elif comment %}
   {% with wrapper=tag|default:"span" %}
-<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote"{% if user.is_authenticated %} hx-on::after-request="this.querySelectorAll('button').forEach(btn => btn.disabled = true)"{% endif %}>
-  {% if user.is_authenticated %}
+<{{ wrapper }} class="vote comment-vote" id="comment-{{ comment.pk }}-vote" hx-on::after-request="if(event.detail.xhr.status===200){this.classList.add('voted');this.querySelectorAll('button').forEach(btn=>btn.disabled=true)}">
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":1}'
     hx-target="#comment-score-{{ comment.pk }}"
     hx-swap="outerHTML"
     aria-label="Upvote">▲</button>
-
-    {% include "core/partials/comment_score.html" with comment=comment only %}
-
+  <span id="comment-score-{{ comment.pk }}">{{ comment.score }}</span>
   <button
     hx-post="{% url 'vote_comment' comment.pk %}"
     hx-vals='{"v":-1}'
     hx-target="#comment-score-{{ comment.pk }}"
     hx-swap="outerHTML"
     aria-label="Downvote">▼</button>
-  {% else %}
-  <button disabled aria-label="Upvote">▲</button>
-    {% include "core/partials/comment_score.html" with comment=comment only %}
-  <button disabled aria-label="Downvote">▼</button>
-  <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to vote</a>
-  {% endif %}
 </{{ wrapper }}>
   {% endwith %}
 {% endif %}
