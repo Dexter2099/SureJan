@@ -20,6 +20,9 @@
       {% endif %}
     </a>
   {% endif %}
+  {% if embed_html %}
+  {{ embed_html|safe }}
+  {% endif %}
   <div class="post-meta">
     <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a> · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
@@ -29,7 +32,7 @@
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
-    {% if post.embed_html %}
+    {% if post.embed_html and not embed_html %}
     {{ post.embed_html|safe }}
     {% endif %}
     <div class="post-actions">
