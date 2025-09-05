@@ -20,11 +20,13 @@ def content(db):
 
 @pytest.mark.django_db
 def test_anonymous_shows_login_prompt(client, content):
-    post, _ = content
+    post, comment = content
     resp = client.get(post.get_absolute_url())
     html = resp.content.decode()
     assert "hx-post" not in html
     assert "Log in to vote" in html
+    assert f'id="post-{post.pk}-score"' in html
+    assert f'id="comment-{comment.pk}-score"' in html
 
 
 @pytest.mark.django_db
@@ -38,3 +40,16 @@ def test_authenticated_shows_vote_buttons(client, content):
     assert "hx-post" in html
     assert f'hx-target="#post-{post.pk}-score"' in html
     assert f'hx-target="#comment-{comment.pk}-score"' in html
+
+
+@pytest.mark.django_db
+def test_vote_widget_hx_on_only_disables_on_200(client, content):
+    post, comment = content
+    User = get_user_model()
+    voter = User.objects.create_user("voter", password="pwd")
+    client.force_login(voter)
+    resp = client.get(post.get_absolute_url())
+    html = resp.content.decode()
+    assert f'id="post-{post.pk}-vote"' in html
+    assert f'id="comment-{comment.pk}-vote"' in html
+    assert "hx-on::after-swap=\"if(event.detail.xhr.status===200)" in html

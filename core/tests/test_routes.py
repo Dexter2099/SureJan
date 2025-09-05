@@ -49,12 +49,27 @@ class RouteTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_mod_astro(self):
-        resp = self.client.get(reverse("mod_astro"))
+        self.client.login(username="tester", password="pwd")
+        resp = self.client.get(reverse("mod_astro"), follow=True)
         self.assertEqual(resp.status_code, 200)
 
     def test_methods(self):
         resp = self.client.get(reverse("transparency_methods"))
         self.assertEqual(resp.status_code, 200)
+
+    def test_vote_widget_anonymous_shows_login_prompt(self):
+        rf = RequestFactory()
+        request = rf.get("/")
+        html_post = render_to_string(
+            "core/partials/vote_widget.html", {"post": self.post}, request=request
+        )
+        self.assertIn("Log in to vote", html_post)
+        self.assertIn(f'id="post-{self.post.pk}-score"', html_post)
+        html_comment = render_to_string(
+            "core/partials/vote_widget.html", {"comment": self.comment}, request=request
+        )
+        self.assertIn("Log in to vote", html_comment)
+        self.assertIn(f'id="comment-{self.comment.pk}-score"', html_comment)
 
     def test_vote_post_htmx_returns_span(self):
         self.client.login(username="tester", password="pwd")
@@ -97,6 +112,7 @@ class RouteTests(TestCase):
         self.assertEqual(self.post.score, 1)
         resp = self.client.post(url, {"v": 1})
         self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.content, b"")
         self.post.refresh_from_db()
         self.assertEqual(self.post.score, 1)
 
@@ -109,6 +125,7 @@ class RouteTests(TestCase):
         self.assertEqual(self.comment.score, 1)
         resp = self.client.post(url, {"v": 1})
         self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.content, b"")
         self.comment.refresh_from_db()
         self.assertEqual(self.comment.score, 1)
 
