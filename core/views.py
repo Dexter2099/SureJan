@@ -52,7 +52,6 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
-from .utils.embeds import build_embed_html
 
 
 def _is_banned(user):
@@ -421,9 +420,6 @@ SORT_TABS = [
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
 
-    for post in posts:
-        post.embed_html = build_embed_html(getattr(post, "content_url", "") or "")
-
     html = render_to_string(
         "core/partials/post_list.html",
         {
@@ -459,8 +455,6 @@ def feed_list(request):
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         posts = list(page_obj.object_list)
-        for post in posts:
-            post.embed_html = build_embed_html(post.content_url or "")
         ctx = {
             "posts": posts,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
@@ -494,8 +488,6 @@ def home(request):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
-    for post in posts:
-        post.embed_html = build_embed_html(post.content_url or "")
 
     sort_query = ""
     if sort and sort != "hot":
@@ -632,8 +624,6 @@ def community(request, slug):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
-    for post in posts:
-        post.embed_html = build_embed_html(getattr(post, "content_url", "") or "")
 
     sort_query = ""
     if sort and sort != "hot":
@@ -711,8 +701,6 @@ def post_detail(request, community, pk, slug):
         else:
             band = "red"
 
-    post.embed_html = build_embed_html(post.content_url or "")
-
     context = {
         "post": post,
         "comments": comments,
@@ -776,8 +764,6 @@ def post_detail_id(request, pk):
             band = "amber"
         else:
             band = "red"
-
-    post.embed_html = build_embed_html(post.content_url or "")
 
     context = {
         "post": post,

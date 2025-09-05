@@ -1,5 +1,6 @@
+{% load embeds %}
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
-  {% with detail_url=post.get_absolute_url %}
+  {% with detail_url=post.get_absolute_url embed_html=post.content_url|build_embed_html %}
     {% if post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb">
       {% if post.image_thumb %}
@@ -19,8 +20,8 @@
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
-    {% if post.embed_html %}
-    {{ post.embed_html|safe }}
+    {% if embed_html %}
+    {{ embed_html|safe }}
     {% endif %}
     <div class="post-actions">
       {% if show_vote_widget is not False %}
