@@ -61,6 +61,17 @@ OpenGraph images are fetched with a browser-like User-Agent and
 logs the provider domain, HTTP status, and whether an image URL or SVG
 placeholder was returned.
 
+Run the backfill command periodically (cron or CI) to populate thumbnails for
+recent link posts:
+
+```
+flyctl ssh console -a surejan -C "python manage.py backfill_thumbs --limit 50 --days 3"
+```
+
+The command fetches provider poster or OpenGraph images asynchronously with
+short timeouts and caches results before saving `thumbnail_url` and
+`thumbnail_alt` on each `Post`.
+
 ## Smoke checklist
 
 * `/accounts/signup/` → create user, header shows username.
