@@ -12,8 +12,8 @@ import requests
 
 OG_IMAGE_RE = re.compile(r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]", re.IGNORECASE)
 
-# Headers used when scraping remote pages for OpenGraph images. A realistic
-# browser-like User-Agent and Accept-Language help avoid some bot protections.
+# Headers used when scraping remote pages for OpenGraph images. A modern
+# desktop User-Agent and Accept-Language help avoid some bot protections.
 REQUEST_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
