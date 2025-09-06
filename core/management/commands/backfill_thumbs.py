@@ -11,6 +11,7 @@ from datetime import timedelta
 from core import http_client
 from core.models import Post, _make_thumb
 from core.utils.thumbnails import resolve_thumbnail
+from core.utils.video_urls import canonicalize_video_url
 
 
 class Command(BaseCommand):
@@ -68,7 +69,7 @@ class Command(BaseCommand):
             if connection.vendor == "sqlite":
                 def worker_sync(post):
                     try:
-                        fail_key = f"thumbfail:{post.content_url}"
+                        fail_key = f"thumbfail:{canonicalize_video_url(post.content_url or '')}"
                         if cache.get(fail_key):
                             return 0
                         src, alt = resolve_thumbnail(
@@ -90,7 +91,7 @@ class Command(BaseCommand):
             else:
                 async def worker(post):
                     try:
-                        fail_key = f"thumbfail:{post.content_url}"
+                        fail_key = f"thumbfail:{canonicalize_video_url(post.content_url or '')}"
                         if cache.get(fail_key):
                             return 0
                         src, alt = await asyncio.to_thread(

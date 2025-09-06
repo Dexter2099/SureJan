@@ -130,7 +130,7 @@ def x_fallback_thumb(url: str) -> str | None:
         resp.raise_for_status()
     except Exception:
         return None
-    match = re.search(r"https://pbs\.twimg\.com/media/[^"]+", resp.text)
+    match = re.search(r'https://pbs\.twimg\.com/media/[^"]+', resp.text)
     if match:
         return html.unescape(match.group(0))
     return None
@@ -165,22 +165,22 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
     SVG placeholder.
     """
 
-    url = canonicalize_video_url(url)
+    canon_url = canonicalize_video_url(url)
 
-    success_key = f"{_THUMB_KEY_PREFIX}{url}"
+    success_key = f"{_THUMB_KEY_PREFIX}{canon_url}"
     cached = cache.get(success_key)
     if cached:
         return cached, label
 
-    fail_key = f"{_FAIL_KEY_PREFIX}{url}"
+    fail_key = f"{_FAIL_KEY_PREFIX}{canon_url}"
     if cache.get(fail_key):
         return svg_placeholder(label)
 
     thumb = None
     if fetch_remote:
-        thumb = fetch_og_image(url)
+        thumb = fetch_og_image(canon_url)
     if not thumb:
-        thumb = _provider_fallback(url, fetch_remote)
+        thumb = _provider_fallback(canon_url, fetch_remote)
 
     if thumb and thumb.startswith("https://"):
         cache.set(success_key, thumb, _THUMB_TTL)
