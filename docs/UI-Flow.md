@@ -43,7 +43,7 @@
 
 * Title (H1)
 * Meta: **by** {username} **in** {community} · {timeago}
-* **Media priority:** gallery → uploaded image → embed preview (YouTube/Rumble/X) → plain link
+* **Media priority:** gallery → uploaded image → link thumbnail (YouTube/Rumble/X) → plain link
 * Body (optional; require media **or** body)
 * **Actions row:** ▲ score ▼ · **Astro chip** (green/amber/red)
 * **Comment composer:** empty box + Cancel/Comment buttons (auth-gated)
@@ -71,12 +71,13 @@
 
 1. **Home feed** → click a **community** (e.g., `r/brisbane`) → **Community feed**
 2. Click a **post title/thumb** → **Post detail**
-3. Attempt to **comment** → redirect to **Login** → back to **Post detail** after auth
+3. Click the **video thumbnail** → provider opens in new tab
+4. Attempt to **comment** → redirect to **Login** → back to **Post detail** after auth
 
 ### B) Engaging as an authenticated user
 
 1. **Home**/**Community** → vote on cards; click to **Post detail**
-2. In **Post detail**: media shows at top; body below; actions row includes astro chip
+2. In **Post detail**: static thumbnail at top; clicking opens provider in new tab; body below; actions row includes astro chip
 3. **Comment:** write + submit; thread updates; reply at any depth
 
 ### C) Submitting content
@@ -92,6 +93,7 @@
 flowchart LR
   A[Home /] -->|click community| B[Community /r/<slug>/]
   B -->|click post| C[Post detail /r/<c>/comments/<id>/<slug>/]
+  C -->|click thumbnail| X[Provider site (new tab)]
   C -->|comment (guest)| D[Login /accounts/login/]
   D -->|success| C
   C -->|submit comment| C
@@ -103,12 +105,13 @@ flowchart LR
 flowchart TB
   subgraph PostDetail
     P1[Title + meta]
-    P2[Media: gallery→image→embed]
+    P2[Media: gallery→image→thumbnail]
     P3[Body (optional)]
     P4[Actions: ▲ score ▼ + Astro chip]
     P5[Composer]
     P6[Thread: nested comments]
     P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    P2 --> L[Provider opens in new tab]
   end
 ```
 
@@ -167,4 +170,9 @@ flowchart TB
 
 * v3.0 (today): initial sitemap, flows, comment contract, preview contract, routes & selectors
 * (append entries as flows change)
+
+## See also (authoritative sources)
+- [Video thumbnail spec](video-thumbnail-spec.md)
+- [UI Contract V3](UI-contract-V3.md)
+- [Wireframes](wireframes/README.md)
 
