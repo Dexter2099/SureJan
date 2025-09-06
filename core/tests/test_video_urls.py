@@ -44,6 +44,14 @@ def test_canonicalize_video_url_dispatcher():
         == "https://youtube.com/watch?v=abc123"
     )
     assert (
+        canonicalize_video_url("https://rumble.com/embed/v1abcd")
+        == "https://rumble.com/v1abcd"
+    )
+    assert (
+        canonicalize_video_url("https://twitter.com/user/status/123")
+        == "https://x.com/user/status/123"
+    )
+    assert (
         canonicalize_video_url("https://example.com/foo")
         == "https://example.com/foo"
     )

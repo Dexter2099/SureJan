@@ -1,5 +1,6 @@
 import pytest
 from django.core.cache import cache
+from pathlib import Path
 
 from core.utils import thumbnails
 
@@ -28,22 +29,30 @@ def test_resolve_thumbnail_failure_caches_and_returns_placeholder(monkeypatch):
 @pytest.mark.django_db
 def test_resolve_thumbnail_success_caches(monkeypatch):
     cache.clear()
-    calls = []
+    og_calls = []
+    fb_called = False
 
     def fake_fetch(url):
-        calls.append(url)
-        return "https://example.com/thumb.jpg"
+        og_calls.append(url)
+        return "https://cdn.example/thumb.jpg"
+
+    def fake_fallback(url, fetch_remote):
+        nonlocal fb_called
+        fb_called = True
+        return "https://fallback.example/thumb.jpg"
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
-    url = "https://example.com"
+    monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
+    url = "https://youtu.be/abc123"
     src, alt = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
-    assert src == "https://example.com/thumb.jpg"
+    assert src == "https://cdn.example/thumb.jpg"
     assert alt == "label"
-    assert cache.get(f"thumb:{url}") == "https://example.com/thumb.jpg"
-    calls.clear()
+    assert cache.get("thumb:https://youtube.com/watch?v=abc123") == "https://cdn.example/thumb.jpg"
+    assert not fb_called
+    og_calls.clear()
     src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
-    assert src2 == "https://example.com/thumb.jpg"
-    assert calls == []
+    assert src2 == "https://cdn.example/thumb.jpg"
+    assert og_calls == []
 
 
 def test_resolve_thumbnail_canonicalizes_url(monkeypatch):
@@ -61,6 +70,31 @@ def test_resolve_thumbnail_canonicalizes_url(monkeypatch):
     thumbnails.resolve_thumbnail("https://youtu.be/abc123?t=9", "label", fetch_remote=True)
     assert seen[0] == "https://youtube.com/watch?v=abc123"
     assert cache.get("thumbfail:https://youtube.com/watch?v=abc123")
+
+
+@pytest.mark.django_db
+def test_resolve_thumbnail_falls_back_after_og(monkeypatch):
+    cache.clear()
+    order = []
+
+    def fake_fetch(url):
+        order.append("og")
+        return None
+
+    def fake_fallback(url, fetch_remote):
+        order.append("fb")
+        return "https://fallback.example/thumb.jpg"
+
+    monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
+    monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
+
+    src, alt = thumbnails.resolve_thumbnail(
+        "https://rumble.com/embed/v1abcd", "label", fetch_remote=True
+    )
+    assert src == "https://fallback.example/thumb.jpg"
+    assert alt == "label"
+    assert order == ["og", "fb"]
+    assert cache.get("thumb:https://rumble.com/v1abcd") == "https://fallback.example/thumb.jpg"
 
 
 @pytest.mark.django_db
@@ -89,3 +123,38 @@ def test_resolve_thumbnail_direct_skips_canon_and_fallback(settings, monkeypatch
     assert alt == thumbnails.FALLBACK_ALT
     assert called["canon"] is False
     assert called["fallback"] is False
+
+
+def _fake_resp(text):
+    class Resp:
+        status_code = 200
+
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    return Resp(text)
+
+
+def test_fetch_og_image_from_fixture(monkeypatch):
+    html = Path("tests/fixtures/youtube/ogonly.html").read_text()
+    monkeypatch.setattr(
+        thumbnails, "fetch_html", lambda url, source=None: _fake_resp(html)
+    )
+    assert (
+        thumbnails.fetch_og_image("https://youtu.be/abc123")
+        == "https://youtube.example/og.jpg"
+    )
+
+
+def test_x_fallback_thumb_from_fixture(monkeypatch):
+    html = Path("tests/fixtures/x/fallback.html").read_text()
+    monkeypatch.setattr(
+        thumbnails, "fetch_html", lambda url, source=None: _fake_resp(html)
+    )
+    assert (
+        thumbnails.x_fallback_thumb("https://x.com/user/status/1")
+        == "https://pbs.twimg.com/media/xyz.jpg"
+    )
