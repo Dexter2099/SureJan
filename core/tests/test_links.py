@@ -97,7 +97,7 @@ class PostLinkTests(TestCase):
         html = render_to_string("core/partials/post_row.html", {"post": self.post}, request=request)
         self.assertIn(f'href="{user_url}"', html)
 
-    def test_feed_card_embed_thumb_links_to_content_url(self):
+    def test_feed_card_thumbnail_links_to_content_url(self):
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -105,7 +105,7 @@ class PostLinkTests(TestCase):
             title="Link",
             content_url="https://example.com/article",
         )
-        post.embed_thumb = "https://example.com/thumb.jpg"
+        post.thumbnail_url = "https://example.com/thumb.jpg"
         request = self.factory.get("/")
         html = render_to_string("partials/feed_card.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
@@ -117,7 +117,7 @@ class PostLinkTests(TestCase):
         self.assertIn(f'href="{detail_url}"', html)
         self.assertIn(f'href="{detail_url}#comments"', html)
 
-    def test_post_row_embed_thumb_links_to_content_url(self):
+    def test_post_row_thumbnail_links_to_content_url(self):
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -125,12 +125,14 @@ class PostLinkTests(TestCase):
             title="Link",
             content_url="https://example.com/article",
         )
-        post.embed_thumb = "https://example.com/thumb.jpg"
+        post.thumbnail_url = "https://example.com/thumb.jpg"
         request = self.factory.get("/")
         html = render_to_string("core/partials/post_row.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
-        self.assertIn(f'href="{post.content_url}" class="thumb"', html)
-        self.assertIn('target="_blank" rel="noopener noreferrer"', html)
+        self.assertIn(
+            f'href="{post.content_url}" target="_blank" rel="noopener noreferrer" class="thumb"',
+            html,
+        )
         self.assertNotIn(f'href="{detail_url}" class="thumb"', html)
         self.assertIn(f'href="{detail_url}"', html)
         self.assertIn(f'href="{detail_url}#comments"', html)

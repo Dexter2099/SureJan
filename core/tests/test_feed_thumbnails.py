@@ -38,11 +38,21 @@ def test_feed_thumbnails_are_images(client):
         thumbnail_url="https://example.com/thumb.jpg",
     )
 
+    # Link post without thumbnail should use placeholder
+    Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="NoThumb",
+        content_url="https://example.com/article",
+    )
+
     resp = client.get("/")
     html = resp.content.decode()
     cards = re.findall(
         r"<article[^>]*data-testid=\"post-card\"[^>]*>(.*?)</article>", html, re.DOTALL
     )
-    assert len(cards) == 2
+    assert len(cards) == 3
     for card in cards:
         assert "<img" in card
+    assert "data:image/svg+xml" in html

@@ -52,20 +52,6 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
-from .utils.thumbnails import svg_placeholder
-
-
-def _attach_thumbnails(posts):
-    """Attach precomputed thumbnails to link posts without network access."""
-    for post in posts:
-        if getattr(post, "post_type", None) == "link":
-            if getattr(post, "thumbnail_url", None):
-                post.embed_thumb = post.thumbnail_url
-                post.embed_thumb_alt = getattr(post, "thumbnail_alt", "") or post.title
-            else:
-                src, alt = svg_placeholder(post.title)
-                post.embed_thumb = src
-                post.embed_thumb_alt = alt
 
 
 def _is_banned(user):
@@ -434,7 +420,6 @@ SORT_TABS = [
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
 
-    _attach_thumbnails(posts)
     html = render_to_string(
         "core/partials/post_list.html",
         {
@@ -470,7 +455,6 @@ def feed_list(request):
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         posts = list(page_obj.object_list)
-        _attach_thumbnails(posts)
         ctx = {
             "posts": posts,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
@@ -514,7 +498,6 @@ def home(request):
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_page, show_community=True, sort_query=sort_query)
 
-    _attach_thumbnails(posts)
     ctx = {
         "posts": posts,
         "next_page": next_page,
@@ -652,7 +635,6 @@ def community(request, slug):
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_page, sort_query=sort_query)
 
-    _attach_thumbnails(posts)
     context = {
         "community": community,
         "community_slug": community.slug,

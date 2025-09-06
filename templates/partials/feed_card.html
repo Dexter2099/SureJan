@@ -3,7 +3,7 @@
 {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
   {% if post.post_type == 'link' %}
-    {% include "partials/post_thumbnail.html" with post=post detail_url=detail_url %}
+    {% include "partials/post_thumbnail.html" with post=post %}
   {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       {% if post.image_thumb %}

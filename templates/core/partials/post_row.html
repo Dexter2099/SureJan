@@ -1,10 +1,7 @@
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   {% with detail_url=post.get_absolute_url %}
-    {% if post.embed_thumb %}
-    <a href="{{ post.content_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post" target="_blank" rel="noopener noreferrer">
-      <img src="{{ post.embed_thumb }}" alt="{{ post.embed_thumb_alt }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-      {% if post.link_domain %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-    </a>
+    {% if post.post_type == 'link' %}
+    {% include "partials/post_thumbnail.html" with post=post %}
     {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       {% if post.image_thumb %}

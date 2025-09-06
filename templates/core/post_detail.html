@@ -18,7 +18,7 @@
   </header>
 
 {% if post.post_type == 'link' %}
-  {% include "partials/post_thumbnail.html" with post=post detail_url=post_url %}
+  {% include "partials/post_thumbnail.html" with post=post %}
 {% elif post.image_thumb or post.image %}
   <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
     {% if post.image_thumb %}
