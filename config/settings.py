@@ -42,6 +42,8 @@ DEFAULT_HOSTS = [
     "surejan.fly.dev",
     f"{FLY_APP_NAME}.fly.dev",
     ".fly.dev",
+    "surejan.app",
+    "www.surejan.app",
 ]
 
 _env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
@@ -54,6 +56,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://surejan.onrender.com",
     "https://surejan.fly.dev",
     f"https://{FLY_APP_NAME}.fly.dev",
+    "https://surejan.app",
+    "https://www.surejan.app",
 ]
 _extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
 if _extra_csrf:
