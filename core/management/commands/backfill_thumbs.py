@@ -1,6 +1,9 @@
 import asyncio
 
+from django.core.cache import cache
 from django.core.management.base import BaseCommand
+from asgiref.sync import sync_to_async
+from django.db import connection
 from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
@@ -35,6 +38,7 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         qs_img = (
             Post.objects.filter(image__isnull=False)
+            .exclude(image="")
             .filter(Q(image_thumb="") | Q(image_thumb__isnull=True))
         )
         cutoff = timezone.now() - timedelta(days=opts["days"])
@@ -61,33 +65,60 @@ class Command(BaseCommand):
             posts = list(qs_link[:limit])
             http_client._TIMEOUT = opts["timeout"]
 
-            async def worker(post):
-                try:
-                    src, alt = await asyncio.to_thread(
-                        resolve_thumbnail,
-                        post.content_url or "",
-                        post.title,
-                        True,
-                    )
-                    post.thumbnail_url = src
-                    post.thumbnail_alt = alt
-                    await asyncio.to_thread(
-                        post.save,
-                        update_fields=["thumbnail_url", "thumbnail_alt"],
-                    )
-                    return 1
-                except Exception as e:
-                    self.stderr.write(f"Post {post.id}: {e}")
-                    return 0
+            if connection.vendor == "sqlite":
+                def worker_sync(post):
+                    try:
+                        fail_key = f"thumbfail:{post.content_url}"
+                        if cache.get(fail_key):
+                            return 0
+                        src, alt = resolve_thumbnail(
+                            post.content_url or "",
+                            post.title,
+                            True,
+                        )
+                        if src:
+                            post.thumbnail_url = src
+                            post.thumbnail_alt = alt
+                            post.save(update_fields=["thumbnail_url", "thumbnail_alt"])
+                            return 1
+                        return 0
+                    except Exception as e:
+                        self.stderr.write(f"Post {post.id}: {e}")
+                        return 0
 
-            async def runner():
-                sem = asyncio.Semaphore(opts["concurrency"])
+                count += sum(worker_sync(p) for p in posts)
+            else:
+                async def worker(post):
+                    try:
+                        fail_key = f"thumbfail:{post.content_url}"
+                        if cache.get(fail_key):
+                            return 0
+                        src, alt = await asyncio.to_thread(
+                            resolve_thumbnail,
+                            post.content_url or "",
+                            post.title,
+                            True,
+                        )
+                        if src:
+                            post.thumbnail_url = src
+                            post.thumbnail_alt = alt
+                            await sync_to_async(
+                                post.save, thread_sensitive=True
+                            )(update_fields=["thumbnail_url", "thumbnail_alt"])
+                            return 1
+                        return 0
+                    except Exception as e:
+                        self.stderr.write(f"Post {post.id}: {e}")
+                        return 0
 
-                async def run(post):
-                    async with sem:
-                        return await worker(post)
+                async def runner():
+                    sem = asyncio.Semaphore(opts["concurrency"])
 
-                return sum(await asyncio.gather(*(run(p) for p in posts)))
+                    async def run(post):
+                        async with sem:
+                            return await worker(post)
 
-            count += asyncio.run(runner())
+                    return sum(await asyncio.gather(*(run(p) for p in posts)))
+
+                count += asyncio.run(runner())
         self.stdout.write(f"Backfilled {count} thumbnails")
