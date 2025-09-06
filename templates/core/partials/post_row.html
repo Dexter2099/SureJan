@@ -1,7 +1,10 @@
-{% load embeds %}
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
-  {% with detail_url=post.get_absolute_url embed_html=post.content_url|build_embed_html %}
-    {% if post.image_thumb or post.image %}
+  {% with detail_url=post.get_absolute_url %}
+    {% if post.embed_thumb %}
+    <a href="{{ detail_url }}" class="thumb">
+      <img src="{{ post.embed_thumb }}" alt="{{ post.embed_thumb_alt }}" width="120" height="120" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+    </a>
+    {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb">
       {% if post.image_thumb %}
       <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
@@ -19,9 +22,6 @@
     <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
-    {% endif %}
-    {% if embed_html %}
-    {{ embed_html|safe }}
     {% endif %}
     <div class="post-actions">
       {% if show_vote_widget is not False %}

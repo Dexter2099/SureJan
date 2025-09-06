@@ -52,16 +52,20 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
-from .utils.thumbnails import resolve_thumbnail
+from .utils.thumbnails import svg_placeholder
 
 
 def _attach_thumbnails(posts):
-    """Attach preview thumbnails to link posts in the given iterable."""
+    """Attach precomputed thumbnails to link posts without network access."""
     for post in posts:
         if getattr(post, "post_type", None) == "link":
-            src, alt = resolve_thumbnail(post.content_url or "", post.title)
-            post.embed_thumb = src
-            post.embed_thumb_alt = alt
+            if getattr(post, "thumbnail_url", None):
+                post.embed_thumb = post.thumbnail_url
+                post.embed_thumb_alt = getattr(post, "thumbnail_alt", "") or post.title
+            else:
+                src, alt = svg_placeholder(post.title)
+                post.embed_thumb = src
+                post.embed_thumb_alt = alt
 
 
 def _is_banned(user):
