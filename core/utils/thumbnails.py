@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import html
+import logging
+import os
 import re
 from typing import Optional
+from urllib.parse import urlparse
 
-import os
 from django.core.cache import cache
 import requests
 
@@ -16,23 +18,35 @@ REQUEST_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
+        "Chrome/125.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
 }
 
+REQUEST_TIMEOUT = 4  # seconds
+
+
+logger = logging.getLogger(__name__)
+
 
 def scrape_og_image(url: str) -> Optional[str]:
     """Return the first OpenGraph image URL for ``url`` if present."""
+    domain = urlparse(url).netloc
+    status = None
     try:
-        resp = requests.get(url, timeout=5, headers=REQUEST_HEADERS)
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=REQUEST_HEADERS)
+        status = resp.status_code
         resp.raise_for_status()
     except Exception:
+        logger.info("og-image fetch %s status=%s result=fallback", domain, status or "error")
         return None
 
     match = OG_IMAGE_RE.search(resp.text)
     if match:
+        logger.info("og-image fetch %s status=%s result=image", domain, status)
         return match.group(1)
+
+    logger.info("og-image fetch %s status=%s result=fallback", domain, status)
     return None
 
 

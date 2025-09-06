@@ -46,6 +46,13 @@ flyctl ssh console -a surejan -C "python manage.py seed_basics"
 flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collectstatic"
 ```
 
+### Link thumbnails
+
+OpenGraph images are fetched with a browser-like User-Agent and
+`Accept-Language` header. Requests timeout after roughly 4 s and each fetch
+logs the provider domain, HTTP status, and whether an image URL or SVG
+placeholder was returned.
+
 ## Smoke checklist
 
 * `/accounts/signup/` → create user, header shows username.
