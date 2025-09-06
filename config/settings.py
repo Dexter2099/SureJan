@@ -102,7 +102,6 @@ EMBED_PROVIDERS = {
     },
     "RUMBLE": {
         "img_hosts": [
-            "https://*.rumble.com",
             "https://*.rumblecdn.com",
             "https://*.rmbl.ws",
         ],

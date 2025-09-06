@@ -39,3 +39,26 @@ def test_backfill_thumbs_skips_cached_failures(monkeypatch):
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch2)
     call_command("backfill_thumbs", limit=1, days=365)
     assert calls == []
+
+
+@pytest.mark.django_db
+def test_backfill_thumbs_rejects_http(monkeypatch):
+    cache.clear()
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+    post = Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="Link",
+        content_url="https://example.com",
+    )
+
+    def fake_resolve(url, label, fetch_remote=False):
+        return "http://insecure/thumb.jpg", "alt"
+
+    monkeypatch.setattr(thumbnails, "resolve_thumbnail", fake_resolve)
+    call_command("backfill_thumbs", limit=1, days=365)
+    post.refresh_from_db()
+    assert not post.thumbnail_url

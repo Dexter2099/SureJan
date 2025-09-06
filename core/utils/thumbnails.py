@@ -105,7 +105,7 @@ def rumble_thumbnail(url: str) -> str | None:
     try:
         data = fetch_json(api, source="rumble-oembed")
         thumb = data.get("thumbnail_url")
-        if isinstance(thumb, str) and thumb.startswith("http"):
+        if isinstance(thumb, str) and thumb.startswith("https://"):
             return thumb
     except Exception:
         pass
@@ -125,8 +125,8 @@ def rumble_thumbnail(url: str) -> str | None:
     for pat in meta_patterns:
         m = re.search(pat, html_text, re.IGNORECASE)
         if m:
-            candidate = html.unescape(m.group(1))
-            if candidate.startswith("http"):
+            candidate = html.unescape(m.group(1)).strip()
+            if candidate.startswith("https://"):
                 return candidate
 
     for block in re.findall(
@@ -139,11 +139,11 @@ def rumble_thumbnail(url: str) -> str | None:
         except Exception:
             continue
         thumb = data.get("thumbnailUrl")
-        if isinstance(thumb, str) and thumb.startswith("http"):
+        if isinstance(thumb, str) and thumb.startswith("https://"):
             return thumb
         if isinstance(thumb, list):
             for item in thumb:
-                if isinstance(item, str) and item.startswith("http"):
+                if isinstance(item, str) and item.startswith("https://"):
                     return item
     return None
 
@@ -176,8 +176,6 @@ def resolve_thumbnail(
         if not thumb:
             cache.set(fail_key, True, _FAIL_TTL)
 
-    if thumb and thumb.startswith("http://"):
-        thumb = "https://" + thumb[len("http://") :]
-    if thumb:
+    if thumb and thumb.startswith("https://"):
         return thumb, label
     return None, svg_placeholder(label)[1]

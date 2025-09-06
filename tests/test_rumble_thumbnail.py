@@ -81,3 +81,36 @@ def test_resolve_thumbnail_rumble(monkeypatch):
     )
     assert src == "https://rumble.example/thumb.jpg"
     assert alt == "label"
+
+
+def test_rumble_thumbnail_cascade_and_https(monkeypatch):
+    data = {"thumbnail_url": "http://rumble.example/insecure.jpg"}
+
+    def fake_fetch_json(url, source=""):
+        return data
+
+    html = load("cascade.html")
+
+    class Resp:
+        status_code = 200
+        text = html
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr(thumbnails, "fetch_json", fake_fetch_json)
+    monkeypatch.setattr(thumbnails, "fetch_html", lambda url, source="": Resp())
+
+    thumb = thumbnails.rumble_thumbnail("https://rumble.com/v1")
+    assert thumb == "https://rumble.example/jsonld.jpg"
+
+
+def test_resolve_thumbnail_rumble_rejects_http(monkeypatch):
+    monkeypatch.setattr(
+        thumbnails, "rumble_thumbnail", lambda url: "http://rumble.example/thumb.jpg"
+    )
+    src, alt = thumbnails.resolve_thumbnail(
+        "https://rumble.com/v1", "label", fetch_remote=True
+    )
+    assert src is None
+    assert alt == "Preview image unavailable"
