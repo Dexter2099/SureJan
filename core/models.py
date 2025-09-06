@@ -94,7 +94,7 @@ class Community(models.Model):
 
 
 class Embed(models.Model):
-    """Stores sanitized embed HTML for a given media URL."""
+    """DEPRECATED: stored sanitized embed HTML for a given media URL."""
 
     url = models.URLField()
     html = models.TextField()
@@ -117,6 +117,7 @@ class Post(models.Model):
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
     content_url = models.URLField(blank=True)
+    # Deprecated: use thumbnail_url/thumbnail_alt instead.
     embed = models.ForeignKey(
         "Embed", null=True, blank=True, on_delete=models.SET_NULL, related_name="posts"
     )
@@ -125,6 +126,8 @@ class Post(models.Model):
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
     )
     image_thumb = models.ImageField(upload_to="posts/thumbs/", blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True)
+    thumbnail_alt = models.CharField(max_length=200, blank=True)
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)

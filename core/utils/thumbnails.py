@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from django.core.cache import cache
 
 from ..http_client import fetch_html
-from ..oembed import fetch_oembed
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -99,17 +98,15 @@ def _provider_default(url: str) -> str | None:
     return None
 
 
-def resolve_thumbnail(url: str, label: str) -> tuple[str, str]:
-    """Return thumbnail URL and alt text or a placeholder when missing."""
-    thumb = None
-    try:
-        data = fetch_oembed(url)
-    except Exception:
-        data = {}
-    thumb = data.get("thumbnail_url")
-    if not thumb:
-        thumb = _provider_default(url)
-    if not thumb:
+def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
+    """Return thumbnail URL and alt text or a placeholder.
+
+    When ``fetch_remote`` is ``False`` (default) only provider defaults are
+    used to avoid network I/O. When ``True`` the function may perform network
+    requests to scrape OpenGraph images.
+    """
+    thumb = _provider_default(url)
+    if not thumb and fetch_remote:
         thumb = fetch_og_image(url)
     if thumb and thumb.startswith("http://"):
         thumb = "https://" + thumb[len("http://") :]

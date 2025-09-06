@@ -9,7 +9,7 @@
 <section aria-labelledby="feed-heading">
   {# optional: replace a “Feed” title #}
   <h1 id="feed-heading" class="sr-only">Home</h1>
-  <div id="feed-list" hx-on="htmx:afterSwap:window.initEmbeds && window.initEmbeds(this)">
+  <div id="feed-list">
     {% include "core/partials/post_list.html" with posts=posts next_page=next_page sort_query=sort_query %}
   </div>
 </section>
@@ -17,5 +17,4 @@
 
 {% block scripts %}
 {{ block.super }}
-<script src="{% static 'js/embeds.js' %}" defer></script>
 {% endblock %}
