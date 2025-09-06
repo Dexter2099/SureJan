@@ -14,3 +14,7 @@
 - Observability:
   - Structured logs `{provider, url, source, status}`.
 - Drift checks must run in CI before merge.
+
+## Click behavior
+
+Feed title → post detail; thumbnail → external provider (new tab).
