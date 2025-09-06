@@ -55,6 +55,13 @@ from .http import login_required_htmx
 from .utils.embeds import build_embed_html
 
 
+def _attach_embed_html(posts):
+    """Attach embed HTML to link posts in the given iterable."""
+    for post in posts:
+        if getattr(post, "post_type", None) == "link":
+            post.embed_html = build_embed_html(post.content_url or "")
+
+
 def _is_banned(user):
     return getattr(getattr(user, "profile", None), "is_banned", False)
 
@@ -421,6 +428,7 @@ SORT_TABS = [
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
 
+    _attach_embed_html(posts)
     html = render_to_string(
         "core/partials/post_list.html",
         {
@@ -437,37 +445,35 @@ def _render_posts(request, posts, next_page, show_community=False, sort_query=""
 @require_GET
 def feed_list(request):
     """Render the feed list or the full feed page."""
-    sort = request.GET.get("sort", "hot")
-    if sort not in TAB_ORDER:
-        sort = "hot"
+    tab = request.GET.get("tab", "hot")
+    if tab not in TAB_ORDER:
+        tab = "hot"
 
     t = request.GET.get("t")
     allowed = {"24h", "7d", "all"}
-    if sort != "top" or t not in allowed:
+    if tab != "top" or t not in allowed:
         t = None
-    if sort == "top" and t is None:
+    if tab == "top" and t is None:
         t = "all"
 
     if request.headers.get("HX-Request") == "true":
         page = int(request.GET.get("page", "1") or 1)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
         base_qs = Post.objects.filter(is_deleted=False).select_related("community", "author")
-        qs = feed_queryset(sort, t, base_qs=base_qs)
+        qs = feed_queryset(tab, t, base_qs=base_qs)
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         posts = list(page_obj.object_list)
-        for post in posts:
-            if post.post_type == "link":
-                post.embed_html = build_embed_html(post.content_url or "")
+        _attach_embed_html(posts)
         ctx = {
             "posts": posts,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
-            "tab": sort,
+            "tab": tab,
             "t": t,
         }
         return render(request, "core/partials/feed_list.html", ctx)
 
-    ctx = {"tab": sort, "t": t}
+    ctx = {"tab": tab, "t": t}
     return render(request, "core/feed.html", ctx)
 
 
@@ -492,9 +498,6 @@ def home(request):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
-    for post in posts:
-        if post.post_type == "link":
-            post.embed_html = build_embed_html(post.content_url or "")
 
     sort_query = ""
     if sort and sort != "hot":
@@ -502,6 +505,10 @@ def home(request):
     if sort == "top" and t:
         sort_query += f"&t={t}"
 
+    if request.headers.get("HX-Request") == "true":
+        return _render_posts(request, posts, next_page, show_community=True, sort_query=sort_query)
+
+    _attach_embed_html(posts)
     ctx = {
         "posts": posts,
         "next_page": next_page,
@@ -510,8 +517,6 @@ def home(request):
         "t": t,
         "sort_tabs": SORT_TABS,
     }
-    if request.headers.get("HX-Request") == "true":
-        return _render_posts(request, posts, next_page, show_community=True, sort_query=sort_query)
     return render(request, "core/home.html", ctx)
 
 
@@ -631,9 +636,6 @@ def community(request, slug):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
-    for post in posts:
-        if post.post_type == "link":
-            post.embed_html = build_embed_html(post.content_url or "")
 
     sort_query = ""
     if sort and sort != "hot":
@@ -641,6 +643,10 @@ def community(request, slug):
     if sort == "top" and t:
         sort_query += f"&t={t}"
 
+    if request.headers.get("HX-Request") == "true":
+        return _render_posts(request, posts, next_page, sort_query=sort_query)
+
+    _attach_embed_html(posts)
     context = {
         "community": community,
         "community_slug": community.slug,
@@ -651,8 +657,6 @@ def community(request, slug):
         "t": t,
         "sort_tabs": SORT_TABS,
     }
-    if request.headers.get("HX-Request") == "true":
-        return _render_posts(request, posts, next_page, sort_query=sort_query)
     return render(request, "core/community.html", context)
 
 
