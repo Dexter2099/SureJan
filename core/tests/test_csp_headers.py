@@ -34,5 +34,5 @@ def test_csp_headers_include_expected_hosts(client):
         for url in urls:
             resp = client.get(url)
             csp_header = resp["Content-Security-Policy"]
-            for host in img_src[1:-1]:  # skip 'self' and 'data:'
+            for host in img_src:
                 assert host in csp_header
