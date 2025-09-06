@@ -17,38 +17,30 @@
     </div>
   </header>
 
-{% comment %} Media priority: gallery → upload → link thumbnail {% endcomment %}
-{% if images %}
-  <div class="post-gallery">
-    {% for link in images %}
-      <figure class="post-media">
-        <img
-          src="{{ link.url|default:link }}"
-          alt="{{ post.title }}"
-          loading="lazy" decoding="async" referrerpolicy="no-referrer"
-          onerror="this.onerror=null; this.closest('figure').remove()"
-        >
-      </figure>
-    {% endfor %}
-  </div>
-{% elif post.image %}
-  <figure class="post-media">
+{% if post.embed_thumb %}
+  <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
     <img
-      src="{{ post.image.url }}"
-      alt="{{ post.title }}"
+      src="{{ post.embed_thumb }}"
+      alt="{{ post.embed_thumb_alt }}"
       loading="lazy" decoding="async" referrerpolicy="no-referrer"
-      onerror="this.onerror=null; this.closest('figure').remove()"
-    >
-  </figure>
-{% elif post.thumbnail_url %}
-  <figure class="post-media">
-    <img
-      src="{{ post.thumbnail_url }}"
-      alt="{{ post.thumbnail_alt|default:post.title }}"
-      loading="lazy" decoding="async" referrerpolicy="no-referrer"
-      onerror="this.onerror=null; this.closest('figure').remove()"
-    >
-  </figure>
+      width="640" height="360">
+  </a>
+{% elif post.image_thumb or post.image %}
+  <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
+    {% if post.image_thumb %}
+      <img
+        src="{{ post.image_thumb.url }}"
+        alt="{{ post.title }}"
+        loading="lazy" decoding="async" referrerpolicy="no-referrer"
+        width="640" height="360">
+    {% else %}
+      <img
+        src="{{ post.image.url }}"
+        alt="{{ post.title }}"
+        loading="lazy" decoding="async" referrerpolicy="no-referrer"
+        width="640" height="360">
+    {% endif %}
+  </a>
 {% endif %}
 
   {% if post.body %}

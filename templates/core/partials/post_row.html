@@ -1,15 +1,15 @@
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   {% with detail_url=post.get_absolute_url %}
     {% if post.embed_thumb %}
-    <a href="{{ detail_url }}" class="thumb">
-      <img src="{{ post.embed_thumb }}" alt="{{ post.embed_thumb_alt }}" width="120" height="120" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
+      <img src="{{ post.embed_thumb }}" alt="{{ post.embed_thumb_alt }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
     </a>
     {% elif post.image_thumb or post.image %}
-    <a href="{{ detail_url }}" class="thumb">
+    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       {% if post.image_thumb %}
-      <img src="{{ post.image_thumb.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       {% else %}
-      <img src="{{ post.image.url }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
       {% endif %}
     </a>
     {% endif %}
