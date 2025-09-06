@@ -1,20 +1,19 @@
-# Policy: Video Thumbnails & Previews
+# Policy: Video Thumbnails
 
 **Scope:** YouTube, X, Rumble link posts.
 
-- All outbound fetches go through the shared HTTP client (browser UA, timeouts, retries).
-- Provider map (`config/provider_map.yml`) is the single source of truth for hosts + flags.
-- CSP v4+ only. Directives derived from provider map; no legacy `CSP_*` settings allowed.
-- Rendering:
-  - Feed → static card with thumbnail + overlay (title → `/r/<c>/comments/<id>/<slug>/`; thumbnail → provider in new tab).
-  - Detail → static thumbnail; clicking opens provider in new tab.
-- Caching:
-  - Cache successful metadata (short TTL).
-  - Never cache errors; error responses return `Cache-Control: no-store`.
-- Observability:
-  - Structured logs `{provider, url, source, status}`.
-- Drift checks must run in CI before merge.
+Feed and post detail render static thumbnails only; clicking the image opens the provider in a new tab.
 
-## Click behavior
+## Provider map
+Provider map (`config/provider_map.yml`) is the single source of truth for hosts and flags.
 
-Feed title → post detail; thumbnail → external provider (new tab).
+## Caching
+All outbound fetches go through the shared HTTP client (browser UA, timeouts, retries).
+Cache successful metadata with a short TTL.
+Never cache errors; error responses return `Cache-Control: no-store`.
+
+## Observability
+Structured logs `{provider, url, source, status}`.
+
+## CI drift checks
+Drift checks must run in CI before merge.

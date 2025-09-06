@@ -14,14 +14,6 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
-Embeds are globally controlled via environment variables:
-
-* `EMBEDS_ENABLED` (default `0`)
-* `THUMBNAILS_ONLY` (default `1`)
-* `THUMBNAIL_CACHE_SECONDS` (default `3600`)
-
-Production defaults in `fly.toml` set `EMBEDS_ENABLED=0` to disable embeds.
-
 ### CSP / Hosts
 
 Define public domains with `DJANGO_ALLOWED_HOSTS` (comma-separated) so Django

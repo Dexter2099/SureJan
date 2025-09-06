@@ -1,6 +1,6 @@
 # SureJan V3 — Wireframes
 
-This folder contains the exported **Penpot wireframes** for SureJan V3. Video previews/embeds are deprecated; all wireframes show thumbnail-only references.
+This folder contains the exported **Penpot wireframes** for SureJan V3. All wireframes show static video thumbnails with no embedded players.
 
 These wireframes depict thumbnail-only media and implementers must follow `docs/V3-onepager.md` and `docs/UI-contract-V3.md`.
 
