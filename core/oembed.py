@@ -9,12 +9,14 @@ from django.conf import settings
 from django.core.cache import cache
 
 import bleach
+import requests
 
 from .http_client import fetch_html, fetch_json
 
 
 _CACHE_KEY_PREFIX = "oembed:"
-_CACHE_TIMEOUT = 60 * 60  # 1 hour
+# Cache successful lookups briefly; errors should not be cached.
+_CACHE_TIMEOUT = 60  # seconds
 
 
 def fetch_oembed(url: str) -> dict:
@@ -47,6 +49,7 @@ def fetch_oembed(url: str) -> dict:
             break
 
     result = None
+    cache_ok = True
     if endpoint:
         try:
             data = fetch_json(endpoint)
@@ -81,8 +84,10 @@ def fetch_oembed(url: str) -> dict:
                 strip=True,
             )
             result = {"type": "embed", "html": clean, "thumbnail_url": thumb}
+        except requests.RequestException:
+            cache_ok = False
         except Exception:
-            pass
+            cache_ok = False
 
     if not result:
         # Fallback simple link card
@@ -93,8 +98,10 @@ def fetch_oembed(url: str) -> dict:
             match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
             if match:
                 title = match.group(1).strip()
+        except requests.RequestException:
+            cache_ok = False
         except Exception:
-            pass
+            cache_ok = False
         favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
         result = {
             "type": "link",
@@ -104,5 +111,6 @@ def fetch_oembed(url: str) -> dict:
             "favicon": favicon,
         }
 
-    cache.set(key, result, _CACHE_TIMEOUT)
+    if cache_ok:
+        cache.set(key, result, _CACHE_TIMEOUT)
     return result
