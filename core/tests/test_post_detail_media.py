@@ -1,4 +1,5 @@
 from unittest.mock import patch, Mock
+from urllib.parse import urlparse
 
 import requests
 
@@ -6,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from config import settings as conf_settings
 from core.models import Community, Post, PostImageLink
 
 
@@ -234,6 +236,51 @@ class PostDetailMediaTests(TestCase):
             reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
         )
         self.assertContains(resp, '<img src="https://pbs.twimg.com/og.jpg"')
+
+    @override_settings(ENABLE_TWITTER_EMBEDS=True)
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_link_thumbnail_host_matches_csp_domains(self, mock_oembed):
+        cases = [
+            (
+                "https://pbs.twimg.com/thumb.jpg",
+                "https://x.com/user/status/123",
+            ),
+            (
+                "https://c.rumblecdn.com/og.jpg",
+                "https://rumble.com/vxyz-test.html",
+            ),
+        ]
+        for i, (thumb_url, content_url) in enumerate(cases, start=1):
+            mock_oembed.return_value = {
+                "type": "embed",
+                "html": "<blockquote></blockquote>",
+                "thumbnail_url": thumb_url,
+            }
+            post = Post.objects.create(
+                community=self.community,
+                author=self.user,
+                post_type="link",
+                title=f"Link {i}",
+                content_url=content_url,
+            )
+            resp = self.client.get(
+                reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+            )
+            self.assertContains(resp, f'src="{thumb_url}"')
+            parsed = urlparse(thumb_url)
+            host = f"{parsed.scheme}://{parsed.netloc}"
+            allowed = list(conf_settings._csp_img_src) + ["https://*.twimg.com"]
+            self.assertTrue(
+                any(
+                    host == pattern
+                    or (
+                        pattern.startswith("https://*.")
+                        and host.endswith(pattern[len("https://*."):])
+                    )
+                    for pattern in allowed
+                ),
+                f"{host} not allowed by CSP",
+            )
 
     def test_image_slideshow_renders(self):
         post = Post.objects.create(
