@@ -3,7 +3,7 @@
 {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
   {% if post.embed_thumb %}
-    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
+    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       <img
         src="{{ post.embed_thumb }}"
         alt="{{ post.embed_thumb_alt }}"
