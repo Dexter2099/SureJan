@@ -1,6 +1,11 @@
+import asyncio
+
 from django.core.management.base import BaseCommand
 from django.db.models import Q
+from django.utils import timezone
+from datetime import timedelta
 
+from core import http_client
 from core.models import Post, _make_thumb
 from core.utils.thumbnails import resolve_thumbnail
 
@@ -13,16 +18,31 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--limit", type=int, default=500)
+        parser.add_argument("--days", type=int, default=7, help="Only process posts newer than this many days")
+        parser.add_argument(
+            "--timeout",
+            type=float,
+            default=2.0,
+            help="HTTP timeout for remote thumbnail fetches (seconds)",
+        )
+        parser.add_argument(
+            "--concurrency",
+            type=int,
+            default=10,
+            help="Number of concurrent thumbnail fetches",
+        )
 
     def handle(self, *args, **opts):
         qs_img = (
             Post.objects.filter(image__isnull=False)
             .filter(Q(image_thumb="") | Q(image_thumb__isnull=True))
         )
+        cutoff = timezone.now() - timedelta(days=opts["days"])
         qs_link = (
-            Post.objects.filter(post_type="link")
+            Post.objects.filter(post_type="link", created_at__gte=cutoff)
             .filter(Q(thumbnail_url="") | Q(thumbnail_url__isnull=True))
             .exclude(content_url="")
+            .order_by("-created_at")
         )
         count = 0
         for p in qs_img.iterator():
@@ -37,17 +57,37 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stderr.write(f"Post {p.id}: {e}")
         if count < opts["limit"]:
-            for p in qs_link.iterator():
+            limit = opts["limit"] - count
+            posts = list(qs_link[:limit])
+            http_client._TIMEOUT = opts["timeout"]
+
+            async def worker(post):
                 try:
-                    src, alt = resolve_thumbnail(
-                        p.content_url or "", p.title, fetch_remote=True
+                    src, alt = await asyncio.to_thread(
+                        resolve_thumbnail,
+                        post.content_url or "",
+                        post.title,
+                        True,
                     )
-                    p.thumbnail_url = src
-                    p.thumbnail_alt = alt
-                    p.save(update_fields=["thumbnail_url", "thumbnail_alt"])
-                    count += 1
-                    if count >= opts["limit"]:
-                        break
+                    post.thumbnail_url = src
+                    post.thumbnail_alt = alt
+                    await asyncio.to_thread(
+                        post.save,
+                        update_fields=["thumbnail_url", "thumbnail_alt"],
+                    )
+                    return 1
                 except Exception as e:
-                    self.stderr.write(f"Post {p.id}: {e}")
+                    self.stderr.write(f"Post {post.id}: {e}")
+                    return 0
+
+            async def runner():
+                sem = asyncio.Semaphore(opts["concurrency"])
+
+                async def run(post):
+                    async with sem:
+                        return await worker(post)
+
+                return sum(await asyncio.gather(*(run(p) for p in posts)))
+
+            count += asyncio.run(runner())
         self.stdout.write(f"Backfilled {count} thumbnails")
