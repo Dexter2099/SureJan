@@ -9,7 +9,6 @@
         alt="{{ post.embed_thumb_alt }}"
         loading="lazy" decoding="async" referrerpolicy="no-referrer"
         width="640" height="360">
-      <span class="play-overlay" aria-hidden="true"></span>
     </a>
   {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
@@ -17,13 +16,13 @@
         <img
           src="{{ post.image_thumb.url }}"
           alt="{{ post.title }}"
-          loading="lazy" decoding="async"
+          loading="lazy" decoding="async" referrerpolicy="no-referrer"
           width="640" height="360">
       {% else %}
         <img
           src="{{ post.image.url }}"
           alt="{{ post.title }}"
-          loading="lazy" decoding="async"
+          loading="lazy" decoding="async" referrerpolicy="no-referrer"
           width="640" height="360">
       {% endif %}
     </a>
