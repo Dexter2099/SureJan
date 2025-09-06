@@ -47,3 +47,12 @@ def test_fallback_when_request_forbidden():
         assert src.startswith("data:image/svg+xml")
         assert "Forbidden" in src
         assert alt == "Preview image unavailable"
+
+
+def test_scrape_og_image_adds_headers():
+    html = "<html><head></head><body></body></html>"
+    with patch("core.utils.thumbnails.requests.get", return_value=_mock_response(html)) as mock_get:
+        scrape_og_image("https://example.com")
+        headers = mock_get.call_args.kwargs["headers"]
+        assert headers["User-Agent"].startswith("Mozilla/5.0")
+        assert headers["Accept-Language"] == "en-US,en;q=0.9"
