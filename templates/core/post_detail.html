@@ -17,15 +17,8 @@
     </div>
   </header>
 
-{% if post.embed_thumb %}
-  <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
-    <img
-      src="{{ post.embed_thumb }}"
-      alt="{{ post.embed_thumb_alt }}"
-      loading="lazy" decoding="async" referrerpolicy="no-referrer"
-      width="640" height="360">
-    {% if post.link_domain %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-  </a>
+{% if post.post_type == 'link' %}
+  {% include "partials/post_thumbnail.html" with post=post detail_url=post_url %}
 {% elif post.image_thumb or post.image %}
   <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
     {% if post.image_thumb %}
@@ -41,7 +34,7 @@
         loading="lazy" decoding="async" referrerpolicy="no-referrer"
         width="640" height="360">
     {% endif %}
-    {% if post.link_domain %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
   </a>
 {% endif %}
 
