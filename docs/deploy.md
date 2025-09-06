@@ -20,14 +20,14 @@ Define public domains with `DJANGO_ALLOWED_HOSTS` (comma-separated) so Django
 and the CSP allowlist match your deployment URLs. Additional trusted origins
 for form posts can be added with `DJANGO_CSRF_TRUSTED`.
 
-The production CSP restricts external media to a small, documented set:
+The production CSP allows external images only from a small, documented set:
 
 * `https://i.ytimg.com` – YouTube thumbnails.
 * `https://*.twimg.com` – images in tweet thumbnails.
 * `https://*.rumblecdn.com`, `https://*.rumble.com`, and `https://*.rmbl.ws` – Rumble thumbnails.
 * `data:` – inline SVG placeholders.
 
-Frames inherit `default-src 'self'`; no external origins are allowed.
+Other resource types are restricted to `'self'`.
 
 ### Moderation
 
