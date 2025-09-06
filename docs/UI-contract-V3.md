@@ -28,7 +28,9 @@
 - Anti-Astroturf → `data-testid="sidebar-astro"`
 
 ## Feed
-- Post card anatomy: meta, title (links to `/r/<c>/comments/<id>/<slug>/`), optional static thumbnail (opens provider in new tab) or body, actions
+- Post card anatomy: meta, title, optional thumbnail, body, actions
+- Title links to `/r/<c>/comments/<id>/<slug>/`
+- Media surfaces are thumbnail images only; clicking the thumbnail opens the provider in a new tab
 - Hook: `data-testid="post-card"`
 
 ## Submit Post
@@ -37,7 +39,7 @@
 - Hook: `data-testid="submit-form"`
 
 ## Post Detail
-- OP card: full content with static thumbnail; clicking opens provider in new tab
+- OP card: full content with static thumbnail only for media; clicking the thumbnail opens the provider in a new tab
 - Comment input
 - Comments list: author/time/body/actions
 
