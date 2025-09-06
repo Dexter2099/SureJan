@@ -1,29 +1,30 @@
 {% load url_domain astro_filters embeds %}
 <article class="post-card" data-testid="post-card">
-{% with detail_url=post.get_absolute_url|default:None embed_html=post.content_url|build_embed_html %}
+{% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
-
-  {% if embed_html %}
-    <div class="thumb" style="aspect-ratio:16/9;">
-      {{ embed_html|safe }}
-    </div>
-  {% elif post.image_thumb or post.image %}
-    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
-      {% if post.image_thumb %}
-        <img
-          src="{{ post.image_thumb.url }}"
-          alt="{{ post.title }}"
-          loading="lazy" decoding="async"
-          width="640" height="360">
-      {% else %}
-        <img
-          src="{{ post.image.url }}"
-          alt="{{ post.title }}"
-          loading="lazy" decoding="async"
-          width="640" height="360">
-      {% endif %}
-    </a>
-  {% endif %}
+  {% with post.content_url|build_embed_html as embed_html %}
+    {% if embed_html %}
+      <div class="thumb" style="aspect-ratio:16/9;">
+        {{ embed_html|safe }}
+      </div>
+    {% elif post.image_thumb or post.image %}
+      <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
+        {% if post.image_thumb %}
+          <img
+            src="{{ post.image_thumb.url }}"
+            alt="{{ post.title }}"
+            loading="lazy" decoding="async"
+            width="640" height="360">
+        {% else %}
+          <img
+            src="{{ post.image.url }}"
+            alt="{{ post.title }}"
+            loading="lazy" decoding="async"
+            width="640" height="360">
+        {% endif %}
+      </a>
+    {% endif %}
+  {% endwith %}
   <div class="post-meta">
     <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a> · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>
