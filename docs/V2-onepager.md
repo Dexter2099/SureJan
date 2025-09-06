@@ -6,7 +6,7 @@ Change control: If this spec changes, update this file in the same PR.
 Ship a small, fast, safe **local forum** for **4 communities** with simple posting, comments, basic voting, and first-pass anti-astroturf (**AstroShield v1**). Target: **first 500 users**.
 
 ## 2) Scope
-**In:** 4 communities (seeded) · Posts (Text/Link/Images ≤5) · Comments · Up/Down vote · Roles (Guest/User/Mod/Admin) · Mod actions (Remove/Lock/Slowmode/Domain-throttle) · AstroShield v1 · Strict CSP, consent-gated embeds · Server-rendered pages · Fly.io + Postgres · Light theme.
+**In:** 4 communities (seeded) · Posts (Text/Link/Images ≤5) · Comments · Up/Down vote · Roles (Guest/User/Mod/Admin) · Mod actions (Remove/Lock/Slowmode/Domain-throttle) · AstroShield v1 · Strict CSP, static thumbnails (no embeds) · Server-rendered pages · Fly.io + Postgres · Light theme.
 **Out:** OAuth/Social login, rich editors, DMs/notifications, appeals, pins/manual boosts, full-text search, theming/i18n, analytics, mobile app.
 
 ## 3) URLs & Navigation
@@ -58,7 +58,7 @@ Locked copy:
 - “You can delete your post within **15 minutes** of publishing.”
 
 ## 10) Safety & Privacy
-Strict **CSP allowlist**; **no third-party JS until consent**; click-to-play embeds (sandbox, referrerpolicy, youtube-nocookie). Rate limits (below).
+Strict **CSP allowlist**; **no third-party JS**; static thumbnails (provider opens in new tab). Rate limits (below).
 
 ## 11) Rate Limits (defaults; env-tunable)
 **New users (<24h):** Posts **5/day**, Comments **6/min** (sliding), Votes **10/min**.  
@@ -84,7 +84,7 @@ Fly: `release_command: python manage.py migrate --noinput`. Static via WhiteNois
 ## 14) Definition of Done (V2)
 - Hot/New/Top behave as above; Top defaults `t=all`.
 - Submit supports Text/Link/Images(≤5 uploads) with validation.
-- Detail renders safe embeds/images; comments + votes work.
+- Detail shows images or static thumbnail; clicking thumbnail opens provider in new tab; comments + votes work.
 - AstroShield chips + slowmode thresholds work; `/methods` published.
 - Mod tools (Remove/Lock/Slowmode/Domain-throttle) function.
 - CSP enforced; consent gating; rate limits enforced.
@@ -96,6 +96,6 @@ Acceptance checks are manual (no UI smoke tests). Targeted unit/integration test
 
 ## 16) Milestones (merge order)
 1) Models/migrations + seed 4 communities · 2) Routes/base views · 3) Feed cards  
-4) Post detail (safe embeds/images) · 5) Submit + validation · 6) AstroShield v1  
+4) Post detail (images or static thumbnail; provider opens in new tab) · 5) Submit + validation · 6) AstroShield v1
 7) Moderation tools · 8) Safety hardening (CSP/consent/rates) · 9) Deploy V2 (staging→prod)
 

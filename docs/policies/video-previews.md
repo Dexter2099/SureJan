@@ -6,8 +6,8 @@
 - Provider map (`config/provider_map.yml`) is the single source of truth for hosts + flags.
 - CSP v4+ only. Directives derived from provider map; no legacy `CSP_*` settings allowed.
 - Rendering:
-  - Feed → static card with thumbnail + overlay, no iframe.
-  - Detail → click-to-play iframe, secure attributes.
+  - Feed → static card with thumbnail + overlay (title → `/r/<c>/comments/<id>/<slug>/`; thumbnail → provider in new tab).
+  - Detail → static thumbnail; clicking opens provider in new tab.
 - Caching:
   - Cache successful metadata (short TTL).
   - Never cache errors; error responses return `Cache-Control: no-store`.

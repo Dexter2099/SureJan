@@ -13,10 +13,10 @@ No embeds anywhere; thumbnail card only on feed and detail.
 
 ## Click behavior
 - **Feed:**
-  - Title → post detail.
+  - Title → `/r/<c>/comments/<id>/<slug>/`.
   - Thumbnail → external provider (`target="_blank"`, `rel="noopener noreferrer"`).
 - **Post detail:**
-  - Thumbnail → external provider (`target="_blank"`, `rel="noopener noreferrer"`).
+  - Static thumbnail; clicking opens external provider (`target="_blank"`, `rel="noopener noreferrer"`).
 
 ## Caching & timeouts
 - Outbound fetches use the shared HTTP client (browser UA, timeouts, retries).
