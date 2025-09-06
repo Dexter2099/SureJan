@@ -116,3 +116,21 @@ class PostLinkTests(TestCase):
         self.assertNotIn(f'href="{detail_url}" class="thumb"', html)
         self.assertIn(f'href="{detail_url}"', html)
         self.assertIn(f'href="{detail_url}#comments"', html)
+
+    def test_post_row_embed_thumb_links_to_content_url(self):
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Link",
+            content_url="https://example.com/article",
+        )
+        post.embed_thumb = "https://example.com/thumb.jpg"
+        request = self.factory.get("/")
+        html = render_to_string("core/partials/post_row.html", {"post": post}, request=request)
+        detail_url = post.get_absolute_url()
+        self.assertIn(f'href="{post.content_url}" class="thumb"', html)
+        self.assertIn('target="_blank" rel="noopener noreferrer"', html)
+        self.assertNotIn(f'href="{detail_url}" class="thumb"', html)
+        self.assertIn(f'href="{detail_url}"', html)
+        self.assertIn(f'href="{detail_url}#comments"', html)
