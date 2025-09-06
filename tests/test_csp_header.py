@@ -12,14 +12,30 @@ def _build_csp(providers):
     return {"DIRECTIVES": {"img-src": tuple(img_src)}}
 
 
-@pytest.mark.parametrize("provider", ["YOUTUBE", "X", "RUMBLE"])
-def test_csp_header_includes_provider_hosts(client, provider):
+@pytest.mark.parametrize(
+    "provider,expected_hosts",
+    [
+        ("YOUTUBE", ["https://*.ytimg.com"]),
+        ("X", ["https://*.twimg.com", "https://pbs.twimg.com"]),
+        (
+            "RUMBLE",
+            [
+                "https://rumblecdn.com",
+                "https://*.rumblecdn.com",
+                "https://i.rmbl.ws",
+                "https://*.rmbl.ws",
+            ],
+        ),
+    ],
+)
+def test_csp_header_includes_provider_hosts(client, provider, expected_hosts):
     providers = {provider: conf_settings.EMBED_PROVIDERS[provider]}
+    assert providers[provider]["img_hosts"] == expected_hosts
     csp = _build_csp(providers)
     with override_settings(DEBUG=False, EMBED_PROVIDERS=providers, CONTENT_SECURITY_POLICY=csp):
         resp = client.get("/healthz")
     csp_header = resp["Content-Security-Policy"]
-    for host in providers[provider]["img_hosts"]:
+    for host in expected_hosts:
         assert host in csp_header
     assert "'self'" in csp_header
     assert "data:" in csp_header
