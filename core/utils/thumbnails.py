@@ -11,6 +11,7 @@ from urllib.parse import quote, urlparse
 from django.core.cache import cache
 
 from ..http_client import fetch_html, fetch_json
+from .video_urls import canonicalize_video_url
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -164,6 +165,7 @@ def resolve_thumbnail(
     avoid repeated network requests.
     """
 
+    url = canonicalize_video_url(url)
     thumb = _provider_default(url)
     if not thumb and fetch_remote:
         fail_key = f"{_FAIL_KEY_PREFIX}{url}"
