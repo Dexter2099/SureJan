@@ -24,7 +24,8 @@ The production CSP allows external images only from a small, documented set:
 
 * `https://i.ytimg.com` – YouTube thumbnails.
 * `https://*.twimg.com` – images in tweet thumbnails.
-* `https://*.rumblecdn.com`, `https://*.rumble.com`, and `https://*.rmbl.ws` – Rumble thumbnails.
+* `https://*.rumblecdn.com` and `https://*.rmbl.ws` – Rumble thumbnails.
+  Rumble embeds are disabled and no `frame-src` allowance is needed.
 * `data:` – inline SVG placeholders.
 
 Other resource types are restricted to `'self'`.

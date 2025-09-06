@@ -76,7 +76,7 @@ class Command(BaseCommand):
                             post.title,
                             True,
                         )
-                        if src:
+                        if src and src.startswith("https://"):
                             post.thumbnail_url = src
                             post.thumbnail_alt = alt
                             post.save(update_fields=["thumbnail_url", "thumbnail_alt"])
@@ -99,7 +99,7 @@ class Command(BaseCommand):
                             post.title,
                             True,
                         )
-                        if src:
+                        if src and src.startswith("https://"):
                             post.thumbnail_url = src
                             post.thumbnail_alt = alt
                             await sync_to_async(
