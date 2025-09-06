@@ -114,16 +114,6 @@ EMBED_PROVIDERS = {
     },
 }
 
-CSP_IMG_SRC: list[str] = ["'self'"]
-CSP_FRAME_SRC: list[str] = []
-
-for provider in EMBED_PROVIDERS.values():
-    if provider["flag"]:
-        CSP_IMG_SRC.extend(provider["img_hosts"])
-        CSP_FRAME_SRC.extend(provider["frame_hosts"])
-
-CSP_IMG_SRC.append("data:")
-
 # Simple per-user rate limits
 RATE_POSTS_PER_DAY_NEW = int(os.getenv("RATE_POSTS_PER_DAY_NEW", "10"))
 RATE_COMMENTS_PER_MIN_NEW = int(os.getenv("RATE_COMMENTS_PER_MIN_NEW", "8"))
@@ -147,14 +137,23 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    _img_src = ["'self'"]
+    _frame_src = ["'self'"]
+    for provider in EMBED_PROVIDERS.values():
+        if provider["flag"]:
+            _img_src.extend(provider["img_hosts"])
+            _frame_src.extend(provider["frame_hosts"])
+    _img_src.append("data:")
+
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": tuple(CSP_IMG_SRC),
+            "img-src": tuple(_img_src),
             "connect-src": ("'self'",),
-            "frame-src": tuple(CSP_FRAME_SRC) or ("'none'",),
+            "frame-src": tuple(_frame_src),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
