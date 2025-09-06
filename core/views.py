@@ -52,14 +52,16 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
-from .utils.embeds import build_embed_html
+from .utils.thumbnails import resolve_thumbnail
 
 
-def _attach_embed_html(posts):
-    """Attach embed HTML to link posts in the given iterable."""
+def _attach_thumbnails(posts):
+    """Attach preview thumbnails to link posts in the given iterable."""
     for post in posts:
         if getattr(post, "post_type", None) == "link":
-            post.embed_html = build_embed_html(post.content_url or "")
+            src, alt = resolve_thumbnail(post.content_url or "", post.title)
+            post.embed_thumb = src
+            post.embed_thumb_alt = alt
 
 
 def _is_banned(user):
@@ -428,7 +430,7 @@ SORT_TABS = [
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
 
-    _attach_embed_html(posts)
+    _attach_thumbnails(posts)
     html = render_to_string(
         "core/partials/post_list.html",
         {
@@ -464,7 +466,7 @@ def feed_list(request):
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         posts = list(page_obj.object_list)
-        _attach_embed_html(posts)
+        _attach_thumbnails(posts)
         ctx = {
             "posts": posts,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
@@ -508,7 +510,7 @@ def home(request):
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_page, show_community=True, sort_query=sort_query)
 
-    _attach_embed_html(posts)
+    _attach_thumbnails(posts)
     ctx = {
         "posts": posts,
         "next_page": next_page,
@@ -646,7 +648,7 @@ def community(request, slug):
     if request.headers.get("HX-Request") == "true":
         return _render_posts(request, posts, next_page, sort_query=sort_query)
 
-    _attach_embed_html(posts)
+    _attach_thumbnails(posts)
     context = {
         "community": community,
         "community_slug": community.slug,

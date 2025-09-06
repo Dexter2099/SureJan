@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from django.core.cache import cache
 
 from ..http_client import fetch_html
+from ..oembed import fetch_oembed
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -81,9 +82,37 @@ def svg_placeholder(label: str, alt: str | None = None) -> tuple[str, str]:
     return uri, alt_text
 
 
+def _provider_default(url: str) -> str | None:
+    """Return a provider-specific default thumbnail if one can be derived."""
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    if "youtube" in domain or "youtu.be" in domain:
+        patterns = [r"v=([\w-]+)", r"be/([\w-]+)", r"embed/([\w-]+)", r"shorts/([\w-]+)"]
+        vid = None
+        for pat in patterns:
+            m = re.search(pat, url)
+            if m:
+                vid = m.group(1)
+                break
+        if vid:
+            return f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+    return None
+
+
 def resolve_thumbnail(url: str, label: str) -> tuple[str, str]:
-    """Return OG image and alt text or a placeholder when missing."""
-    og = fetch_og_image(url)
-    if og:
-        return og, label
+    """Return thumbnail URL and alt text or a placeholder when missing."""
+    thumb = None
+    try:
+        data = fetch_oembed(url)
+    except Exception:
+        data = {}
+    thumb = data.get("thumbnail_url")
+    if not thumb:
+        thumb = _provider_default(url)
+    if not thumb:
+        thumb = fetch_og_image(url)
+    if thumb and thumb.startswith("http://"):
+        thumb = "https://" + thumb[len("http://") :]
+    if thumb:
+        return thumb, label
     return svg_placeholder(label)

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.html import escape
 
 from core.oembed import fetch_oembed
-from core.utils.thumbnails import fetch_og_image, svg_placeholder
+from core.utils.thumbnails import resolve_thumbnail
 
 
 def build_embed_html(url: str) -> str:
@@ -38,9 +38,6 @@ def build_embed_html(url: str) -> str:
         return link_card
 
     html = data.get("html", "")
-
-    thumb = data.get("thumbnail_url") or fetch_og_image(url)
-    thumb_alt = "Preview image unavailable"
 
     src = ""
     placeholder_label = "Preview"
@@ -90,22 +87,15 @@ def build_embed_html(url: str) -> str:
         placeholder_label = "Tweet preview"
     else:
         return link_card
-    if not thumb and "youtube" in domain and vid:
-        thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
-        thumb_alt = placeholder_label
-    if not thumb:
-        thumb, thumb_alt = svg_placeholder(placeholder_label, placeholder_label)
-    else:
-        thumb_alt = placeholder_label
-    if thumb.startswith("http://"):
-        thumb = "https://" + thumb[len("http://") :]
+    thumb, thumb_alt = resolve_thumbnail(url, placeholder_label)
 
     return (
         f'<div class="post-embed" data-src="{escape(src)}" '
         'style="position:relative;padding-top:56.25%;overflow:hidden;">'
-        f'<a href="{escape(url)}" rel="noopener nofollow" '
+        f'<a href="{escape(url)}" rel="noopener" '
         'style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;">'
         f'<img src="{escape(thumb)}" alt="{escape(thumb_alt)}" loading="lazy" decoding="async" '
         'referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;">'
+        '<span class="play-overlay" aria-hidden="true"></span>'
         '</a></div>'
     )

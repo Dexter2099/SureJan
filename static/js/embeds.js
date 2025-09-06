@@ -5,9 +5,9 @@
       e.preventDefault();
       var iframe = document.createElement('iframe');
       iframe.src = src;
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
       iframe.setAttribute('allowfullscreen', '');
       iframe.setAttribute('loading', 'lazy');
+      iframe.setAttribute('referrerpolicy', 'no-referrer');
       iframe.style.position = 'absolute';
       iframe.style.top = '0';
       iframe.style.left = '0';

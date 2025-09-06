@@ -2,10 +2,15 @@
 <article class="post-card" data-testid="post-card">
 {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
-  {% if post.embed_html %}
-    <div class="thumb" style="aspect-ratio:16/9;">
-      {{ post.embed_html|safe }}
-    </div>
+  {% if post.embed_thumb %}
+    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
+      <img
+        src="{{ post.embed_thumb }}"
+        alt="{{ post.embed_thumb_alt }}"
+        loading="lazy" decoding="async" referrerpolicy="no-referrer"
+        width="640" height="360">
+      <span class="play-overlay" aria-hidden="true"></span>
+    </a>
   {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       {% if post.image_thumb %}
