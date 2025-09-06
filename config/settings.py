@@ -92,26 +92,37 @@ ENABLE_RUMBLE_EMBEDS = os.environ.get("ENABLE_RUMBLE_EMBEDS", "1") in (
     "true",
     "True",
 )
+EMBED_PROVIDERS = {
+    "YOUTUBE": {
+        "flag": ENABLE_YOUTUBE_EMBEDS,
+        "img_hosts": ["https://i.ytimg.com"],
+        "frame_hosts": ["https://www.youtube-nocookie.com"],
+    },
+    "X": {
+        "flag": ENABLE_TWITTER_EMBEDS,
+        "img_hosts": ["https://*.twimg.com"],
+        "frame_hosts": ["https://platform.twitter.com"],
+    },
+    "RUMBLE": {
+        "flag": ENABLE_RUMBLE_EMBEDS,
+        "img_hosts": [
+            "https://*.rumble.com",
+            "https://*.rumblecdn.com",
+            "https://*.rmbl.ws",
+        ],
+        "frame_hosts": ["https://rumble.com"],
+    },
+}
 
-# CSP whitelists
-_csp_frame_src: list[str] = []
-_csp_img_src: list[str] = []
+CSP_IMG_SRC: list[str] = ["'self'"]
+CSP_FRAME_SRC: list[str] = []
 
-if ENABLE_YOUTUBE_EMBEDS:
-    _csp_frame_src.append("https://www.youtube-nocookie.com")
-    _csp_img_src.append("https://i.ytimg.com")
+for provider in EMBED_PROVIDERS.values():
+    if provider["flag"]:
+        CSP_IMG_SRC.extend(provider["img_hosts"])
+        CSP_FRAME_SRC.extend(provider["frame_hosts"])
 
-if ENABLE_RUMBLE_EMBEDS:
-    _csp_frame_src.append("https://rumble.com")
-    _csp_img_src += [
-        "https://*.rumble.com",
-        "https://*.rumblecdn.com",
-        "https://*.rmbl.ws",
-    ]
-
-if ENABLE_TWITTER_EMBEDS:
-    _csp_frame_src.append("https://platform.twitter.com")
-    _csp_img_src.append("https://*.twimg.com")
+CSP_IMG_SRC.append("data:")
 
 # Simple per-user rate limits
 RATE_POSTS_PER_DAY_NEW = int(os.getenv("RATE_POSTS_PER_DAY_NEW", "10"))
@@ -141,9 +152,9 @@ if not DEBUG:
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": tuple(["'self'"] + _csp_img_src + ["data:"]),
+            "img-src": tuple(CSP_IMG_SRC),
             "connect-src": ("'self'",),
-            "frame-src": tuple(_csp_frame_src) or ("'none'",),
+            "frame-src": tuple(CSP_FRAME_SRC) or ("'none'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
