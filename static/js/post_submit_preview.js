@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const html = await resp.text();
           linkPreview.innerHTML = html;
-          if (window.initEmbeds) window.initEmbeds(linkPreview);
         } catch (e) {
           linkPreview.innerHTML = '';
         }
