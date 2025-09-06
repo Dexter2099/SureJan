@@ -23,7 +23,7 @@ REQUEST_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-REQUEST_TIMEOUT = 4  # seconds
+REQUEST_TIMEOUT = 5  # seconds
 
 
 logger = logging.getLogger(__name__)
