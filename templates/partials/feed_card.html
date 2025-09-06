@@ -2,7 +2,7 @@
 <article class="post-card" data-testid="post-card">
 {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
-  {% if post.post_type == "link" and post.embed_html %}
+  {% if post.embed_html %}
     <div class="thumb" style="aspect-ratio:16/9;">
       {{ post.embed_html|safe }}
     </div>
