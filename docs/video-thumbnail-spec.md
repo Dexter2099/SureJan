@@ -13,13 +13,13 @@ No embeds anywhere; thumbnail card only on feed and detail.
 
 ## Click behavior
 - **Feed:**
-  - Title → `/r/<c>/comments/<id>/<slug>/`.
-  - Thumbnail → external provider (`target="_blank"`, `rel="noopener noreferrer"`).
+  - Title links to post detail (`/r/<c>/comments/<id>/<slug>/`).
+  - Thumbnail opens the provider in a new tab (`target="_blank"`, `rel="noopener noreferrer"`).
 - **Post detail:**
-  - Static thumbnail; clicking opens external provider (`target="_blank"`, `rel="noopener noreferrer"`).
+  - Thumbnail opens the provider in a new tab (`target="_blank"`, `rel="noopener noreferrer"`).
 
 ## Caching & timeouts
-- Outbound fetches use the shared HTTP client (browser UA, timeouts, retries).
+- Outbound fetches use the shared HTTP client (browser UA, request timeouts, retries).
 - Cache successful metadata with a short TTL; never cache errors (`Cache-Control: no-store`).
 - See [UI Flow](UI-Flow.md) and [UI Contract V3](UI-contract-V3.md) for integration details.
 
