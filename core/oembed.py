@@ -9,7 +9,8 @@ from django.conf import settings
 from django.core.cache import cache
 
 import bleach
-import requests
+
+from .http_client import fetch_html, fetch_json
 
 
 _CACHE_KEY_PREFIX = "oembed:"
@@ -48,9 +49,7 @@ def fetch_oembed(url: str) -> dict:
     result = None
     if endpoint:
         try:
-            resp = requests.get(endpoint, timeout=5)
-            resp.raise_for_status()
-            data = resp.json()
+            data = fetch_json(endpoint)
             html = data.get("html", "")
             thumb = data.get("thumbnail_url")
             clean = bleach.clean(
@@ -89,7 +88,7 @@ def fetch_oembed(url: str) -> dict:
         # Fallback simple link card
         title = None
         try:
-            resp = requests.get(url, timeout=5)
+            resp = fetch_html(url)
             resp.raise_for_status()
             match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
             if match:

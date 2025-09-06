@@ -10,7 +10,12 @@ from urllib.parse import urlparse
 from django.core.cache import cache
 import requests
 
-OG_IMAGE_RE = re.compile(r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]", re.IGNORECASE)
+from ..http_client import fetch_html
+
+OG_IMAGE_RE = re.compile(
+    r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
+    re.IGNORECASE,
+)
 
 # Headers used when scraping remote pages for OpenGraph images. A modern
 # desktop User-Agent and Accept-Language help avoid some bot protections.
@@ -34,7 +39,7 @@ def scrape_og_image(url: str) -> Optional[str]:
     domain = urlparse(url).netloc
     status = None
     try:
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=REQUEST_HEADERS)
+        resp = fetch_html(url)
         status = resp.status_code
         resp.raise_for_status()
     except Exception:
