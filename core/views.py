@@ -38,8 +38,6 @@ from django.utils.cache import patch_cache_control
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
 from django.urls import reverse
-from urllib.parse import urlparse
-
 from .forms import CommentForm, PostForm, CommunityCreateForm
 from .models import Comment, Community, Post, RecoveryCode, Report
 from .pagination import PAGE_SIZE
@@ -52,6 +50,7 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
+from .utils.video_urls import canonicalize_video_url
 
 
 def _is_banned(user):
@@ -539,16 +538,18 @@ def post_submit(request):
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
 
+            content_url = ""
+            if post_type == "link":
+                content_url = canonicalize_video_url(
+                    form.cleaned_data.get("content_url", "")
+                )
             post = Post(
                 community=form.cleaned_data["community"],
                 author=request.user,
                 post_type=post_type,
                 title=form.cleaned_data["title"],
                 body=form.cleaned_data.get("body", ""),
-                content_url=
-                    form.cleaned_data.get("content_url", "")
-                    if post_type == "link"
-                    else "",
+                content_url=content_url,
             )
             if post_type == "image":
                 post.image = form.cleaned_data.get("image")
@@ -793,9 +794,7 @@ def post_edit(request, pk):
         if form.is_valid():
             post = form.save(commit=False)
             if post.content_url:
-                post.link_domain = urlparse(post.content_url).netloc
-            else:
-                post.link_domain = ""
+                post.content_url = canonicalize_video_url(post.content_url)
             post.save()
             messages.success(request, "Post updated")
             return redirect(

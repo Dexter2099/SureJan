@@ -24,6 +24,7 @@ from io import BytesIO
 import os
 
 from .ranking import recompute_post_ranks
+from .utils.video_urls import canonicalize_video_url
 
 
 MAX_BYTES = 4 * 1024 * 1024
@@ -199,6 +200,7 @@ class Post(models.Model):
         recompute = kwargs.pop("recompute_hot", True)
 
         if self.content_url:
+            self.content_url = canonicalize_video_url(self.content_url)
             self.link_domain = urlparse(self.content_url).netloc
 
         # Apply domain throttling weight on every save

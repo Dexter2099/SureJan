@@ -23,3 +23,15 @@ def test_resolve_thumbnail_failure_caches_and_returns_none(monkeypatch):
     src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
     assert src2 is None
     assert calls == []
+
+
+def test_resolve_thumbnail_canonicalizes_url(monkeypatch):
+    seen = []
+
+    def fake_provider_default(url):
+        seen.append(url)
+        return None
+
+    monkeypatch.setattr(thumbnails, "_provider_default", fake_provider_default)
+    thumbnails.resolve_thumbnail("https://youtu.be/abc123?t=9", "label")
+    assert seen[0] == "https://youtube.com/watch?v=abc123"
