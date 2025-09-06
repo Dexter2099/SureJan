@@ -1,17 +1,23 @@
-{% load thumbnails %}
-{% if post.thumbnail_url %}
+{% load thumbnails embed %}
+{% build_embed_iframe post.content_url as iframe %}
+{% if iframe %}
+  <div class="thumb" style="aspect-ratio:16/9;">
+    {{ iframe }}
+    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+  </div>
+{% elif post.thumbnail_url %}
   {% with src=post.thumbnail_url alt=post.thumbnail_alt|default:post.title %}
-    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
-      <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
-      {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-    </a>
+  <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
+    <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+  </a>
   {% endwith %}
 {% else %}
   {% svg_placeholder post.title as ph %}
   {% with src=ph.src alt=ph.alt %}
-    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
-      <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
-      {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-    </a>
+  <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
+    <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+  </a>
   {% endwith %}
 {% endif %}
