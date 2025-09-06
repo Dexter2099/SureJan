@@ -1,19 +1,30 @@
 from unittest.mock import Mock, patch
-
 import requests
+from django.core.cache import cache
 from django.test import TestCase
 
+from core import http_client
 from core.oembed import fetch_oembed
 
 
-def _mock_response(json=None, status=200):
+def _mock_json_response(data=None, status=200):
     resp = Mock()
-    resp.json.return_value = json
-
+    resp.status_code = status
+    resp.json.return_value = data or {}
     def raise_for_status():
         if status >= 400:
-            raise requests.HTTPError()
+            raise requests.HTTPError(response=resp)
+    resp.raise_for_status = raise_for_status
+    return resp
 
+
+def _mock_html_response(text="", status=200):
+    resp = Mock()
+    resp.status_code = status
+    resp.text = text
+    def raise_for_status():
+        if status >= 400:
+            raise requests.HTTPError(response=resp)
     resp.raise_for_status = raise_for_status
     return resp
 
@@ -21,7 +32,34 @@ def _mock_response(json=None, status=200):
 class OEmbedTests(TestCase):
     def test_fetch_oembed_removes_scripts(self):
         sample_html = '<iframe src="https://youtube.com/embed/abc"></iframe><script>alert(1)</script>'
-        with patch("requests.get", return_value=_mock_response(json={"html": sample_html})):
+        resp = _mock_json_response({"html": sample_html})
+        session = http_client.get_session()
+        session.get = Mock(return_value=resp)
+        with patch("core.http_client.get_session", return_value=session):
             data = fetch_oembed("https://www.youtube.com/watch?v=abc")
         self.assertEqual(data["type"], "embed")
         self.assertNotIn("script", data["html"].lower())
+        session.get.assert_called_once()
+        headers = session.headers
+        self.assertTrue(headers["User-Agent"].startswith("Mozilla/5.0"))
+        self.assertEqual(headers["Accept-Language"], "en-US,en;q=0.9")
+
+    def test_fetch_oembed_caches_success(self):
+        url = "https://www.youtube.com/watch?v=abc"
+        cache.clear()
+        sample_html = "<iframe></iframe>"
+        with patch("core.http_client.fetch_json", return_value={"html": sample_html}) as mock_json:
+            fetch_oembed(url)
+            fetch_oembed(url)
+        self.assertEqual(mock_json.call_count, 1)
+
+    def test_fetch_oembed_no_cache_on_error(self):
+        url = "https://www.youtube.com/watch?v=abc"
+        cache.clear()
+        def raise_http_error(*args, **kwargs):
+            raise requests.HTTPError(response=Mock(status_code=500))
+        with patch("core.http_client.fetch_json", side_effect=raise_http_error) as mock_json, \
+             patch("core.http_client.fetch_html", return_value=_mock_html_response("<title>t</title>")):
+            fetch_oembed(url)
+            fetch_oembed(url)
+        self.assertEqual(mock_json.call_count, 2)

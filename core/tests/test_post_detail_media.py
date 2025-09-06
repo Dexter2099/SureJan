@@ -65,10 +65,10 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'src="https://cdn.example/og.jpg"')
 
-    @patch("core.utils.thumbnails.requests.get")
+    @patch("core.http_client.fetch_html")
     @patch("core.utils.embeds.fetch_oembed")
     def test_embed_uses_placeholder_when_og_fetch_fails(
-        self, mock_oembed, mock_get
+        self, mock_oembed, mock_fetch_html
     ):
         mock_oembed.return_value = {
             "type": "embed",
@@ -79,7 +79,7 @@ class PostDetailMediaTests(TestCase):
         response.raise_for_status.side_effect = requests.exceptions.HTTPError(
             "403"
         )
-        mock_get.return_value = response
+        mock_fetch_html.return_value = response
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -92,10 +92,10 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
 
-    @patch("core.utils.thumbnails.requests.get")
+    @patch("core.http_client.fetch_html")
     @patch("core.utils.embeds.fetch_oembed")
     def test_embed_uses_scraped_og_image_when_available(
-        self, mock_oembed, mock_get
+        self, mock_oembed, mock_fetch_html
     ):
         mock_oembed.return_value = {
             "type": "embed",
@@ -108,7 +108,7 @@ class PostDetailMediaTests(TestCase):
             "<html><head><meta property='og:image' "
             "content='https://cdn.example/og2.jpg'></head></html>"
         )
-        mock_get.return_value = response
+        mock_fetch_html.return_value = response
         post = Post.objects.create(
             community=self.community,
             author=self.user,
