@@ -29,10 +29,22 @@ def test_csp_headers_include_expected_hosts(client):
     for p in conf_settings.EMBED_PROVIDERS.values():
         img_src.extend(p["img_hosts"])
     img_src.append("data:")
+    expected_hosts = [
+        "'self'",
+        "https://*.ytimg.com",
+        "https://*.twimg.com",
+        "https://pbs.twimg.com",
+        "https://rumblecdn.com",
+        "https://*.rumblecdn.com",
+        "https://i.rmbl.ws",
+        "https://*.rmbl.ws",
+        "data:",
+    ]
+    assert img_src == expected_hosts
     csp = {"DIRECTIVES": {"img-src": tuple(img_src)}}
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
         for url in urls:
             resp = client.get(url)
             csp_header = resp["Content-Security-Policy"]
-            for host in img_src:
+            for host in expected_hosts:
                 assert host in csp_header

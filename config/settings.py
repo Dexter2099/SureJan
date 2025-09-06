@@ -99,14 +99,19 @@ ENABLE_RUMBLE_EMBEDS = False
 
 EMBED_PROVIDERS = {
     "YOUTUBE": {
-        "img_hosts": ["https://i.ytimg.com"],
+        "img_hosts": ["https://*.ytimg.com"],
     },
     "X": {
-        "img_hosts": ["https://*.twimg.com"],
+        "img_hosts": [
+            "https://*.twimg.com",
+            "https://pbs.twimg.com",
+        ],
     },
     "RUMBLE": {
         "img_hosts": [
+            "https://rumblecdn.com",
             "https://*.rumblecdn.com",
+            "https://i.rmbl.ws",
             "https://*.rmbl.ws",
         ],
     },
