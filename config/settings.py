@@ -110,10 +110,6 @@ X_DIRECT_OG = os.environ.get("X_DIRECT_OG", "0") in (
     "True",
 )
 
-ENABLE_TWITTER_EMBEDS = False
-ENABLE_YOUTUBE_EMBEDS = False
-ENABLE_RUMBLE_EMBEDS = False
-
 EMBED_PROVIDERS = {
     "YOUTUBE": {
         "img_hosts": ["https://*.ytimg.com"],
