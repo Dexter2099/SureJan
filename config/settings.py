@@ -106,6 +106,7 @@ if ENABLE_RUMBLE_EMBEDS:
     _csp_img_src += [
         "https://*.rumble.com",
         "https://*.rumblecdn.com",
+        "https://*.rmbl.ws",
     ]
 
 if ENABLE_TWITTER_EMBEDS:
@@ -140,9 +141,9 @@ if not DEBUG:
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": tuple(["'self'", "https:"] + _csp_img_src + ["data:"]),
+            "img-src": tuple(["'self'"] + _csp_img_src + ["data:"]),
             "connect-src": ("'self'",),
-            "frame-src": tuple(["'self'"] + _csp_frame_src),
+            "frame-src": tuple(_csp_frame_src) or ("'none'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
