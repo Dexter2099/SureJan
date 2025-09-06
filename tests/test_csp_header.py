@@ -1,25 +1,31 @@
 import pytest
 from django.test import override_settings
+from config import settings as conf_settings
 
 
 def test_csp_header_includes_img_src_hosts(client):
     csp = {
         "DIRECTIVES": {
-            "img-src": (
-                "'self'",
-                "https:",
-                "https://*.twimg.com",
-                "https://i.ytimg.com",
-                "https://*.rumble.com",
-                "https://*.rumblecdn.com",
-                "data:",
+            "img-src": tuple(
+                ["'self'", "https:"] + conf_settings._csp_img_src + ["data:"]
             )
         }
     }
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
         resp = client.get("/healthz")
     csp_header = resp["Content-Security-Policy"]
-    assert "https://*.rumble.com" in csp_header
-    assert "https://*.rumblecdn.com" in csp_header
-    assert "https://*.twimg.com" in csp_header
-    assert "https://i.ytimg.com" in csp_header
+    for host in conf_settings._csp_img_src:
+        assert host in csp_header
+
+
+def test_csp_header_includes_frame_src_hosts(client):
+    csp = {
+        "DIRECTIVES": {
+            "frame-src": tuple(["'self'"] + conf_settings._csp_frame_src)
+        }
+    }
+    with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
+        resp = client.get("/healthz")
+    csp_header = resp["Content-Security-Policy"]
+    for host in conf_settings._csp_frame_src:
+        assert host in csp_header

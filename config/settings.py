@@ -84,7 +84,10 @@ ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
 )
 
 # CSP whitelists
-_csp_frame_src = ["https://www.youtube-nocookie.com", "https://rumble.com"]
+_csp_frame_src = [
+    "https://www.youtube-nocookie.com",
+    "https://rumble.com",
+]
 _csp_img_src = [
     "https://i.ytimg.com",
     "https://*.rumble.com",
