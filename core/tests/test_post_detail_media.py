@@ -1,4 +1,6 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
+
+import requests
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -60,6 +62,62 @@ class PostDetailMediaTests(TestCase):
             reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
         )
         self.assertContains(resp, 'src="https://cdn.example/og.jpg"')
+
+    @patch("core.utils.thumbnails.requests.get")
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_embed_uses_placeholder_when_og_fetch_fails(
+        self, mock_oembed, mock_get
+    ):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
+            "thumbnail_url": None,
+        }
+        response = Mock()
+        response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+            "403"
+        )
+        mock_get.return_value = response
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Rumble 403",
+            content_url="https://rumble.com/vxyz-test.html",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
+
+    @patch("core.utils.thumbnails.requests.get")
+    @patch("core.utils.embeds.fetch_oembed")
+    def test_embed_uses_scraped_og_image_when_available(
+        self, mock_oembed, mock_get
+    ):
+        mock_oembed.return_value = {
+            "type": "embed",
+            "html": '<iframe src="https://www.youtube.com/embed/abc"></iframe>',
+            "thumbnail_url": None,
+        }
+        response = Mock()
+        response.raise_for_status.return_value = None
+        response.text = (
+            "<html><head><meta property='og:image' "
+            "content='https://cdn.example/og2.jpg'></head></html>"
+        )
+        mock_get.return_value = response
+        post = Post.objects.create(
+            community=self.community,
+            author=self.user,
+            post_type="link",
+            title="Video OG2",
+            content_url="https://www.youtube.com/watch?v=abc",
+        )
+        resp = self.client.get(
+            reverse("post_detail", args=[self.community.slug, post.pk, post.slug])
+        )
+        self.assertContains(resp, 'src="https://cdn.example/og2.jpg"')
 
     @patch("core.utils.embeds.fetch_oembed")
     def test_rumble_embed_has_placeholder(self, mock_oembed):
