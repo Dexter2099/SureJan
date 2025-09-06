@@ -1,7 +1,7 @@
-Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /oembed?format=json&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
-Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /oembed?format=json&url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ
-Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /watch?v=dQw4w9WgXcQ
-Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /watch?v=dQw4w9WgXcQ
-22 objects imported automatically (use -v 2 for details).
+Input URL: https://youtu.be/dQw4w9WgXcQ
+Canonical URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
-<div class="link-card"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" rel="noopener nofollow">www.youtube.com</a></div>
+Preview sequence:
+1. OpenGraph metadata
+2. Provider fallback (oEmbed)
+3. SVG placeholder

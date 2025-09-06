@@ -19,9 +19,10 @@ Every HTTP response must include:
 
 ### 2. Structured Logging
 
+Preview resolution is OG-first with provider fallback and an SVG placeholder.
 All fetch/render operations log structured events:
 
-* `event=preview.fetch` → `provider`, `source=oembed|og|default`, `status`, `duration_ms`, `cache=hit|miss`.
+* `event=preview.fetch` → `provider`, `source=og|provider|placeholder`, `status`, `duration_ms`, `cache=hit|miss`.
 * `event=render` → `path`, `status`, `duration_ms`, `preview_calls`.
 
 **Why:** identify if pages are slow due to live remote fetches, cache misses, or CSP blocks.
