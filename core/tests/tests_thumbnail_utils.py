@@ -17,7 +17,7 @@ def test_resolve_thumbnail_failure_caches_and_returns_none(monkeypatch):
     url = "https://example.com"
     src, alt = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
     assert src is None
-    assert alt == thumbnails.svg_placeholder("label")[1]
+    assert alt == thumbnails.FALLBACK_ALT
     assert cache.get(f"thumbfail:{url}")
     calls.clear()
     src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)

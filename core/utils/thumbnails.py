@@ -45,6 +45,7 @@ _CACHE_KEY_PREFIX = "og-image:"  # cache key prefix for og image lookups
 # Cache successful lookups briefly; errors should not be cached.
 _CACHE_TIMEOUT = 60  # seconds
 _CACHE_NONE = ""  # sentinel value for cached misses
+FALLBACK_ALT = "Preview image unavailable"  # alt text for missing thumbnails
 
 
 def fetch_og_image(url: str) -> Optional[str]:
@@ -70,7 +71,7 @@ def fetch_og_image(url: str) -> Optional[str]:
 def svg_placeholder(label: str, alt: str | None = None) -> tuple[str, str]:
     """Return a small inline SVG placeholder and its alt text."""
     text = html.escape(label or "")
-    alt_text = alt or "Preview image unavailable"
+    alt_text = alt or FALLBACK_ALT
     uri = (
         "data:image/svg+xml;utf8,"
         "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'>"
@@ -167,7 +168,7 @@ def resolve_thumbnail(
     if not thumb and fetch_remote:
         fail_key = f"{_FAIL_KEY_PREFIX}{url}"
         if cache.get(fail_key):
-            return None, svg_placeholder(label)[1]
+            return None, FALLBACK_ALT
         domain = urlparse(url).netloc.lower()
         if "rumble.com" in domain:
             thumb = rumble_thumbnail(url)
@@ -178,4 +179,4 @@ def resolve_thumbnail(
 
     if thumb and thumb.startswith("https://"):
         return thumb, label
-    return None, svg_placeholder(label)[1]
+    return None, FALLBACK_ALT

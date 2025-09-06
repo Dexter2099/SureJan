@@ -13,16 +13,7 @@ class Command(BaseCommand):
         qs.update(thumbnail_url="", thumbnail_alt="")
         self.stdout.write(f"Cleared {count} placeholder thumbnails")
 
-        deleted = 0
         if hasattr(cache, "delete_pattern"):
             cache.delete_pattern("thumbfail:*")
         else:
-            try:
-                for key in list(getattr(cache, "_cache", {}).keys()):
-                    if str(key).startswith("thumbfail:"):
-                        cache.delete(key)
-                        deleted += 1
-            except Exception:
-                pass
-        if deleted:
-            self.stdout.write(f"Deleted {deleted} thumbfail cache keys")
+            cache.clear()
