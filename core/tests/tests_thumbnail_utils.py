@@ -27,6 +27,50 @@ def test_resolve_thumbnail_failure_caches_and_returns_placeholder(monkeypatch):
 
 
 @pytest.mark.django_db
+def test_fail_ttl_generic(monkeypatch):
+    cache.clear()
+
+    def fake_fetch(url):
+        fake_fetch.last_status = 500
+        return None
+
+    monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
+
+    seen = {}
+    orig_set = cache.set
+
+    def fake_set(key, value, timeout):
+        seen["timeout"] = timeout
+        return orig_set(key, value, timeout)
+
+    monkeypatch.setattr(cache, "set", fake_set)
+    thumbnails.resolve_thumbnail("https://example.com", "label", fetch_remote=True)
+    assert seen["timeout"] == thumbnails._FAIL_TTL
+
+
+@pytest.mark.django_db
+def test_fail_ttl_throttled(monkeypatch):
+    cache.clear()
+
+    def fake_fetch(url):
+        fake_fetch.last_status = 429
+        return None
+
+    monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
+
+    seen = {}
+    orig_set = cache.set
+
+    def fake_set(key, value, timeout):
+        seen["timeout"] = timeout
+        return orig_set(key, value, timeout)
+
+    monkeypatch.setattr(cache, "set", fake_set)
+    thumbnails.resolve_thumbnail("https://example.com", "label", fetch_remote=True)
+    assert seen["timeout"] == thumbnails._FAIL_RETRY_TTL
+
+
+@pytest.mark.django_db
 def test_resolve_thumbnail_success_caches(monkeypatch):
     cache.clear()
     og_calls = []
