@@ -22,7 +22,7 @@
 **Key UI:**
 
 * Header logo (home), centered sort tabs (Hot · New · Top)
-* Post cards: community link, author link, timeago, image preview (thumb → image), title, excerpt, vote snippet, comments count
+* Post cards: community link, author link, timeago, static thumbnail (click → provider in new tab), title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
 
 ### 2) **Community feed**
 
@@ -32,7 +32,7 @@
 **Key UI:**
 
 * H1 community title, same sort tabs semantics as home
-* Post cards (same as home)
+* Post cards: community link, author link, timeago, static thumbnail (click → provider in new tab), title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
 
 ### 3) **Post detail**
 
@@ -43,7 +43,7 @@
 
 * Title (H1)
 * Meta: **by** {username} **in** {community} · {timeago}
-* **Media priority:** gallery → uploaded image → link thumbnail (YouTube/Rumble/X) → plain link
+* **Media priority:** gallery → uploaded image → static thumbnail (YouTube/Rumble/X; click opens provider in new tab) → plain link
 * Body (optional; require media **or** body)
 * **Actions row:** ▲ score ▼ · **Astro chip** (green/amber/red)
 * **Comment composer:** empty box + Cancel/Comment buttons (auth-gated)
@@ -70,13 +70,13 @@
 ### A) Browsing as a guest
 
 1. **Home feed** → click a **community** (e.g., `r/brisbane`) → **Community feed**
-2. Click a **post title/thumb** → **Post detail**
-3. Click the **video thumbnail** → provider opens in new tab
+2. Click a **post title** → **Post detail** (`/r/<c>/comments/<id>/<slug>/`)
+3. Click the **thumbnail** → provider opens in new tab
 4. Attempt to **comment** → redirect to **Login** → back to **Post detail** after auth
 
 ### B) Engaging as an authenticated user
 
-1. **Home**/**Community** → vote on cards; click to **Post detail**
+1. **Home**/**Community** → vote on cards; click title to **Post detail**
 2. In **Post detail**: static thumbnail at top; clicking opens provider in new tab; body below; actions row includes astro chip
 3. **Comment:** write + submit; thread updates; reply at any depth
 
@@ -92,8 +92,11 @@
 ```mermaid
 flowchart LR
   A[Home /] -->|click community| B[Community /r/<slug>/]
-  B -->|click post| C[Post detail /r/<c>/comments/<id>/<slug>/]
-  C -->|click thumbnail| X[Provider site (new tab)]
+  A -->|click post title| C[Post detail /r/<c>/comments/<id>/<slug>/]
+  A -->|click thumbnail| X[Provider site (new tab)]
+  B -->|click post title| C
+  B -->|click thumbnail| X
+  C -->|click thumbnail| X
   C -->|comment (guest)| D[Login /accounts/login/]
   D -->|success| C
   C -->|submit comment| C
@@ -105,7 +108,7 @@ flowchart LR
 flowchart TB
   subgraph PostDetail
     P1[Title + meta]
-    P2[Media: gallery→image→thumbnail]
+    P2[Media: gallery→image→static thumbnail]
     P3[Body (optional)]
     P4[Actions: ▲ score ▼ + Astro chip]
     P5[Composer]
@@ -131,7 +134,7 @@ flowchart TB
 * **Preview:** if `image_thumb` present, show that; **else** show `image`
 * **If neither:** (optional) use first `PostImageLink` if available
 * **Thumb framing:** `aspect-ratio: 16/9; object-fit: cover; border-radius: 12px`
-* **Click:** opens **Post detail** via `post.get_absolute_url` (fallback to `/p/<id>/`)
+* **Click:** thumbnail opens provider in new tab; title links to `/r/<c>/comments/<id>/<slug>/`
 
 ---
 

@@ -31,7 +31,7 @@ for form posts can be added with `DJANGO_CSRF_TRUSTED`.
 The production CSP restricts external media to a small, documented set:
 
 * `https://i.ytimg.com` – YouTube thumbnails.
-* `https://*.twimg.com` – images in tweet embeds.
+* `https://*.twimg.com` – images in tweet thumbnails.
 * `https://*.rumblecdn.com`, `https://*.rumble.com`, and `https://*.rmbl.ws` – Rumble thumbnails.
 * `data:` – inline SVG placeholders.
 
