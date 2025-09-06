@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import logging
+from collections import Counter, defaultdict
 from typing import Optional
+from urllib.parse import urlparse
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -18,6 +21,10 @@ _HEADERS = {
     ),
     "Accept-Language": "en-US,en;q=0.9",
 }
+
+logger = logging.getLogger(__name__)
+# provider -> Counter(success=, error=)
+COUNTERS: dict[str, Counter] = defaultdict(Counter)
 
 
 def get_session() -> requests.Session:
@@ -39,14 +46,24 @@ def get_session() -> requests.Session:
     return _SESSION
 
 
-def fetch_json(url: str) -> dict:
+def _log(url: str, source: str, status: int | None) -> None:
+    provider = urlparse(url).netloc
+    level = logging.INFO if status and status < 400 else logging.WARNING
+    key = "success" if status and status < 400 else "error"
+    COUNTERS[provider][key] += 1
+    logger.log(level, "provider=%s url=%s source=%s status=%s", provider, url, source, status)
+
+
+def fetch_json(url: str, source: str = "unknown") -> dict:
     """Fetch ``url`` and return the parsed JSON response."""
     resp = get_session().get(url, timeout=_TIMEOUT)
+    _log(url, source, getattr(resp, "status_code", None))
     resp.raise_for_status()
     return resp.json()
 
 
-def fetch_html(url: str) -> requests.Response:
+def fetch_html(url: str, source: str = "unknown") -> requests.Response:
     """Fetch ``url`` and return the raw response object."""
     resp = get_session().get(url, timeout=_TIMEOUT)
+    _log(url, source, getattr(resp, "status_code", None))
     return resp

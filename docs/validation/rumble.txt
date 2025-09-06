@@ -1,0 +1,7 @@
+Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /api/oembed.json?url=https%3A%2F%2Frumble.com%2Fvxyz-test.html
+Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /api/oembed.json?url=https%3A%2F%2Frumble.com%2Fvxyz-test.html
+Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /vxyz-test.html
+Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /vxyz-test.html
+22 objects imported automatically (use -v 2 for details).
+
+<div class="link-card"><a href="https://rumble.com/vxyz-test.html" rel="noopener nofollow">rumble.com</a></div>

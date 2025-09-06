@@ -25,7 +25,7 @@ def scrape_og_image(url: str) -> tuple[Optional[str], Optional[int]]:
     domain = urlparse(url).netloc
     status = None
     try:
-        resp = fetch_html(url)
+        resp = fetch_html(url, source="og-image")
         status = resp.status_code
         resp.raise_for_status()
     except Exception:

@@ -1,0 +1,7 @@
+Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /oembed?omit_script=1&url=https%3A%2F%2Fx.com%2Fjack%2Fstatus%2F20
+Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /oembed?omit_script=1&url=https%3A%2F%2Fx.com%2Fjack%2Fstatus%2F20
+Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /jack/status/20
+Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'OSError('Tunnel connection failed: 403 Forbidden')': /jack/status/20
+22 objects imported automatically (use -v 2 for details).
+
+<div class="link-card"><a href="https://x.com/jack/status/20" rel="noopener nofollow">x.com</a></div>
