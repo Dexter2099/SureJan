@@ -82,17 +82,32 @@ ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
     "true",
     "True",
 )
+ENABLE_YOUTUBE_EMBEDS = os.environ.get("ENABLE_YOUTUBE_EMBEDS", "1") in (
+    "1",
+    "true",
+    "True",
+)
+ENABLE_RUMBLE_EMBEDS = os.environ.get("ENABLE_RUMBLE_EMBEDS", "1") in (
+    "1",
+    "true",
+    "True",
+)
 
 # CSP whitelists
-_csp_frame_src = [
-    "https://www.youtube-nocookie.com",
-    "https://rumble.com",
-]
-_csp_img_src = [
-    "https://i.ytimg.com",
-    "https://*.rumble.com",
-    "https://*.rumblecdn.com",
-]
+_csp_frame_src: list[str] = []
+_csp_img_src: list[str] = []
+
+if ENABLE_YOUTUBE_EMBEDS:
+    _csp_frame_src.append("https://www.youtube-nocookie.com")
+    _csp_img_src.append("https://i.ytimg.com")
+
+if ENABLE_RUMBLE_EMBEDS:
+    _csp_frame_src.append("https://rumble.com")
+    _csp_img_src += [
+        "https://*.rumble.com",
+        "https://*.rumblecdn.com",
+    ]
+
 if ENABLE_TWITTER_EMBEDS:
     _csp_frame_src.append("https://platform.twitter.com")
     _csp_img_src.append("https://*.twimg.com")
