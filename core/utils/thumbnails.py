@@ -54,19 +54,26 @@ def fetch_og_image(url: str) -> Optional[str]:
 
     # During tests we bypass caching to avoid cross-test interference.
     if os.getenv("PYTEST_CURRENT_TEST"):
-        return scrape_og_image(url)[0]
+        result, status = scrape_og_image(url)
+        fetch_og_image.last_status = status
+        return result
 
     key = f"{_CACHE_KEY_PREFIX}{url}"
     cached = cache.get(key)
     if cached is not None:
+        fetch_og_image.last_status = None
         return None if cached == _CACHE_NONE else cached
 
     result, status = scrape_og_image(url)
+    fetch_og_image.last_status = status
     if status is None or status >= 400:
         return result
 
     cache.set(key, result or _CACHE_NONE, _CACHE_TIMEOUT)
     return result
+
+
+fetch_og_image.last_status = None  # type: ignore[attr-defined]
 
 
 def svg_placeholder(label: str, alt: str | None = None) -> tuple[str, str]:
@@ -140,7 +147,15 @@ def x_fallback_thumb(url: str) -> str | None:
 _THUMB_KEY_PREFIX = "thumb:"  # cache key prefix for successful lookups
 _THUMB_TTL = 60 * 60 * 24  # seconds
 _FAIL_KEY_PREFIX = "thumbfail:"  # cache key prefix for failures
-_FAIL_TTL = 60 * 30  # seconds
+_FAIL_TTL = 60 * 15  # seconds
+_FAIL_RETRY_TTL = 60  # seconds for throttling errors
+
+
+def _fail_ttl(status: Optional[int]) -> int:
+    """Return cache TTL for failed lookups based on ``status``."""
+    if status in {403, 429}:
+        return _FAIL_RETRY_TTL
+    return _FAIL_TTL
 
 
 def _provider_fallback(url: str, fetch_remote: bool) -> str | None:
@@ -196,8 +211,10 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         return svg_placeholder(label)
 
     thumb = None
+    status = None
     if fetch_remote:
         thumb = fetch_og_image(canon_url)
+        status = getattr(fetch_og_image, "last_status", None)
     if not thumb and not direct_og:
         thumb = _provider_fallback(canon_url, fetch_remote)
 
@@ -205,5 +222,5 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         cache.set(success_key, thumb, _THUMB_TTL)
         return thumb, label
 
-    cache.set(fail_key, True, _FAIL_TTL)
+    cache.set(fail_key, True, _fail_ttl(status))
     return svg_placeholder(label)
