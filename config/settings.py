@@ -83,12 +83,16 @@ ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
     "True",
 )
 
-EMBED_WHITELIST = [
-    "https://www.youtube-nocookie.com",
-    "https://rumble.com",
+# CSP whitelists
+_csp_frame_src = ["https://www.youtube-nocookie.com", "https://rumble.com"]
+_csp_img_src = [
+    "https://i.ytimg.com",
+    "https://*.rumble.com",
+    "https://*.rumblecdn.com",
 ]
 if ENABLE_TWITTER_EMBEDS:
-    EMBED_WHITELIST.append("https://platform.twitter.com")
+    _csp_frame_src.append("https://platform.twitter.com")
+    _csp_img_src.append("https://*.twimg.com")
 
 # Simple per-user rate limits
 RATE_POSTS_PER_DAY_NEW = int(os.getenv("RATE_POSTS_PER_DAY_NEW", "10"))
@@ -118,17 +122,9 @@ if not DEBUG:
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": (
-                "'self'",
-                "https:",
-                "https://*.twimg.com",
-                "https://i.ytimg.com",
-                "https://*.rumble.com",
-                "https://*.rumblecdn.com",
-                "data:",
-            ),
+            "img-src": tuple(["'self'", "https:"] + _csp_img_src + ["data:"]),
             "connect-src": ("'self'",),
-            "frame-src": tuple(["'self'"] + EMBED_WHITELIST),
+            "frame-src": tuple(["'self'"] + _csp_frame_src),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
