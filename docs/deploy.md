@@ -14,8 +14,14 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
-Set `ENABLE_TWITTER_EMBEDS=True` via Fly secrets or environment variables to
-allow tweet embeds to render properly and include Twitter in the CSP.
+Embed providers can be toggled via environment variables:
+
+* `ENABLE_YOUTUBE_EMBEDS` (default `1`)
+* `ENABLE_RUMBLE_EMBEDS` (default `1`)
+* `ENABLE_TWITTER_EMBEDS` (default `0`)
+
+For example, to allow tweet embeds to render properly and include Twitter in
+the CSP:
 
 ```bash
 fly secrets set ENABLE_TWITTER_EMBEDS=True

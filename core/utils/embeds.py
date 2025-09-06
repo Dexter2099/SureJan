@@ -24,16 +24,18 @@ def build_embed_html(url: str) -> str:
     parsed = urlparse(url)
     domain = parsed.netloc.lower()
 
+    link_card = (
+        f'<div class="link-card"><a href="{escape(url)}" '
+        f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
+    )
+
     try:
         data = fetch_oembed(url)
     except Exception:
         data = {}
 
     if data.get("type") != "embed":
-        return (
-            f'<div class="link-card"><a href="{escape(url)}" '
-            f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-        )
+        return link_card
 
     html = data.get("html", "")
 
@@ -44,6 +46,8 @@ def build_embed_html(url: str) -> str:
     placeholder_label = "Preview"
     vid = None
     if "youtube" in domain:
+        if not getattr(settings, "ENABLE_YOUTUBE_EMBEDS", True):
+            return link_card
         for pattern in [r"v=([\w-]+)", r"be/([\w-]+)", r"embed/([\w-]+)"]:
             m = re.search(pattern, url)
             if m:
@@ -54,13 +58,12 @@ def build_embed_html(url: str) -> str:
             if m:
                 vid = m.group(1)
         if not vid:
-            return (
-                f'<div class="link-card"><a href="{escape(url)}" '
-                f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-            )
+            return link_card
         src = f"https://www.youtube-nocookie.com/embed/{vid}"
         placeholder_label = "YouTube preview"
     elif "rumble.com" in domain:
+        if not getattr(settings, "ENABLE_RUMBLE_EMBEDS", True):
+            return link_card
         # 1) Try to read iframe src from the provider HTML (support " and ' quotes)
         m = re.search(r"src=['\"]([^'\"]+)['\"]", html or "")
         src = m.group(1) if m else ""
@@ -75,30 +78,18 @@ def build_embed_html(url: str) -> str:
 
         # If still no usable src, degrade to a plain link card
         if not src:
-            return (
-                f'<div class="link-card"><a href="{escape(url)}" '
-                f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-            )
+            return link_card
         placeholder_label = "Rumble preview"
     elif "twitter.com" in domain or "x.com" in domain:
         if not getattr(settings, "ENABLE_TWITTER_EMBEDS", False):
-            return (
-                f'<div class="link-card"><a href="{escape(url)}" '
-                f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-            )
+            return link_card
         m = re.search(r"status/(\d+)", url)
         if not m:
-            return (
-                f'<div class="link-card"><a href="{escape(url)}" '
-                f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-            )
+            return link_card
         src = f"https://platform.twitter.com/embed/Tweet.html?id={m.group(1)}"
         placeholder_label = "Tweet preview"
     else:
-        return (
-            f'<div class="link-card"><a href="{escape(url)}" '
-            f'rel="noopener nofollow">{escape(parsed.netloc)}</a></div>'
-        )
+        return link_card
     if not thumb and "youtube" in domain and vid:
         thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
         thumb_alt = placeholder_label
