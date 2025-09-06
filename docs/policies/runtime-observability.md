@@ -32,6 +32,7 @@ All fetch/render operations log structured events:
 
 * Enable `/_csp-report` endpoint.
 * Log `{directive, blocked_uri, document_uri, user_agent}`.
+* No external frame origins: `frame-src` is always `'self'`.
 
 **Why:** catch real-world CSP breaks in prod (e.g. twimg host not whitelisted).
 
