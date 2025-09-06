@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.template.loader import render_to_string
 from django.test import TestCase, RequestFactory
 
 from ..models import Community, Post
@@ -16,7 +15,7 @@ class FeedCardEmbedTests(TestCase):
         )
         self.factory = RequestFactory()
 
-    @patch("core.templatetags.embeds._build_embed_html")
+    @patch("core.views.build_embed_html")
     def test_feed_card_renders_embed_html(self, mock_build):
         mock_build.return_value = "<div class='post-embed'>stub</div>"
         post = Post.objects.create(
@@ -26,11 +25,10 @@ class FeedCardEmbedTests(TestCase):
             title="Embed",
             content_url="https://example.com/video",
         )
-        request = self.factory.get("/")
-        html = render_to_string(
-            "partials/feed_card.html",
-            {"post": post, "show_vote_widget": False},
-            request=request,
-        )
+        from .. import views
+
+        request = self.factory.get("/feed", HTTP_HX_REQUEST="true")
+        response = views.feed_list(request)
+        html = response.content.decode()
         mock_build.assert_called_once_with(post.content_url)
         self.assertIn("post-embed", html)

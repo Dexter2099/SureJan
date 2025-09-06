@@ -52,6 +52,7 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
+from .utils.embeds import build_embed_html
 
 
 def _is_banned(user):
@@ -455,6 +456,9 @@ def feed_list(request):
         paginator = Paginator(qs, size)
         page_obj = paginator.get_page(page)
         posts = list(page_obj.object_list)
+        for post in posts:
+            if post.post_type == "link":
+                post.embed_html = build_embed_html(post.content_url or "")
         ctx = {
             "posts": posts,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
@@ -488,6 +492,9 @@ def home(request):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
+    for post in posts:
+        if post.post_type == "link":
+            post.embed_html = build_embed_html(post.content_url or "")
 
     sort_query = ""
     if sort and sort != "hot":
@@ -624,6 +631,9 @@ def community(request, slug):
     posts = list(qs[offset : offset + PAGE_SIZE + 1])
     next_page = page + 1 if len(posts) > PAGE_SIZE else None
     posts = posts[:PAGE_SIZE]
+    for post in posts:
+        if post.post_type == "link":
+            post.embed_html = build_embed_html(post.content_url or "")
 
     sort_query = ""
     if sort and sort != "hot":
