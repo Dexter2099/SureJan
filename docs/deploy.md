@@ -14,13 +14,20 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
-Set `ENABLE_TWITTER_EMBEDS=True` via Fly secrets or environment variables to allow tweet embeds to render properly.
+Set `ENABLE_TWITTER_EMBEDS=True` via Fly secrets or environment variables to
+allow tweet embeds to render properly and include Twitter in the CSP.
 
 ```bash
 fly secrets set ENABLE_TWITTER_EMBEDS=True
 ```
 
 `fly.toml` includes this flag in the `[env]` section so tweets render in production.
+
+### CSP / Hosts
+
+Define public domains with `DJANGO_ALLOWED_HOSTS` (comma-separated) so Django
+and the CSP allowlist match your deployment URLs. Additional trusted origins
+for form posts can be added with `DJANGO_CSRF_TRUSTED`.
 
 ### Moderation
 
