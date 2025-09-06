@@ -2,15 +2,8 @@
 <article class="post-card" data-testid="post-card">
 {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
-  {% if post.embed_thumb %}
-    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
-      <img
-        src="{{ post.embed_thumb }}"
-        alt="{{ post.embed_thumb_alt }}"
-        loading="lazy" decoding="async" referrerpolicy="no-referrer"
-        width="640" height="360">
-      {% if post.link_domain %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-    </a>
+  {% if post.post_type == 'link' %}
+    {% include "partials/post_thumbnail.html" with post=post detail_url=detail_url %}
   {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
       {% if post.image_thumb %}

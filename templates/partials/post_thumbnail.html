@@ -1,0 +1,12 @@
+{% load thumbnails %}
+{% if post.embed_thumb %}
+  {% with src=post.embed_thumb alt=post.embed_thumb_alt %}
+{% else %}
+  {% svg_placeholder post.title as ph %}
+  {% with src=ph.src alt=ph.alt %}
+{% endif %}
+<a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
+  <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+  {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+</a>
+{% endwith %}
