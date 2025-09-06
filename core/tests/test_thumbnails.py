@@ -2,7 +2,12 @@ from unittest.mock import patch, Mock
 
 import requests
 
-from core.utils.thumbnails import resolve_thumbnail, scrape_og_image, REQUEST_HEADERS
+from core.utils.thumbnails import (
+    resolve_thumbnail,
+    scrape_og_image,
+    REQUEST_HEADERS,
+    REQUEST_TIMEOUT,
+)
 
 
 def _mock_response(text: str) -> Mock:
@@ -27,7 +32,9 @@ def test_scraper_returns_og_image_url():
         src, alt = resolve_thumbnail(url, "Preview")
         assert src == "https://cdn.example/img.jpg"
         assert alt == "Preview"
-        mock_get.assert_called_once_with(url, timeout=5, headers=REQUEST_HEADERS)
+        mock_get.assert_called_once_with(
+            url, timeout=REQUEST_TIMEOUT, headers=REQUEST_HEADERS
+        )
 
 
 def test_placeholder_returned_when_missing():
