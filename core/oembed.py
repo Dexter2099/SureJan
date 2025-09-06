@@ -52,7 +52,7 @@ def fetch_oembed(url: str) -> dict:
     cache_ok = True
     if endpoint:
         try:
-            data = fetch_json(endpoint)
+            data = fetch_json(endpoint, source="oembed")
             html = data.get("html", "")
             thumb = data.get("thumbnail_url")
             clean = bleach.clean(
@@ -93,7 +93,7 @@ def fetch_oembed(url: str) -> dict:
         # Fallback simple link card
         title = None
         try:
-            resp = fetch_html(url)
+            resp = fetch_html(url, source="oembed")
             resp.raise_for_status()
             match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
             if match:
