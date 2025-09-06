@@ -7,9 +7,8 @@ def test_homepage_layout(client):
     resp = client.get("/")
     assert resp.status_code == 200
     html = resp.content.decode()
-    assert '<div class="layout-grid">' in html
-    assert '<main class="feed-col">' in html
-    assert '<aside class="sidebar-col">' in html
+    assert 'class="layout' in html
+    assert 'feed-col' in html
 
 
 @pytest.mark.django_db

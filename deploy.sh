@@ -32,11 +32,9 @@ PY
   echo "Set SECRET_KEY."
 fi
 
-# Ensure ENABLE_TWITTER_EMBEDS is enabled for tweet rendering
-if ! fly secrets list 2>/dev/null | awk '{print $1}' | grep -q '^ENABLE_TWITTER_EMBEDS$'; then
-  fly secrets set ENABLE_TWITTER_EMBEDS=True >/dev/null
-  echo "Set ENABLE_TWITTER_EMBEDS=True."
-fi
+# Ensure embeds remain disabled in production
+fly secrets set EMBEDS_ENABLED=0 >/dev/null
+echo "Set EMBEDS_ENABLED=0."
 
 # Deploy using the committed Dockerfile
 fly deploy --remote-only --dockerfile Dockerfile "$@"

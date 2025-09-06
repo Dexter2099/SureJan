@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 
 from django_ratelimit.decorators import ratelimit
+from django_ratelimit.exceptions import Ratelimited
 
 
 class RateLimitTests(TestCase):
@@ -24,5 +25,5 @@ class RateLimitTests(TestCase):
         self.assertEqual(resp1.status_code, 200)
         resp2 = view(req)
         self.assertEqual(resp2.status_code, 200)
-        resp3 = view(req)
-        self.assertEqual(resp3.status_code, 429)
+        with self.assertRaises(Ratelimited):
+            view(req)

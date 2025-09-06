@@ -14,20 +14,13 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
-Embed providers can be toggled via environment variables:
+Embeds are globally controlled via environment variables:
 
-* `ENABLE_YOUTUBE_EMBEDS` (default `1`)
-* `ENABLE_RUMBLE_EMBEDS` (default `1`)
-* `ENABLE_TWITTER_EMBEDS` (default `0`)
+* `EMBEDS_ENABLED` (default `0`)
+* `THUMBNAILS_ONLY` (default `1`)
+* `THUMBNAIL_CACHE_SECONDS` (default `3600`)
 
-For example, to allow tweet embeds to render properly and include Twitter in
-the CSP:
-
-```bash
-fly secrets set ENABLE_TWITTER_EMBEDS=True
-```
-
-`fly.toml` includes this flag in the `[env]` section so tweets render in production.
+Production defaults in `fly.toml` set `EMBEDS_ENABLED=0` to disable embeds.
 
 ### CSP / Hosts
 
@@ -42,7 +35,7 @@ The production CSP restricts external media to a small, documented set:
 * `https://*.rumblecdn.com`, `https://*.rumble.com`, and `https://*.rmbl.ws` – Rumble thumbnails.
 * `data:` – inline SVG placeholders.
 
-Frames may only load from `https://www.youtube-nocookie.com`, `https://rumble.com`, and `https://platform.twitter.com`.
+Frames are restricted to `'self'`; no external frame hosts are allowed.
 
 ### Moderation
 

@@ -19,13 +19,16 @@ class PostDetailMediaTests(TestCase):
             slug="test", name="Test", title="Test", created_by=self.user
         )
 
+    @override_settings(ENABLE_YOUTUBE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_youtube_embed_has_placeholder(self, mock_oembed):
-        mock_oembed.return_value = {
+    def test_youtube_embed_has_placeholder(self, mock_embed_oembed, mock_thumb_oembed):
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://www.youtube.com/embed/abc"></iframe>',
             "thumbnail_url": "http://img.youtube.com/vi/abc/hqdefault.jpg",
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -42,16 +45,20 @@ class PostDetailMediaTests(TestCase):
             resp, 'src="https://img.youtube.com/vi/abc/hqdefault.jpg"'
         )
 
-    @patch("core.utils.embeds.fetch_og_image")
+    @override_settings(ENABLE_YOUTUBE_EMBEDS=True)
+    @patch("core.utils.thumbnails._provider_default", return_value=None)
+    @patch("core.utils.thumbnails.fetch_oembed")
+    @patch("core.utils.thumbnails.fetch_og_image")
     @patch("core.utils.embeds.fetch_oembed")
     def test_embed_uses_og_image_when_no_thumbnail(
-        self, mock_oembed, mock_fetch_og_image
+        self, mock_embed_oembed, mock_fetch_og_image, mock_thumb_oembed, mock_provider_default
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://www.youtube.com/embed/abc"></iframe>',
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         mock_fetch_og_image.return_value = "https://cdn.example/og.jpg"
         post = Post.objects.create(
             community=self.community,
@@ -65,21 +72,19 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'src="https://cdn.example/og.jpg"')
 
-    @patch("core.http_client.fetch_html")
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_og_image", return_value=None)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
     def test_embed_uses_placeholder_when_og_fetch_fails(
-        self, mock_oembed, mock_fetch_html
+        self, mock_embed_oembed, mock_thumb_oembed, mock_fetch_og_image
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
             "thumbnail_url": None,
         }
-        response = Mock()
-        response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-            "403"
-        )
-        mock_fetch_html.return_value = response
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -92,23 +97,20 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
 
-    @patch("core.http_client.fetch_html")
+    @override_settings(ENABLE_YOUTUBE_EMBEDS=True)
+    @patch("core.utils.thumbnails._provider_default", return_value=None)
+    @patch("core.utils.thumbnails.fetch_oembed")
+    @patch("core.utils.thumbnails.fetch_og_image", return_value="https://cdn.example/og2.jpg")
     @patch("core.utils.embeds.fetch_oembed")
     def test_embed_uses_scraped_og_image_when_available(
-        self, mock_oembed, mock_fetch_html
+        self, mock_embed_oembed, mock_fetch_og_image, mock_thumb_oembed, mock_provider_default
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://www.youtube.com/embed/abc"></iframe>',
             "thumbnail_url": None,
         }
-        response = Mock()
-        response.raise_for_status.return_value = None
-        response.text = (
-            "<html><head><meta property='og:image' "
-            "content='https://cdn.example/og2.jpg'></head></html>"
-        )
-        mock_fetch_html.return_value = response
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -121,13 +123,16 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, 'src="https://cdn.example/og2.jpg"')
 
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_rumble_embed_has_placeholder(self, mock_oembed):
-        mock_oembed.return_value = {
+    def test_rumble_embed_has_placeholder(self, mock_embed_oembed, mock_thumb_oembed):
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://rumble.com/embed/vxyz/?pub=4"></iframe>',
             "thumbnail_url": "http://thumb.jpg",
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -142,13 +147,19 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'href="https://rumble.com/vxyz-test.html"')
         self.assertContains(resp, 'src="https://thumb.jpg"')
 
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_og_image", return_value=None)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_rumble_embed_handles_single_quotes_in_iframe(self, mock_oembed):
-        mock_oembed.return_value = {
+    def test_rumble_embed_handles_single_quotes_in_iframe(
+        self, mock_embed_oembed, mock_thumb_oembed, mock_fetch_og_image
+    ):
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": "<iframe src='https://rumble.com/embed/vxyz/?pub=4'></iframe>",
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -164,14 +175,20 @@ class PostDetailMediaTests(TestCase):
         # With missing thumbnail_url, we should still render an <img> (data: URL fallback)
         self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
 
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_og_image", return_value=None)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_rumble_embed_falls_back_when_no_iframe_html(self, mock_oembed):
+    def test_rumble_embed_falls_back_when_no_iframe_html(
+        self, mock_embed_oembed, mock_thumb_oembed, mock_fetch_og_image
+    ):
         # oEmbed returns no iframe; builder derives /embed/<id>/ from page URL /vxyz-...
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": "<div>no iframe here</div>",
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -187,13 +204,15 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'src="data:image/svg+xml;utf8,')
 
     @override_settings(ENABLE_TWITTER_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_twitter_embed_has_placeholder(self, mock_oembed):
-        mock_oembed.return_value = {
+    def test_twitter_embed_has_placeholder(self, mock_embed_oembed, mock_thumb_oembed):
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": "<blockquote></blockquote>",
             "thumbnail_url": "http://pbs.twimg.com/thumb.jpg",
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         post = Post.objects.create(
             community=self.community,
             author=self.user,
@@ -212,16 +231,18 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'src="https://pbs.twimg.com/thumb.jpg"')
 
     @override_settings(ENABLE_TWITTER_EMBEDS=True)
-    @patch("core.utils.embeds.fetch_og_image")
+    @patch("core.utils.thumbnails.fetch_oembed")
+    @patch("core.utils.thumbnails.fetch_og_image")
     @patch("core.utils.embeds.fetch_oembed")
     def test_twitter_embed_uses_og_image_when_no_thumbnail(
-        self, mock_oembed, mock_fetch_og_image
+        self, mock_embed_oembed, mock_fetch_og_image, mock_thumb_oembed
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": "<blockquote></blockquote>",
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         mock_fetch_og_image.return_value = "https://pbs.twimg.com/og.jpg"
         post = Post.objects.create(
             community=self.community,
@@ -237,9 +258,10 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, '<img src="https://pbs.twimg.com/og.jpg"')
 
-    @override_settings(ENABLE_TWITTER_EMBEDS=True)
+    @override_settings(ENABLE_TWITTER_EMBEDS=True, ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
     @patch("core.utils.embeds.fetch_oembed")
-    def test_link_thumbnail_host_matches_csp_domains(self, mock_oembed):
+    def test_link_thumbnail_host_matches_csp_domains(self, mock_embed_oembed, mock_thumb_oembed):
         cases = [
             (
                 "https://pbs.twimg.com/thumb.jpg",
@@ -251,11 +273,12 @@ class PostDetailMediaTests(TestCase):
             ),
         ]
         for i, (thumb_url, content_url) in enumerate(cases, start=1):
-            mock_oembed.return_value = {
+            mock_embed_oembed.return_value = {
                 "type": "embed",
                 "html": "<blockquote></blockquote>",
                 "thumbnail_url": thumb_url,
             }
+            mock_thumb_oembed.return_value = mock_embed_oembed.return_value
             post = Post.objects.create(
                 community=self.community,
                 author=self.user,
@@ -269,12 +292,10 @@ class PostDetailMediaTests(TestCase):
             self.assertContains(resp, f'src="{thumb_url}"')
             parsed = urlparse(thumb_url)
             host = f"{parsed.scheme}://{parsed.netloc}"
-            providers = {k: v.copy() for k, v in conf_settings.EMBED_PROVIDERS.items()}
-            providers["X"]["flag"] = True
+            providers = conf_settings.EMBED_PROVIDERS
             allowed = []
             for p in providers.values():
-                if p["flag"]:
-                    allowed.extend(p["img_hosts"])
+                allowed.extend(p["img_hosts"])
             self.assertTrue(
                 any(
                     host == pattern
@@ -302,16 +323,19 @@ class PostDetailMediaTests(TestCase):
         self.assertContains(resp, 'class="post-gallery"')
         self.assertContains(resp, 'src="https://example.com/0.jpg"')
 
-    @patch("core.utils.embeds.fetch_og_image")
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
+    @patch("core.utils.thumbnails.fetch_og_image")
     @patch("core.utils.embeds.fetch_oembed")
     def test_rumble_embed_uses_og_image_on_feed_and_detail(
-        self, mock_oembed, mock_fetch_og_image
+        self, mock_embed_oembed, mock_fetch_og_image, mock_thumb_oembed
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         mock_fetch_og_image.return_value = "https://c.rumblecdn.com/og.jpg"
         post = Post.objects.create(
             community=self.community,
@@ -327,16 +351,19 @@ class PostDetailMediaTests(TestCase):
         )
         self.assertContains(resp, '<img src="https://c.rumblecdn.com/og.jpg"')
 
-    @patch("core.utils.embeds.fetch_og_image")
+    @override_settings(ENABLE_RUMBLE_EMBEDS=True)
+    @patch("core.utils.thumbnails.fetch_oembed")
+    @patch("core.utils.thumbnails.fetch_og_image")
     @patch("core.utils.embeds.fetch_oembed")
     def test_missing_thumbnail_shows_on_feed_and_detail(
-        self, mock_oembed, mock_fetch_og_image
+        self, mock_embed_oembed, mock_fetch_og_image, mock_thumb_oembed
     ):
-        mock_oembed.return_value = {
+        mock_embed_oembed.return_value = {
             "type": "embed",
             "html": '<iframe src="https://rumble.com/embed/vxyz/"></iframe>',
             "thumbnail_url": None,
         }
+        mock_thumb_oembed.return_value = mock_embed_oembed.return_value
         mock_fetch_og_image.return_value = None
         post = Post.objects.create(
             community=self.community,
