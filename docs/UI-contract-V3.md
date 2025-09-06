@@ -28,7 +28,7 @@
 - Anti-Astroturf → `data-testid="sidebar-astro"`
 
 ## Feed
-- Post card anatomy: meta, title, optional media/body, actions
+- Post card anatomy: meta, title (links to `/r/<c>/comments/<id>/<slug>/`), optional static thumbnail (opens provider in new tab) or body, actions
 - Hook: `data-testid="post-card"`
 
 ## Submit Post
@@ -37,7 +37,7 @@
 - Hook: `data-testid="submit-form"`
 
 ## Post Detail
-- OP card: full content with static thumbnail only (no embed)
+- OP card: full content with static thumbnail; clicking opens provider in new tab
 - Comment input
 - Comments list: author/time/body/actions
 
@@ -55,7 +55,7 @@
 - Right sidebar with Account/Login, Submit, Astro
 - Feed with `data-testid="post-card"`
 - Submit form with `data-testid="submit-form"`
-- Post detail shows post + comments; media is static thumbnail only (no embed)
+- Post detail shows post + comments; media is static thumbnail; clicking opens provider in new tab
 - Footer: Terms · Privacy · About
 
 ## See also (authoritative sources)
