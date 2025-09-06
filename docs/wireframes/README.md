@@ -2,6 +2,8 @@
 
 This folder contains the exported **Penpot wireframes** for SureJan V3. Video previews/embeds are deprecated; all wireframes show thumbnail-only references.
 
+These wireframes depict thumbnail-only media and implementers must follow `docs/V3-onepager.md` and `docs/UI-contract-V3.md`.
+
 ## Pages covered
 - **Main Page** (`V3-Main-Page.svg/png`)
   - Header 128px tall (Logo → Home, Tabs Hot/New/Top, Account/Login)
