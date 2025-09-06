@@ -137,7 +137,6 @@ if not DEBUG:
     for provider in EMBED_PROVIDERS.values():
         _img_src.extend(provider["img_hosts"])
     _img_src.append("data:")
-    _frame_src = ["'self'"]
 
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
@@ -146,7 +145,7 @@ if not DEBUG:
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": tuple(_img_src),
             "connect-src": ("'self'",),
-            "frame-src": tuple(_frame_src),
+            "frame-src": ("'self'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),
