@@ -29,7 +29,7 @@ def test_csp_headers_include_expected_hosts(client):
     for p in conf_settings.EMBED_PROVIDERS.values():
         img_src.extend(p["img_hosts"])
     img_src.append("data:")
-    csp = {"DIRECTIVES": {"img-src": tuple(img_src), "frame-src": ("'self'",)}}
+    csp = {"DIRECTIVES": {"img-src": tuple(img_src)}}
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
         for url in urls:
             resp = client.get(url)
