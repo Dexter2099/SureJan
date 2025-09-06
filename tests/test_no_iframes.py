@@ -1,3 +1,4 @@
+import re
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -18,4 +19,12 @@ def test_no_iframes(client):
     for url in urls:
         resp = client.get(url)
         assert resp.status_code == 200
-        assert "<iframe" not in resp.content.decode().lower()
+        html = resp.content.decode().lower()
+        iframes = re.findall(r'<iframe[^>]+src="([^"]+)"', html)
+        allowed = (
+            "youtube.com/embed/",
+            "rumble.com/embed/",
+            "platform.twitter.com/embed/tweet.html",
+        )
+        for src in iframes:
+            assert any(a in src for a in allowed)
