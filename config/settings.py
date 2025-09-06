@@ -93,6 +93,23 @@ THUMBNAILS_ONLY = os.environ.get("THUMBNAILS_ONLY", "1") in (
 )
 THUMBNAIL_CACHE_SECONDS = int(os.environ.get("THUMBNAIL_CACHE_SECONDS", "3600"))
 
+# Opt-in provider-specific direct OpenGraph lookups
+YT_DIRECT_OG = os.environ.get("YT_DIRECT_OG", "0") in (
+    "1",
+    "true",
+    "True",
+)
+RUMBLE_DIRECT_OG = os.environ.get("RUMBLE_DIRECT_OG", "0") in (
+    "1",
+    "true",
+    "True",
+)
+X_DIRECT_OG = os.environ.get("X_DIRECT_OG", "0") in (
+    "1",
+    "true",
+    "True",
+)
+
 ENABLE_TWITTER_EMBEDS = False
 ENABLE_YOUTUBE_EMBEDS = False
 ENABLE_RUMBLE_EMBEDS = False

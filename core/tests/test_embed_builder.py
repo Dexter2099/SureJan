@@ -1,5 +1,20 @@
 from core.utils.embed_builder import build_embed_iframe
 
+
+def test_build_embed_iframe_youtube_direct(settings):
+    settings.YT_DIRECT_OG = True
+    assert build_embed_iframe("https://youtu.be/abc123") is None
+
+
+def test_build_embed_iframe_rumble_direct(settings):
+    settings.RUMBLE_DIRECT_OG = True
+    assert build_embed_iframe("https://rumble.com/v1abcd") is None
+
+
+def test_build_embed_iframe_x_direct(settings):
+    settings.X_DIRECT_OG = True
+    assert build_embed_iframe("https://twitter.com/user/status/123") is None
+
 def test_build_embed_iframe_youtube():
     html = build_embed_iframe("https://youtu.be/abc123")
     assert html and "https://www.youtube.com/embed/abc123" in html
