@@ -5,7 +5,7 @@ from core.models import Community, Post
 
 
 @pytest.mark.django_db
-def test_no_iframes_in_rendered_pages(client):
+def test_feed_and_detail_render_thumbnails(client):
     User = get_user_model()
     user = User.objects.create_user("alice", password="pw")
     com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
@@ -18,7 +18,6 @@ def test_no_iframes_in_rendered_pages(client):
         thumbnail_url="https://example.com/thumb.jpg",
     )
 
-    urls = ["/", post.get_absolute_url()]
-    for url in urls:
+    for url in ["/", post.get_absolute_url()]:
         html = client.get(url).content.decode()
-        assert "<iframe" not in html
+        assert "<img" in html

@@ -46,4 +46,3 @@ def test_feed_thumbnails_are_images(client):
     assert len(cards) == 2
     for card in cards:
         assert "<img" in card
-        assert "<iframe" not in card

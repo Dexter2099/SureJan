@@ -1,7 +1,7 @@
 # Feature Spec: Video Thumbnails (YouTube, X, Rumble)
 
 ## Goal
-No embeds anywhere; thumbnail card only on feed and detail.
+Feed and post detail render static thumbnails only.
 
 ## Thumbnail requirements
 - 16:9 crop (`aspect-ratio: 16/9`)
