@@ -164,6 +164,13 @@ class Post(models.Model):
         text = re.sub(r"\s+", " ", text).strip()
         return Truncator(text).chars(180)
 
+    @property
+    def provider_name(self) -> str:
+        """Return a human-friendly name for the linked content provider."""
+        from .utils.providers import provider_from_domain
+
+        return provider_from_domain(self.link_domain)
+
     def get_absolute_url(self):
         return reverse("post_detail", args=[self.community.slug, self.pk, self.slug])
 
