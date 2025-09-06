@@ -33,6 +33,7 @@ class OEmbedTests(TestCase):
     def test_fetch_oembed_removes_scripts(self):
         sample_html = '<iframe src="https://youtube.com/embed/abc"></iframe><script>alert(1)</script>'
         resp = _mock_json_response({"html": sample_html})
+        http_client._SESSION = None
         session = http_client.get_session()
         session.get = Mock(return_value=resp)
         with patch("core.http_client.get_session", return_value=session):
@@ -48,7 +49,7 @@ class OEmbedTests(TestCase):
         url = "https://www.youtube.com/watch?v=abc"
         cache.clear()
         sample_html = "<iframe></iframe>"
-        with patch("core.http_client.fetch_json", return_value={"html": sample_html}) as mock_json:
+        with patch("core.oembed.fetch_json", return_value={"html": sample_html}) as mock_json:
             fetch_oembed(url)
             fetch_oembed(url)
         self.assertEqual(mock_json.call_count, 1)
@@ -58,8 +59,19 @@ class OEmbedTests(TestCase):
         cache.clear()
         def raise_http_error(*args, **kwargs):
             raise requests.HTTPError(response=Mock(status_code=500))
-        with patch("core.http_client.fetch_json", side_effect=raise_http_error) as mock_json, \
-             patch("core.http_client.fetch_html", return_value=_mock_html_response("<title>t</title>")):
+        with patch("core.oembed.fetch_json", side_effect=raise_http_error) as mock_json, \
+             patch("core.oembed.fetch_html", return_value=_mock_html_response("<title>t</title>")):
             fetch_oembed(url)
             fetch_oembed(url)
         self.assertEqual(mock_json.call_count, 2)
+
+    def test_fetch_oembed_logs_provider_host(self):
+        http_client.COUNTERS.clear()
+        cache.clear()
+        resp = _mock_json_response({"html": "<iframe></iframe>"})
+        http_client._SESSION = None
+        session = http_client.get_session()
+        session.get = Mock(return_value=resp)
+        with patch("core.http_client.get_session", return_value=session):
+            fetch_oembed("https://www.youtube.com/watch?v=xyz")
+        self.assertEqual(http_client.COUNTERS["www.youtube.com"]["success"], 1)
