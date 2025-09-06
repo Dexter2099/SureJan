@@ -98,18 +98,32 @@ def _provider_default(url: str) -> str | None:
     return None
 
 
-def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
-    """Return thumbnail URL and alt text or a placeholder.
+_FAIL_KEY_PREFIX = "thumbfail:"  # cache key prefix for failures
+_FAIL_TTL = 60  # seconds
+
+
+def resolve_thumbnail(
+    url: str, label: str, fetch_remote: bool = False
+) -> tuple[Optional[str], str]:
+    """Return thumbnail URL and alt text.
 
     When ``fetch_remote`` is ``False`` (default) only provider defaults are
     used to avoid network I/O. When ``True`` the function may perform network
-    requests to scrape OpenGraph images.
+    requests to scrape OpenGraph images. Fetch failures are cached briefly to
+    avoid repeated network requests.
     """
+
     thumb = _provider_default(url)
     if not thumb and fetch_remote:
+        fail_key = f"{_FAIL_KEY_PREFIX}{url}"
+        if cache.get(fail_key):
+            return None, svg_placeholder(label)[1]
         thumb = fetch_og_image(url)
+        if not thumb:
+            cache.set(fail_key, True, _FAIL_TTL)
+
     if thumb and thumb.startswith("http://"):
         thumb = "https://" + thumb[len("http://") :]
     if thumb:
         return thumb, label
-    return svg_placeholder(label)
+    return None, svg_placeholder(label)[1]
