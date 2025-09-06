@@ -35,7 +35,7 @@ The production CSP restricts external media to a small, documented set:
 * `https://*.rumblecdn.com`, `https://*.rumble.com`, and `https://*.rmbl.ws` – Rumble thumbnails.
 * `data:` – inline SVG placeholders.
 
-Frames: `frame-src` is `'self'`; no external origins are allowed.
+Frames inherit `default-src 'self'`; no external origins are allowed.
 
 ### Moderation
 

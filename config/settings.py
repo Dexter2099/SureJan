@@ -145,7 +145,6 @@ if not DEBUG:
             "style-src": ("'self'", "'unsafe-inline'"),
             "img-src": tuple(_img_src),
             "connect-src": ("'self'",),
-            "frame-src": ("'self'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
             "base-uri": ("'self'",),

@@ -9,7 +9,7 @@ def _build_csp(providers):
     for p in providers.values():
         img_src.extend(p["img_hosts"])
     img_src.append("data:")
-    return {"DIRECTIVES": {"img-src": tuple(img_src), "frame-src": ("'self'",)}}
+    return {"DIRECTIVES": {"img-src": tuple(img_src)}}
 
 
 @pytest.mark.parametrize("provider", ["YOUTUBE", "X", "RUMBLE"])
@@ -28,7 +28,6 @@ def test_csp_header_has_directives(client):
         "DIRECTIVES": {
             "default-src": ("'self'",),
             "img-src": ("'self'", "data:"),
-            "frame-src": ("'self'",),
         }
     }
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
@@ -36,7 +35,6 @@ def test_csp_header_has_directives(client):
     csp_header = resp["Content-Security-Policy"]
     assert "default-src" in csp_header
     assert "img-src" in csp_header
-    assert "frame-src" in csp_header
 
 
 def test_no_legacy_csp_settings():
