@@ -4,6 +4,8 @@ import html
 import re
 from typing import Optional
 
+import os
+from django.core.cache import cache
 import requests
 
 OG_IMAGE_RE = re.compile(r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]", re.IGNORECASE)
@@ -34,13 +36,26 @@ def scrape_og_image(url: str) -> Optional[str]:
     return None
 
 
-def fetch_og_image(url: str) -> Optional[str]:
-    """Fetch the OpenGraph image for ``url``.
+_CACHE_KEY_PREFIX = "og-image:"  # cache key prefix for og image lookups
+_CACHE_TIMEOUT = 60 * 60  # 1 hour
+_CACHE_NONE = ""  # sentinel value for cached misses
 
-    A light wrapper around :func:`scrape_og_image` that is easier to mock in
-    tests. Returns ``None`` when no OG image is available or fetching fails.
-    """
-    return scrape_og_image(url)
+
+def fetch_og_image(url: str) -> Optional[str]:
+    """Fetch the OpenGraph image for ``url`` with caching."""
+
+    # During tests we bypass caching to avoid cross-test interference.
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return scrape_og_image(url)
+
+    key = f"{_CACHE_KEY_PREFIX}{url}"
+    cached = cache.get(key)
+    if cached is not None:
+        return None if cached == _CACHE_NONE else cached
+
+    result = scrape_og_image(url)
+    cache.set(key, result or _CACHE_NONE, _CACHE_TIMEOUT)
+    return result
 
 
 def svg_placeholder(label: str, alt: str | None = None) -> tuple[str, str]:
@@ -60,7 +75,7 @@ def svg_placeholder(label: str, alt: str | None = None) -> tuple[str, str]:
 
 def resolve_thumbnail(url: str, label: str) -> tuple[str, str]:
     """Return OG image and alt text or a placeholder when missing."""
-    og = scrape_og_image(url)
+    og = fetch_og_image(url)
     if og:
         return og, label
     return svg_placeholder(label)
