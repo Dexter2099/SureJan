@@ -39,3 +39,24 @@ def test_post_detail_shows_thumbnail_and_link(client):
     assert f'href="{post.content_url}"' in detail_html
     assert 'target="_blank"' in detail_html
     assert 'rel="noreferrer noopener"' in detail_html
+
+
+@pytest.mark.django_db
+def test_post_detail_link_placeholder(client):
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+
+    post = Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="Link",
+        content_url="https://example.com/article",
+    )
+
+    html = client.get(post.get_absolute_url()).content.decode()
+    assert "data:image/svg+xml" in html
+    assert f'href="{post.content_url}"' in html
+    assert 'target="_blank"' in html
+    assert 'rel="noopener noreferrer"' in html

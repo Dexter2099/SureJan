@@ -1,7 +1,7 @@
 {% load thumbnails %}
-{% if post.embed_thumb %}
-  {% with src=post.embed_thumb alt=post.embed_thumb_alt %}
-    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
+{% if post.thumbnail_url %}
+  {% with src=post.thumbnail_url alt=post.thumbnail_alt|default:post.title %}
+    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
       <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
       {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
     </a>
@@ -9,7 +9,7 @@
 {% else %}
   {% svg_placeholder post.title as ph %}
   {% with src=ph.src alt=ph.alt %}
-    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
+    <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
       <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
       {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
     </a>
