@@ -40,6 +40,17 @@ def test_backfill_thumbs_skips_cached_failures(monkeypatch):
     call_command("backfill_thumbs", limit=1, days=365)
     assert calls == []
 
+    cache.delete(f"thumbfail:{post.content_url}")
+
+    def fake_fetch3(url):
+        return "https://cdn.example.com/thumb.jpg"
+
+    monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch3)
+    call_command("backfill_thumbs", limit=1, days=365)
+    post.refresh_from_db()
+    assert post.thumbnail_url == "https://cdn.example.com/thumb.jpg"
+    assert post.thumbnail_alt == post.title
+
 
 @pytest.mark.django_db
 def test_backfill_thumbs_rejects_http(monkeypatch):
