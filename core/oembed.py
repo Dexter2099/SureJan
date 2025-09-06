@@ -6,19 +6,23 @@ import re
 from urllib.parse import quote, urlparse
 
 from django.conf import settings
+from django.core.cache import cache
 
 import bleach
 import requests
 
 
-def fetch_oembed(url: str) -> dict:
-    """Return embed HTML or a fallback link card for ``url``.
+_CACHE_KEY_PREFIX = "oembed:"
+_CACHE_TIMEOUT = 60 * 60  # 1 hour
 
-    For known providers (YouTube, Rumble and X/Twitter) the provider's oEmbed
-    endpoint is queried and the returned HTML is sanitized with Bleach.  On
-    failure or for unsupported providers a basic link card with title and
-    favicon information is returned.
-    """
+
+def fetch_oembed(url: str) -> dict:
+    """Return embed HTML or a fallback link card for ``url`` with caching."""
+
+    key = f"{_CACHE_KEY_PREFIX}{url}"
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
 
     providers = {
         "youtube.com": "https://www.youtube.com/oembed?format=json&url=",
@@ -36,11 +40,12 @@ def fetch_oembed(url: str) -> dict:
     parsed = urlparse(url)
     domain = parsed.netloc
     endpoint = None
-    for key, base in providers.items():
-        if key in domain:
+    for key_, base in providers.items():
+        if key_ in domain:
             endpoint = f"{base}{quote(url, safe='')}"
             break
 
+    result = None
     if endpoint:
         try:
             resp = requests.get(endpoint, timeout=5)
@@ -76,25 +81,29 @@ def fetch_oembed(url: str) -> dict:
                 },
                 strip=True,
             )
-            return {"type": "embed", "html": clean, "thumbnail_url": thumb}
+            result = {"type": "embed", "html": clean, "thumbnail_url": thumb}
         except Exception:
             pass
 
-    # Fallback simple link card
-    title = None
-    try:
-        resp = requests.get(url, timeout=5)
-        resp.raise_for_status()
-        match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
-        if match:
-            title = match.group(1).strip()
-    except Exception:
-        pass
-    favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
-    return {
-        "type": "link",
-        "url": url,
-        "domain": domain,
-        "title": title,
-        "favicon": favicon,
-    }
+    if not result:
+        # Fallback simple link card
+        title = None
+        try:
+            resp = requests.get(url, timeout=5)
+            resp.raise_for_status()
+            match = re.search(r"<title>(.*?)</title>", resp.text, re.IGNORECASE | re.DOTALL)
+            if match:
+                title = match.group(1).strip()
+        except Exception:
+            pass
+        favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+        result = {
+            "type": "link",
+            "url": url,
+            "domain": domain,
+            "title": title,
+            "favicon": favicon,
+        }
+
+    cache.set(key, result, _CACHE_TIMEOUT)
+    return result

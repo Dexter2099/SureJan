@@ -15,6 +15,8 @@ def build_embed_html(url: str) -> str:
 
     Supports YouTube, Rumble, and Twitter/X embeds rendered behind a click-to-
     play consent gate. Unrecognized providers fall back to a simple link card.
+    oEmbed and OpenGraph image lookups are cached to reduce repeated network
+    requests.
     """
     if not url:
         return ""
