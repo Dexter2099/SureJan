@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import html
+import json
 import logging
 import os
 import re
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from django.core.cache import cache
 
-from ..http_client import fetch_html
+from ..http_client import fetch_html, fetch_json
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -98,6 +99,55 @@ def _provider_default(url: str) -> str | None:
     return None
 
 
+def rumble_thumbnail(url: str) -> str | None:
+    """Return thumbnail URL for a Rumble video if available."""
+    api = f"https://rumble.com/api/oembed?url={quote(url, safe='')}"
+    try:
+        data = fetch_json(api, source="rumble-oembed")
+        thumb = data.get("thumbnail_url")
+        if isinstance(thumb, str) and thumb.startswith("http"):
+            return thumb
+    except Exception:
+        pass
+
+    try:
+        resp = fetch_html(url, source="rumble-page")
+        resp.raise_for_status()
+    except Exception:
+        return None
+    html_text = resp.text
+
+    meta_patterns = [
+        r"<meta[^>]+property=['\"]og:image:secure_url['\"][^>]+content=['\"]([^'\"]+)['\"]",
+        r"<meta[^>]+property=['\"]og:image['\"][^>]+content=['\"]([^'\"]+)['\"]",
+        r"<meta[^>]+name=['\"]twitter:image['\"][^>]+content=['\"]([^'\"]+)['\"]",
+    ]
+    for pat in meta_patterns:
+        m = re.search(pat, html_text, re.IGNORECASE)
+        if m:
+            candidate = html.unescape(m.group(1))
+            if candidate.startswith("http"):
+                return candidate
+
+    for block in re.findall(
+        r"<script[^>]+type=['\"]application/ld\+json['\"][^>]*>(.*?)</script>",
+        html_text,
+        re.IGNORECASE | re.DOTALL,
+    ):
+        try:
+            data = json.loads(block)
+        except Exception:
+            continue
+        thumb = data.get("thumbnailUrl")
+        if isinstance(thumb, str) and thumb.startswith("http"):
+            return thumb
+        if isinstance(thumb, list):
+            for item in thumb:
+                if isinstance(item, str) and item.startswith("http"):
+                    return item
+    return None
+
+
 _FAIL_KEY_PREFIX = "thumbfail:"  # cache key prefix for failures
 _FAIL_TTL = 60  # seconds
 
@@ -118,7 +168,11 @@ def resolve_thumbnail(
         fail_key = f"{_FAIL_KEY_PREFIX}{url}"
         if cache.get(fail_key):
             return None, svg_placeholder(label)[1]
-        thumb = fetch_og_image(url)
+        domain = urlparse(url).netloc.lower()
+        if "rumble.com" in domain:
+            thumb = rumble_thumbnail(url)
+        if not thumb:
+            thumb = fetch_og_image(url)
         if not thumb:
             cache.set(fail_key, True, _FAIL_TTL)
 
