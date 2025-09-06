@@ -1,6 +1,6 @@
 # SureJan V3 — Wireframes
 
-This folder contains the exported **Penpot wireframes** for SureJan V3.
+This folder contains the exported **Penpot wireframes** for SureJan V3. Video previews/embeds are deprecated; all wireframes show thumbnail-only references.
 
 ## Pages covered
 - **Main Page** (`V3-Main-Page.svg/png`)
@@ -21,9 +21,14 @@ This folder contains the exported **Penpot wireframes** for SureJan V3.
   - Same left/right sidebars as other pages
 
 ## Usage
-- These wireframes are **layout references only**.  
-- All code must follow the authoritative spec in `docs/V3-onepager.md` and `docs/UI-contract-V3.md`.  
+- These wireframes are **layout references only**.
+- All code must follow the authoritative spec in `docs/V3-onepager.md` and `docs/UI-contract-V3.md`.
 - If wireframes or layout change, update this folder and the spec files in the **same PR**.
+
+## See also (authoritative sources)
+- [Video thumbnail spec](../video-thumbnail-spec.md)
+- [UI Contract V3](../UI-contract-V3.md)
+- [UI Flow](../UI-Flow.md)
 
 ## Export formats
 - `.svg` → scalable vector reference for dev/design
