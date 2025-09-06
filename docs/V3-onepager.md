@@ -27,7 +27,7 @@
 - Anti-Astroturf
 
 ## Main Feed
-- Post card: Title, meta, optional media, body preview, actions
+- Post card: Title (links to `/r/<c>/comments/<id>/<slug>/`), meta, static thumbnail (opens provider in new tab), body preview, actions
 
 ## Submit Post
 - Community selector (required)
@@ -38,7 +38,7 @@
 - Validation: Title + (Body or Media)
 
 ## Post Detail
-- Full post (title/meta/media/body/actions)
+- Full post: title/meta, static thumbnail (click opens provider in new tab), body, actions
 - Comment input
 - Comment list (flat, simple)
 

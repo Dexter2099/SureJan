@@ -76,7 +76,7 @@
 
 ### B) Engaging as an authenticated user
 
-1. **Home**/**Community** → vote on cards; click title to **Post detail**
+1. **Home**/**Community** → vote on cards; click title to **Post detail** (`/r/<c>/comments/<id>/<slug>/`); click thumbnail → provider opens in new tab
 2. In **Post detail**: static thumbnail at top; clicking opens provider in new tab; body below; actions row includes astro chip
 3. **Comment:** write + submit; thread updates; reply at any depth
 
