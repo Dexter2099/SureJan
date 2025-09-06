@@ -1,6 +1,9 @@
-from unittest.mock import patch
 import os
+from unittest.mock import Mock, patch
+
 from django.core.cache import cache
+
+from core import http_client
 from core.utils import thumbnails
 
 
@@ -55,3 +58,18 @@ def test_fetch_og_image_no_cache_on_error():
             assert thumbnails.fetch_og_image(url) is None
             assert thumbnails.fetch_og_image(url) is None
     assert mock_scrape.call_count == 2
+
+
+def test_scrape_og_image_logs_provider_and_ua():
+    http_client.COUNTERS.clear()
+    resp = Mock()
+    resp.status_code = 200
+    resp.text = "<html></html>"
+    resp.raise_for_status = lambda: None
+    session = http_client.get_session()
+    session.get = Mock(return_value=resp)
+    with patch('core.http_client.get_session', return_value=session):
+        thumbnails.scrape_og_image('https://example.com/post')
+    headers = session.headers
+    assert headers['User-Agent'].startswith('Mozilla/5.0')
+    assert http_client.COUNTERS['example.com']['success'] == 1

@@ -52,6 +52,8 @@ class FeedThumbnailTests(TestCase):
             const code = fs.readFileSync('static/js/embeds.js', 'utf8');
             eval(code);
             window.initEmbeds(document);
+            const before = document.querySelector('iframe');
+            console.log(before ? before.outerHTML : '');
             const link = document.querySelector('a');
             link.dispatchEvent(new window.Event('click', { bubbles: true }));
             const iframe = document.querySelector('iframe');
@@ -59,7 +61,9 @@ class FeedThumbnailTests(TestCase):
             """
         )
         result = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
-        out = result.stdout.strip()
-        self.assertIn("<iframe", out)
-        self.assertIn('allowfullscreen', out)
-        self.assertIn('referrerpolicy="no-referrer"', out)
+        lines = result.stdout.splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertNotIn('<iframe', lines[0])
+        self.assertIn('<iframe', lines[1])
+        self.assertIn('allowfullscreen', lines[1])
+        self.assertIn('referrerpolicy="no-referrer"', lines[1])
