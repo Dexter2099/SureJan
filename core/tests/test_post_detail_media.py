@@ -269,7 +269,12 @@ class PostDetailMediaTests(TestCase):
             self.assertContains(resp, f'src="{thumb_url}"')
             parsed = urlparse(thumb_url)
             host = f"{parsed.scheme}://{parsed.netloc}"
-            allowed = list(conf_settings._csp_img_src) + ["https://*.twimg.com"]
+            providers = {k: v.copy() for k, v in conf_settings.EMBED_PROVIDERS.items()}
+            providers["X"]["flag"] = True
+            allowed = []
+            for p in providers.values():
+                if p["flag"]:
+                    allowed.extend(p["img_hosts"])
             self.assertTrue(
                 any(
                     host == pattern
