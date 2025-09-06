@@ -77,40 +77,35 @@ SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG
 
-ENABLE_TWITTER_EMBEDS = os.environ.get("ENABLE_TWITTER_EMBEDS", "0") in (
+EMBEDS_ENABLED = os.environ.get("EMBEDS_ENABLED", "0") in (
     "1",
     "true",
     "True",
 )
-ENABLE_YOUTUBE_EMBEDS = os.environ.get("ENABLE_YOUTUBE_EMBEDS", "1") in (
+THUMBNAILS_ONLY = os.environ.get("THUMBNAILS_ONLY", "1") in (
     "1",
     "true",
     "True",
 )
-ENABLE_RUMBLE_EMBEDS = os.environ.get("ENABLE_RUMBLE_EMBEDS", "1") in (
-    "1",
-    "true",
-    "True",
-)
+THUMBNAIL_CACHE_SECONDS = int(os.environ.get("THUMBNAIL_CACHE_SECONDS", "3600"))
+
+ENABLE_TWITTER_EMBEDS = False
+ENABLE_YOUTUBE_EMBEDS = False
+ENABLE_RUMBLE_EMBEDS = False
+
 EMBED_PROVIDERS = {
     "YOUTUBE": {
-        "flag": ENABLE_YOUTUBE_EMBEDS,
         "img_hosts": ["https://i.ytimg.com"],
-        "frame_hosts": ["https://www.youtube-nocookie.com"],
     },
     "X": {
-        "flag": ENABLE_TWITTER_EMBEDS,
         "img_hosts": ["https://*.twimg.com"],
-        "frame_hosts": ["https://platform.twitter.com"],
     },
     "RUMBLE": {
-        "flag": ENABLE_RUMBLE_EMBEDS,
         "img_hosts": [
             "https://*.rumble.com",
             "https://*.rumblecdn.com",
             "https://*.rmbl.ws",
         ],
-        "frame_hosts": ["https://rumble.com"],
     },
 }
 
@@ -139,12 +134,10 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
     _img_src = ["'self'"]
-    _frame_src = ["'self'"]
     for provider in EMBED_PROVIDERS.values():
-        if provider["flag"]:
-            _img_src.extend(provider["img_hosts"])
-            _frame_src.extend(provider["frame_hosts"])
+        _img_src.extend(provider["img_hosts"])
     _img_src.append("data:")
+    _frame_src = ["'self'"]
 
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {

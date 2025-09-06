@@ -45,7 +45,7 @@ class CommentLinkTests(TestCase):
         )
         self.assertEqual(
             url,
-            f"/r/{self.community.slug}/comments/{self.post.pk}/{self.post.slug}/",
+            f"/r/{self.community.slug}/comments/{self.post.pk}/{self.post.slug}",
         )
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

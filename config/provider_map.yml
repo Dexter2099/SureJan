@@ -1,9 +1,6 @@
 youtube:
   img_hosts: ["i.ytimg.com"]
-  frame_hosts: ["www.youtube-nocookie.com"]
 x:
   img_hosts: ["*.twimg.com"]
-  frame_hosts: ["platform.twitter.com", "*.twitter.com", "*.x.com"]
 rumble:
   img_hosts: ["*.rumblecdn.com", "*.rmbl.ws"]
-  frame_hosts: ["rumble.com", "*.rumble.com"]
