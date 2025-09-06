@@ -14,6 +14,10 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
+`YT_DIRECT_OG`, `RUMBLE_DIRECT_OG`, and `X_DIRECT_OG` (all default `0`) opt a
+provider into direct OpenGraph thumbnail lookups. See
+[direct-og-rollout.md](direct-og-rollout.md) for rollout and rollback steps.
+
 ### CSP / Hosts
 
 Define public domains with `DJANGO_ALLOWED_HOSTS` (comma-separated) so Django

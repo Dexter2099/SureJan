@@ -6,6 +6,7 @@ import re
 from urllib.parse import parse_qs, urlparse
 
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from .video_urls import canonicalize_video_url
 
@@ -32,6 +33,25 @@ def build_embed_iframe(url: str | None) -> str | None:
     return ``None`` which allows callers to fall back to a link card.
     """
     if not url:
+        return None
+
+    raw_domain = urlparse(url).netloc.lower()
+    if (
+        (settings.YT_DIRECT_OG and ("youtube.com" in raw_domain or "youtu.be" in raw_domain))
+        or (settings.RUMBLE_DIRECT_OG and "rumble.com" in raw_domain)
+        or (
+            settings.X_DIRECT_OG
+            and raw_domain
+            in {
+                "x.com",
+                "twitter.com",
+                "mobile.twitter.com",
+                "m.twitter.com",
+                "fxtwitter.com",
+                "vxtwitter.com",
+            }
+        )
+    ):
         return None
 
     canon = canonicalize_video_url(url)

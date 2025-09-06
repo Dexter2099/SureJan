@@ -8,6 +8,7 @@ from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 from django.core.cache import cache
+from django.conf import settings
 
 from ..http_client import fetch_html
 from .video_urls import canonicalize_video_url
@@ -165,7 +166,25 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
     SVG placeholder.
     """
 
-    canon_url = canonicalize_video_url(url)
+    domain = urlparse(url).netloc.lower()
+    direct_og = (
+        (settings.YT_DIRECT_OG and ("youtube.com" in domain or "youtu.be" in domain))
+        or (settings.RUMBLE_DIRECT_OG and "rumble.com" in domain)
+        or (
+            settings.X_DIRECT_OG
+            and domain
+            in {
+                "x.com",
+                "twitter.com",
+                "mobile.twitter.com",
+                "m.twitter.com",
+                "fxtwitter.com",
+                "vxtwitter.com",
+            }
+        )
+    )
+
+    canon_url = url if direct_og else canonicalize_video_url(url)
 
     success_key = f"{_THUMB_KEY_PREFIX}{canon_url}"
     cached = cache.get(success_key)
@@ -179,7 +198,7 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
     thumb = None
     if fetch_remote:
         thumb = fetch_og_image(canon_url)
-    if not thumb:
+    if not thumb and not direct_og:
         thumb = _provider_fallback(canon_url, fetch_remote)
 
     if thumb and thumb.startswith("https://"):
