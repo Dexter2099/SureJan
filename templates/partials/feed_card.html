@@ -1,12 +1,7 @@
 {% load url_domain astro_filters %}
 <article class="post-card" data-testid="post-card">
-{% with detail_url=post.get_absolute_url|default:None %}
+  {% with detail_url=post.get_absolute_url|default:None %}
   {% if not detail_url %}{% url 'post_detail_id' post.pk as detail_url %}{% endif %}
-  {% if post.post_type == 'link' %}
-    {% include "partials/post_thumbnail.html" with post=post %}
-  {% elif post.image %}
-    {% include "partials/post_thumbnail.html" with post=post href=detail_url target='' rel='' aria_label='Open post' %}
-  {% endif %}
   <div class="post-meta">
     <a href="{% url 'community' post.community.slug %}">r/{{ post.community.slug }}</a> · {{ post.author.username }} · {{ post.created_at|timesince }} ago
   </div>

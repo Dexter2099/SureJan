@@ -1,13 +1,11 @@
 from io import BytesIO
+from io import BytesIO
 from PIL import Image
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import TestCase
-from unittest.mock import patch
-
-from core.utils import thumbnails
 from .models import Community, Post, RateLimitCounter
 
 
@@ -45,74 +43,23 @@ class PostSubmitTests(TestCase):
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "Hello")
 
-    def test_youtube_link_post(self):
-        link = "https://www.youtube-nocookie.com/watch?v=dQw4w9WgXcQ"
-        with patch("core.views.resolve_thumbnail", return_value=("data:image/svg+xml;base64,ph", "alt")):
-            resp = self.client.post(
-                reverse("post_submit"),
-                {
-                    "community": self.community.id,
-                    "post_type": "link",
-                    "title": "YT",
-                    "content_url": link,
-                },
-                follow=True,
-            )
-        self.assertEqual(resp.status_code, 200)
-        post = Post.objects.get(title="YT")
-        self.assertEqual(post.content_url, "https://youtube.com/watch?v=dQw4w9WgXcQ")
-        feed = self.client.get(reverse("home"))
-        self.assertContains(feed, "YT")
-
-    def test_link_post_remote_thumb_saved(self):
+    def test_link_post(self):
         link = "https://example.com/page"
-        def fake_resolve(url, label, fetch_remote=False, post=None):
-            post.image = make_image("thumb.jpg")
-            post.save(update_fields=["image"])
-            return ("https://cdn.example.com/thumb.jpg", "alt")
-
-        with patch(
-            "core.views.resolve_thumbnail",
-            side_effect=fake_resolve,
-        ):
-            resp = self.client.post(
-                reverse("post_submit"),
-                {
-                    "community": self.community.id,
-                    "post_type": "link",
-                    "title": "NoThumb",
-                    "content_url": link,
-                },
-                follow=True,
-            )
+        resp = self.client.post(
+            reverse("post_submit"),
+            {
+                "community": self.community.id,
+                "post_type": "link",
+                "title": "Link",
+                "content_url": link,
+            },
+            follow=True,
+        )
         self.assertEqual(resp.status_code, 200)
-        post = Post.objects.get(title="NoThumb")
-        self.assertTrue(post.image)
-
-    def test_rumble_link_post_fetches_og_image(self):
-        link = "https://rumble.com/v1abc"
-        called = {}
-
-        def fake_fetch(url):
-            called["url"] = url
-            thumbnails.fetch_og_image.last_status = 200
-            return None
-
-        with patch("core.utils.thumbnails.fetch_og_image", side_effect=fake_fetch) as mock_fetch, \
-            patch("core.utils.thumbnails._provider_fallback", return_value=None):
-            resp = self.client.post(
-                reverse("post_submit"),
-                {
-                    "community": self.community.id,
-                    "post_type": "link",
-                    "title": "R", 
-                    "content_url": link,
-                },
-                follow=True,
-            )
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(mock_fetch.call_count, 1)
-        self.assertEqual(called.get("url"), "https://rumble.com/v1abc.html")
+        post = Post.objects.get(title="Link")
+        self.assertEqual(post.content_url, link)
+        feed = self.client.get(reverse("home"))
+        self.assertContains(feed, "Link")
 
     def test_image_post(self):
         img = make_image()
