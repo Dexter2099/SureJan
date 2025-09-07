@@ -47,7 +47,7 @@ class PostSubmitTests(TestCase):
 
     def test_youtube_link_post(self):
         link = "https://www.youtube-nocookie.com/watch?v=dQw4w9WgXcQ"
-        with patch("core.utils.thumbnails.resolve_thumbnail", return_value=("data:image/svg+xml;base64,ph", "alt")):
+        with patch("core.views.resolve_thumbnail", return_value=("data:image/svg+xml;base64,ph", "alt")):
             resp = self.client.post(
                 reverse("post_submit"),
                 {
@@ -60,19 +60,21 @@ class PostSubmitTests(TestCase):
             )
         self.assertEqual(resp.status_code, 200)
         post = Post.objects.get(title="YT")
-        self.assertEqual(post.content_url, link)
+        self.assertEqual(post.content_url, "https://youtube.com/watch?v=dQw4w9WgXcQ")
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "YT")
 
     def test_link_post_remote_thumb_saved(self):
         link = "https://example.com/page"
-        def fake_persist(post, url, label):
+        def fake_resolve(url, label, fetch_remote=False, post=None):
             post.image = make_image("thumb.jpg")
             post.save(update_fields=["image"])
+            return ("https://cdn.example.com/thumb.jpg", "alt")
+
         with patch(
-            "core.utils.thumbnails.resolve_thumbnail",
-            return_value=("https://cdn.example.com/thumb.jpg", "alt"),
-        ), patch("core.utils.thumbnails.persist_thumbnail", side_effect=fake_persist):
+            "core.views.resolve_thumbnail",
+            side_effect=fake_resolve,
+        ):
             resp = self.client.post(
                 reverse("post_submit"),
                 {
@@ -110,7 +112,7 @@ class PostSubmitTests(TestCase):
             )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(mock_fetch.call_count, 1)
-        self.assertEqual(called.get("url"), link)
+        self.assertEqual(called.get("url"), "https://rumble.com/v1abc.html")
 
     def test_image_post(self):
         img = make_image()
