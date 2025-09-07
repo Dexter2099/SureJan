@@ -51,7 +51,16 @@ def _log(url: str, source: str, status: int | None) -> None:
     level = logging.INFO if status and status < 400 else logging.WARNING
     key = "success" if status and status < 400 else "error"
     COUNTERS[provider][key] += 1
-    logger.log(level, "provider=%s url=%s source=%s status=%s", provider, url, source, status)
+    ua = get_session().headers.get("User-Agent", "")
+    logger.log(
+        level,
+        "provider=%s url=%s source=%s ua=%s status=%s",
+        provider,
+        url,
+        source,
+        ua,
+        status,
+    )
 
 
 def fetch_json(url: str, source: str = "unknown") -> dict:

@@ -305,5 +305,7 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         cache.set(success_key, thumb, _THUMB_TTL)
         return thumb, label
 
-    cache.set(fail_key, True, _fail_ttl(status))
+    ttl = _fail_ttl(status)
+    logger.info("thumb-fail url=%s status=%s ttl=%s", canon_url, status, ttl)
+    cache.set(fail_key, True, ttl)
     return svg_placeholder(label)
