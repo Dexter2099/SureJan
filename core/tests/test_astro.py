@@ -184,17 +184,14 @@ class AstroFeatureFlagViewTests(TestCase):
             self.assertEqual(self.client.get(url_methods).status_code, 404)
             self.assertEqual(self.client.get(url_posts).status_code, 404)
 
-    def test_chip_containers_hidden_when_flag_disabled(self):
+    def test_chip_containers_removed(self):
         chips_url = reverse("post_signals_chips", args=[self.post.pk])
         detail_url = reverse(
             "post_detail",
             args=[self.community.slug, self.post.pk, self.post.slug],
         )
-        self.assertContains(self.client.get(detail_url), chips_url)
-        self.assertContains(self.client.get(reverse("home")), chips_url)
-        with override_settings(ASTROTURF_WATCH=False):
-            self.assertNotContains(self.client.get(detail_url), chips_url)
-            self.assertNotContains(self.client.get(reverse("home")), chips_url)
+        self.assertNotContains(self.client.get(detail_url), chips_url)
+        self.assertNotContains(self.client.get(reverse("home")), chips_url)
 
 
 class AstroEnvVarToggleTests(SimpleTestCase):
