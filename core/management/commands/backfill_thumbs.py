@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 
-from core import http_client
+from core import og_fetch_config
 from core.models import Post, _make_thumb
 from core.utils.thumbnails import resolve_thumbnail
 from core.utils.video_urls import canonicalize_video_url
@@ -69,7 +69,8 @@ class Command(BaseCommand):
         if count < opts["limit"]:
             limit = opts["limit"] - count
             posts = list(qs_link[:limit])
-            http_client._TIMEOUT = opts["timeout"]
+            og_fetch_config.CONNECT_TIMEOUT = opts["timeout"]
+            og_fetch_config.READ_TIMEOUT = opts["timeout"]
 
             if connection.vendor == "sqlite":
                 def worker_sync(post):
