@@ -9,26 +9,14 @@ from core.models import Community, Post
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "url,thumb_url,expected",
+    "url",
     [
-        (
-            "https://www.youtube.com/watch?v=abc123",
-            "https://i.ytimg.com/thumb.jpg",
-            "i.ytimg.com",
-        ),
-        (
-            "https://rumble.com/vabcde-example.html",
-            f"{settings.MEDIA_URL}thumb.jpg",
-            settings.MEDIA_URL,
-        ),
-        (
-            "https://x.com/user/status/1",
-            "https://pbs.twimg.com/thumb.jpg",
-            "pbs.twimg.com",
-        ),
+        "https://www.youtube.com/watch?v=abc123",
+        "https://rumble.com/vabcde-example.html",
+        "https://x.com/user/status/1",
     ],
 )
-def test_post_thumbnail_uses_img_not_iframe(url, thumb_url, expected):
+def test_post_thumbnail_uses_img_not_iframe(url):
     User = get_user_model()
     user = User.objects.create_user("alice", password="pw")
     com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
@@ -39,11 +27,11 @@ def test_post_thumbnail_uses_img_not_iframe(url, thumb_url, expected):
         post_type="link",
         title="Video",
         content_url=url,
-        thumbnail_url=thumb_url,
+        thumbnail_url=f"{settings.MEDIA_URL}thumb.jpg",
     )
 
     html = render_to_string("partials/post_thumbnail.html", {"post": post})
     assert "<iframe" not in html
     imgs = re.findall(r'<img[^>]+src="([^"]+)"', html)
     assert len(imgs) == 1
-    assert expected in imgs[0]
+    assert imgs[0].startswith(settings.MEDIA_URL)

@@ -10,7 +10,7 @@ from datetime import timedelta
 
 from core import http_client
 from core.models import Post, _make_thumb
-from core.utils.thumbnails import resolve_thumbnail, cache_remote_image
+from core.utils.thumbnails import resolve_thumbnail
 from core.utils.video_urls import canonicalize_video_url
 
 
@@ -54,27 +54,6 @@ class Command(BaseCommand):
             .exclude(content_url="")
             .order_by("-created_at")
         )
-        qs_rumble = (
-            Post.objects.filter(post_type="link", created_at__gte=cutoff)
-            .exclude(thumbnail_url__isnull=True)
-            .exclude(thumbnail_url="")
-            .filter(
-                Q(thumbnail_url__icontains="rmbl.ws")
-                | Q(thumbnail_url__icontains="rumblecdn.com")
-            )
-        )
-        converted = 0
-        for p in qs_rumble.iterator():
-            try:
-                cached = cache_remote_image(p.thumbnail_url or "")
-                if cached:
-                    converted += 1
-                    if not opts["dry_run"]:
-                        p.thumbnail_url = cached
-                        p.save(update_fields=["thumbnail_url"])
-                        connection.commit()
-            except Exception as e:
-                self.stderr.write(f"Post {p.id}: {e}")
         count = 0
         for p in qs_img.iterator():
             try:
@@ -148,4 +127,4 @@ class Command(BaseCommand):
                     return sum(await asyncio.gather(*(run(p) for p in posts)))
 
                 count += asyncio.run(runner())
-        self.stdout.write(f"Backfilled {count} thumbnails; converted {converted} thumbnails")
+        self.stdout.write(f"Backfilled {count} thumbnails")
