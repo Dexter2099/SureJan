@@ -17,6 +17,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
 from ..http_client import fetch_og_html
+from ..og_fetch_config import OG_HEADERS
 from .url_cleanup import cleanup_url
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -282,7 +283,7 @@ def persist_thumbnail(post: "Post", img_url: str, label: str) -> None:
         return
 
     try:
-        resp = requests.get(img_url, timeout=(8, 8))
+        resp = requests.get(img_url, headers=OG_HEADERS, timeout=(8, 8))
     except Exception:
         return
 
