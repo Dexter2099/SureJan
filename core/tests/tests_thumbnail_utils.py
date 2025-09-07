@@ -1,4 +1,5 @@
 import pytest
+import requests
 from django.core.cache import cache
 from pathlib import Path
 
@@ -210,7 +211,9 @@ def _fake_resp(text):
 def test_fetch_og_image_from_fixture(monkeypatch):
     html = Path("tests/fixtures/youtube/ogonly.html").read_text()
     monkeypatch.setattr(
-        thumbnails, "fetch_og_html", lambda url, source=None: _fake_resp(html)
+        thumbnails,
+        "fetch_og_html",
+        lambda url, source=None, fallback=False: _fake_resp(html),
     )
     assert (
         thumbnails.fetch_og_image("https://youtu.be/abc123")
@@ -221,9 +224,32 @@ def test_fetch_og_image_from_fixture(monkeypatch):
 def test_x_fallback_thumb_from_fixture(monkeypatch):
     html = Path("tests/fixtures/x/fallback.html").read_text()
     monkeypatch.setattr(
-        thumbnails, "fetch_og_html", lambda url, source=None: _fake_resp(html)
+        thumbnails,
+        "fetch_og_html",
+        lambda url, source=None, fallback=False: _fake_resp(html),
     )
     assert (
         thumbnails.x_fallback_thumb("https://x.com/user/status/1")
         == "https://pbs.twimg.com/media/xyz.jpg"
     )
+
+
+def test_scrape_og_image_timeout_logs_elapsed(monkeypatch, caplog):
+    def fake_fetch(url, source="og-image", fallback=True):
+        raise requests.exceptions.Timeout()
+
+    monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch)
+
+    counter = {"t": 0}
+
+    def fake_monotonic():
+        counter["t"] += 1
+        return counter["t"]
+
+    monkeypatch.setattr(thumbnails.time, "monotonic", fake_monotonic)
+
+    with caplog.at_level("INFO"):
+        thumbnails.scrape_og_image("https://example.com")
+
+    assert "result=http_timeout" in caplog.text
+    assert "elapsed=1.00" in caplog.text

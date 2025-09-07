@@ -106,3 +106,47 @@ def test_fetch_og_html_robots_block(monkeypatch):
     monkeypatch.setattr(http_client, "_robots_allowed", lambda url: False)
     with pytest.raises(PermissionError):
         http_client.fetch_og_html("https://example.com")
+
+
+def test_fetch_og_html_logs_attempts(monkeypatch, caplog):
+    http_client._OG_SESSION = None
+    monkeypatch.setattr(http_client, "OG_FETCH_DISABLE_RETRIES", False)
+    calls = []
+
+    def fake_get(url, timeout):
+        calls.append(1)
+        if len(calls) < 3:
+            raise requests.exceptions.Timeout()
+        return type("R", (), {"status_code": 200})()
+
+    monkeypatch.setattr(http_client, "_robots_allowed", lambda url: True)
+    session = http_client.get_og_session()
+    monkeypatch.setattr(session, "get", fake_get)
+    monkeypatch.setattr(http_client.time, "sleep", lambda s: None)
+    with caplog.at_level("INFO"):
+        http_client.fetch_og_html("https://example.com", fallback=True)
+    attempt_logs = [m for m in caplog.messages if "attempt=" in m]
+    assert len(attempt_logs) == 3
+    assert "status=timeout" in attempt_logs[0]
+    assert "status=timeout" in attempt_logs[1]
+    assert "status=200" in attempt_logs[2]
+
+
+def test_fetch_og_html_failure_summary(monkeypatch, caplog):
+    http_client._OG_SESSION = None
+    monkeypatch.setattr(http_client, "OG_FETCH_DISABLE_RETRIES", False)
+
+    def fake_get(url, timeout):
+        raise requests.exceptions.Timeout()
+
+    monkeypatch.setattr(http_client, "_robots_allowed", lambda url: True)
+    session = http_client.get_og_session()
+    monkeypatch.setattr(session, "get", fake_get)
+    monkeypatch.setattr(http_client.time, "sleep", lambda s: None)
+    with caplog.at_level("INFO"):
+        with pytest.raises(requests.exceptions.Timeout):
+            http_client.fetch_og_html("https://example.com", fallback=True)
+    summary_logs = [m for m in caplog.messages if "reason=" in m]
+    assert summary_logs
+    assert "reason=timeout" in summary_logs[-1]
+    assert "fallback=True" in summary_logs[-1]
