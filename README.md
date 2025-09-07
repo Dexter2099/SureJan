@@ -29,7 +29,8 @@ SureJan is an independent, Brisbane-built community forum inspired by the old Re
 * **Frontend**: HTMX for partial page updates, Django templates for rendering
 * **Database**: Postgres, SQLite fallback for development
 * **Deployment**: Fly.io with Docker-based builds
-* **Static Files**: WhiteNoise for static file serving, S3-compatible storage for media (Tigris)
+* **Static Files**: WhiteNoise for static file serving, S3-compatible storage for media (Tigris),
+  with a local `/media/` fallback when S3 credentials are missing or placeholders
 * **Security**: django-csp, CSRF protection, secure session and cookie handling
 * **Testing**: Django test framework with HTMX request coverage
 

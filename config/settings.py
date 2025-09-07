@@ -243,22 +243,37 @@ STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 WHITENOISE_MANIFEST_STRICT = True
 
 # Required envs
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")  # e.g. https://fly.storage.tigris.dev
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
+
 # Determine if S3 is fully configured and enabled
-required = [
-    AWS_STORAGE_BUCKET_NAME,
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    AWS_S3_ENDPOINT_URL,
-    os.getenv("MEDIA_URL"),
+required = {
+    "AWS_STORAGE_BUCKET_NAME": AWS_STORAGE_BUCKET_NAME,
+    "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
+    "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
+    "AWS_S3_ENDPOINT_URL": AWS_S3_ENDPOINT_URL,
+    "MEDIA_URL": os.getenv("MEDIA_URL", ""),
+}
+
+# Basic placeholder detection so sample values like "your-bucket" don't enable S3
+placeholder_tokens = [
+    "your-bucket",
+    "your-access-key",
+    "your-secret",
+    "your-endpoint",
 ]
+has_placeholders = any(
+    token in (value or "")
+    for value in required.values()
+    for token in placeholder_tokens
+)
+
 USE_S3 = os.getenv("USE_S3", "1") in ("1", "true", "True")
-if USE_S3 and all(required) and not IS_BUILD:
-    MEDIA_URL = os.environ["MEDIA_URL"]
+if USE_S3 and all(required.values()) and not has_placeholders and not IS_BUILD:
+    MEDIA_URL = required["MEDIA_URL"]
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_ADDRESSING_STYLE = "virtual"
@@ -266,6 +281,8 @@ if USE_S3 and all(required) and not IS_BUILD:
     AWS_DEFAULT_ACL = "public-read"
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
 else:
+    # Fallback to local storage so development and misconfigured deployments
+    # serve media from /media/.
     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
