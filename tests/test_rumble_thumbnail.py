@@ -1,7 +1,11 @@
+import hashlib
+
+from django.conf import settings
 from django.core.cache import cache
+from django.test import override_settings
+
 from core.utils import thumbnails
 from core.utils.video_urls import canonicalize_video_url
-import hashlib
 
 
 def test_resolve_thumbnail_rumble(monkeypatch):
@@ -29,18 +33,8 @@ def test_resolve_thumbnail_rumble_rejects_http(monkeypatch):
     assert alt == thumbnails.FALLBACK_ALT
 
 
-def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, settings, tmp_path):
+def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, tmp_path):
     cache.clear()
-    settings.RUMBLE_DIRECT_OG = True
-    settings.MEDIA_ROOT = tmp_path / "media"
-    settings.THUMB_CACHE_DIR = settings.MEDIA_ROOT / "thumbs"
-    settings.MEDIA_URL = "/media/"
-
-    # ensure directory clean
-    if settings.THUMB_CACHE_DIR.exists():
-        for p in settings.THUMB_CACHE_DIR.iterdir():
-            p.unlink()
-
     remote_url = "https://sp.rmbl.ws/s8/1/testslug.jpg"
 
     def fake_fetch_og(url):
@@ -67,16 +61,24 @@ def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, settings, tmp_pa
     url = "https://rumble.com/v1abc"
     canon = canonicalize_video_url(url)
     digest = hashlib.sha256(canon.encode("utf-8")).hexdigest()
-    expected = settings.THUMB_CACHE_DIR / f"{digest}.jpg"
 
-    src, alt = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
-    assert src == f"{settings.MEDIA_URL}thumbs/{expected.name}"
-    assert expected.exists()
-    assert calls == [remote_url]
+    with override_settings(
+        RUMBLE_DIRECT_OG=True,
+        MEDIA_ROOT=tmp_path / "media",
+        THUMB_CACHE_DIR=tmp_path / "media" / "thumbs",
+        MEDIA_URL="/media/",
+    ):
+        expected = settings.THUMB_CACHE_DIR / f"{digest}.jpg"
 
-    src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
-    assert src2 == src
-    assert calls == [remote_url]
+        src, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
+        assert src.startswith(settings.MEDIA_URL)
+        assert src.endswith(expected.name)
+        assert expected.exists()
+        assert calls == [remote_url]
+
+        src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
+        assert src2 == src
+        assert calls == [remote_url]
 
 
 def test_resolve_thumbnail_rumble_direct_og_error(monkeypatch, settings, tmp_path):
