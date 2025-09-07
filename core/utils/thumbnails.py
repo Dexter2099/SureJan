@@ -5,6 +5,8 @@ import logging
 import os
 import re
 import hashlib
+import time
+import requests
 from pathlib import Path
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
@@ -29,25 +31,39 @@ def scrape_og_image(url: str) -> tuple[Optional[str], Optional[int]]:
     """Return the first OpenGraph image URL for ``url`` if present."""
     url = cleanup_url(url)
     provider = urlparse(url).netloc
-    status = None
+    status: Optional[int] = None
     image = None
     result = "og_missing"
+    start = time.monotonic()
+    elapsed: Optional[float] = None
     try:
-        resp = fetch_og_html(url, source="og-image")
+        resp = fetch_og_html(url, source="og-image", fallback=True)
         status = resp.status_code
         resp.raise_for_status()
         match = OG_IMAGE_RE.search(resp.text)
         if match:
             image = match.group(1)
             result = "og_found"
+    except requests.exceptions.Timeout:
+        elapsed = time.monotonic() - start
+        result = "http_timeout"
     except Exception:
         if status == 403:
             result = "http_403"
         else:
             result = f"http_{status}" if status else "error"
-    logger.info(
-        "provider=%s result=%s origin_image_url=%s", provider, result, image or ""
-    )
+    if elapsed is not None:
+        logger.info(
+            "provider=%s result=%s origin_image_url=%s elapsed=%.2f",
+            provider,
+            result,
+            image or "",
+            elapsed,
+        )
+    else:
+        logger.info(
+            "provider=%s result=%s origin_image_url=%s", provider, result, image or "",
+        )
     return image, status
 
 

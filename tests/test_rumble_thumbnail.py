@@ -24,7 +24,7 @@ def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
 
     calls = []
 
-    def fake_fetch_og_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown", fallback=False):
         calls.append(url)
         return Resp()
 
@@ -83,7 +83,7 @@ def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, tmp_path):
 
     calls = []
 
-    def fake_fetch_og_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown", fallback=False):
         calls.append(url)
         return Resp()
 
@@ -133,7 +133,7 @@ def test_resolve_thumbnail_rumble_direct_og_error(monkeypatch, settings, tmp_pat
         def raise_for_status(self):
             raise Exception("boom")
 
-    def fake_fetch_og_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown", fallback=False):
         return Resp()
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch_og)

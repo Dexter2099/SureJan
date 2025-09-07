@@ -111,10 +111,17 @@ def _robots_allowed(url: str) -> bool:
     return parser.can_fetch(ua, url)
 
 
-def fetch_og_html(url: str, source: str = "unknown") -> requests.Response:
+def fetch_og_html(
+    url: str, source: str = "unknown", fallback: bool = False
+) -> requests.Response:
     """Fetch ``url`` for OpenGraph scraping with retries and robots checks."""
+
+    provider = urlparse(url).netloc
     if not _robots_allowed(url):
         _log(url, source, None)
+        logger.warning(
+            "provider=%s url=%s reason=robots fallback=%s", provider, url, fallback
+        )
         raise PermissionError("Blocked by robots.txt")
 
     session = get_og_session()
@@ -122,26 +129,50 @@ def fetch_og_html(url: str, source: str = "unknown") -> requests.Response:
     resp: Optional[requests.Response] = None
     last_exc: Optional[Exception] = None
 
-    for attempt in range(attempts):
+    for attempt in range(1, attempts + 1):
         try:
             resp = session.get(url, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+            status: Optional[int] = resp.status_code
         except requests.exceptions.Timeout as exc:
             last_exc = exc
             status = None
-        else:
-            status = resp.status_code
-            if status not in OG_RETRY_STATUSES or status in {403, 404}:
-                _log(url, source, status)
-                return resp
 
-        if attempt == attempts - 1:
+        logger.info(
+            "provider=%s url=%s status=%s attempt=%s",
+            provider,
+            url,
+            status if status is not None else "timeout",
+            attempt,
+        )
+
+        if status is not None and (status not in OG_RETRY_STATUSES or status in {403, 404}):
+            _log(url, source, status)
+            if status >= 400:
+                logger.warning(
+                    "provider=%s url=%s reason=http_%s fallback=%s",
+                    provider,
+                    url,
+                    status,
+                    fallback,
+                )
+            return resp
+
+        if attempt == attempts:
             _log(url, source, status if resp is not None else None)
+            reason = "timeout" if status is None else f"http_{status}"
+            logger.warning(
+                "provider=%s url=%s reason=%s fallback=%s",
+                provider,
+                url,
+                reason,
+                fallback,
+            )
             if resp is not None:
                 return resp
             raise last_exc if last_exc else Exception("fetch failed")
 
         time.sleep(random.uniform(0.2, 0.3))
-        backoff = (0.5 if attempt == 0 else 1.5) + random.uniform(-0.25, 0.25)
+        backoff = (0.5 if attempt == 1 else 1.5) + random.uniform(-0.25, 0.25)
         time.sleep(max(backoff, 0))
 
     return resp  # pragma: no cover
