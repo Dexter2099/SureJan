@@ -313,10 +313,12 @@ if USE_S3 and all(required) and not IS_BUILD:
     AWS_S3_SIGNATURE_VERSION = "s3v4"
     AWS_DEFAULT_ACL = "public-read"
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
+    THUMB_CACHE_DIR = BASE_DIR / "media" / "thumbs"
 else:
     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
+    THUMB_CACHE_DIR = MEDIA_ROOT / "thumbs"
 
 # Ensure STORAGES['default'] points to the active storage backend
 STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}

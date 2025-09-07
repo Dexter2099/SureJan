@@ -4,6 +4,7 @@ import html
 import logging
 import os
 import re
+import hashlib
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
@@ -171,6 +172,54 @@ def _provider_fallback(url: str, fetch_remote: bool) -> str | None:
     return None
 
 
+_EXTENSION_MAP = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/webp": "webp",
+}
+
+
+def cache_remote_image(remote_url: str, canon_url: str) -> str | None:
+    """Fetch ``remote_url`` and cache locally under a stable name.
+
+    The canonical video URL ``canon_url`` is hashed to derive the filename. A
+    previously cached file is returned without fetching the remote again.
+    On a fetch failure we return ``None`` so callers can fall back.
+    """
+
+    digest = hashlib.sha256(canon_url.encode("utf-8")).hexdigest()
+    base = settings.THUMB_CACHE_DIR / digest
+
+    for ext in _EXTENSION_MAP.values():
+        candidate = base.with_suffix(f".{ext}")
+        if candidate.exists():
+            logger.info("rumble-thumb cache %s result=hit", canon_url)
+            return f"{settings.MEDIA_URL}thumbs/{candidate.name}"
+
+    status = None
+    try:
+        resp = fetch_html(remote_url, source="rumble-thumb")
+        status = resp.status_code
+        resp.raise_for_status()
+    except Exception:
+        logger.info("rumble-thumb fetch %s status=%s result=fallback", remote_url, status or "error")
+        return None
+
+    content_type = resp.headers.get("Content-Type", "").split(";")[0].lower()
+    ext = _EXTENSION_MAP.get(content_type)
+    if not ext:
+        logger.info("rumble-thumb fetch %s status=%s result=fallback", remote_url, status)
+        return None
+
+    path = base.with_suffix(f".{ext}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as fh:
+        fh.write(resp.content)
+    logger.info("rumble-thumb fetch %s status=%s result=stored", remote_url, status)
+    return f"{settings.MEDIA_URL}thumbs/{path.name}"
+
+
 def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
     """Return thumbnail URL and alt text.
 
@@ -215,10 +264,16 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
     if fetch_remote:
         thumb = fetch_og_image(canon_url)
         status = getattr(fetch_og_image, "last_status", None)
+        if thumb and direct_og and "rumble.com" in domain:
+            cached = cache_remote_image(thumb, canon_url)
+            if cached:
+                thumb = cached
+            else:
+                thumb = None
     if not thumb and not direct_og:
         thumb = _provider_fallback(canon_url, fetch_remote)
 
-    if thumb and thumb.startswith("https://"):
+    if thumb and (thumb.startswith("https://") or thumb.startswith(settings.MEDIA_URL)):
         cache.set(success_key, thumb, _THUMB_TTL)
         return thumb, label
 

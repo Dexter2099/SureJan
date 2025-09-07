@@ -19,4 +19,5 @@ STORAGES = {
 }
 
 MEDIA_ROOT = BASE_DIR / "test-media"
+THUMB_CACHE_DIR = MEDIA_ROOT / "thumbs"
 
