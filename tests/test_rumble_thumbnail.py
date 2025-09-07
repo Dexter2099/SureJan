@@ -5,7 +5,6 @@ from django.core.cache import cache
 from django.test import override_settings
 
 from core.utils import thumbnails
-from core.utils.video_urls import canonicalize_video_url
 
 
 def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
@@ -32,15 +31,14 @@ def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
     monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
 
     url = "https://rumble.com/v1"
-    canon = canonicalize_video_url(url)
-    digest = hashlib.sha256(canon.encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(remote_url.encode("utf-8")).hexdigest()
 
     with override_settings(
         MEDIA_ROOT=tmp_path / "media",
         THUMB_CACHE_DIR=tmp_path / "media" / "thumbs",
         MEDIA_URL="/media/",
     ):
-        expected = settings.THUMB_CACHE_DIR / f"{digest}.jpg"
+        expected = settings.THUMB_CACHE_DIR / "rumble" / f"{digest}.jpg"
 
         src, alt = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
         assert src.startswith(settings.MEDIA_URL)
@@ -93,8 +91,7 @@ def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, tmp_path):
     monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
 
     url = "https://rumble.com/v1abc"
-    canon = canonicalize_video_url(url)
-    digest = hashlib.sha256(canon.encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(remote_url.encode("utf-8")).hexdigest()
 
     with override_settings(
         RUMBLE_DIRECT_OG=True,
@@ -102,7 +99,7 @@ def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, tmp_path):
         THUMB_CACHE_DIR=tmp_path / "media" / "thumbs",
         MEDIA_URL="/media/",
     ):
-        expected = settings.THUMB_CACHE_DIR / f"{digest}.jpg"
+        expected = settings.THUMB_CACHE_DIR / "rumble" / f"{digest}.jpg"
 
         src, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
         assert src.startswith(settings.MEDIA_URL)

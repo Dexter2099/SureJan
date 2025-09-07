@@ -66,8 +66,7 @@ class Command(BaseCommand):
         converted = 0
         for p in qs_rumble.iterator():
             try:
-                canon = canonicalize_video_url(p.content_url or "")
-                cached = cache_remote_image(p.thumbnail_url or "", canon)
+                cached = cache_remote_image(p.thumbnail_url or "")
                 if cached:
                     converted += 1
                     if not opts["dry_run"]:

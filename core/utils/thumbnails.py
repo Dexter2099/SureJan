@@ -24,23 +24,27 @@ logger = logging.getLogger(__name__)
 
 def scrape_og_image(url: str) -> tuple[Optional[str], Optional[int]]:
     """Return the first OpenGraph image URL for ``url`` if present."""
-    domain = urlparse(url).netloc
+    provider = urlparse(url).netloc
     status = None
+    image = None
+    result = "og_missing"
     try:
         resp = fetch_html(url, source="og-image")
         status = resp.status_code
         resp.raise_for_status()
+        match = OG_IMAGE_RE.search(resp.text)
+        if match:
+            image = match.group(1)
+            result = "og_found"
     except Exception:
-        logger.info("og-image fetch %s status=%s result=fallback", domain, status or "error")
-        return None, status
-
-    match = OG_IMAGE_RE.search(resp.text)
-    if match:
-        logger.info("og-image fetch %s status=%s result=image", domain, status)
-        return match.group(1), status
-
-    logger.info("og-image fetch %s status=%s result=fallback", domain, status)
-    return None, status
+        if status == 403:
+            result = "http_403"
+        else:
+            result = f"http_{status}" if status else "error"
+    logger.info(
+        "provider=%s result=%s origin_image_url=%s", provider, result, image or ""
+    )
+    return image, status
 
 
 _CACHE_KEY_PREFIX = "og-image:"  # cache key prefix for og image lookups
@@ -175,49 +179,64 @@ def _provider_fallback(url: str, fetch_remote: bool) -> str | None:
 _EXTENSION_MAP = {
     "image/jpeg": "jpg",
     "image/png": "png",
-    "image/gif": "gif",
     "image/webp": "webp",
 }
 
 
-def cache_remote_image(remote_url: str, canon_url: str) -> str | None:
-    """Fetch ``remote_url`` and cache locally under a stable name.
+def cache_remote_image(origin_url: str) -> str | None:
+    """Fetch ``origin_url`` and cache locally under a stable name.
 
-    The canonical video URL ``canon_url`` is hashed to derive the filename. A
-    previously cached file is returned without fetching the remote again.
-    On a fetch failure we return ``None`` so callers can fall back.
+    The origin URL is hashed to derive the filename. A previously cached file is
+    returned without fetching the remote again. On a fetch failure we return
+    ``None`` so callers can fall back.
     """
 
-    digest = hashlib.sha256(canon_url.encode("utf-8")).hexdigest()
-    base = settings.THUMB_CACHE_DIR / digest
+    digest = hashlib.sha1(origin_url.encode("utf-8")).hexdigest()
+    base = settings.THUMB_CACHE_DIR / "rumble" / digest
 
     for ext in _EXTENSION_MAP.values():
         candidate = base.with_suffix(f".{ext}")
         if candidate.exists():
-            logger.info("rumble-thumb cache %s result=hit", canon_url)
-            return f"{settings.MEDIA_URL}thumbs/{candidate.name}"
+            logger.info("rumble-thumb cache %s result=hit", origin_url)
+            return f"{settings.MEDIA_URL}thumbs/rumble/{candidate.name}"
 
     status = None
     try:
-        resp = fetch_html(remote_url, source="rumble-thumb")
+        resp = fetch_html(origin_url, source="rumble-thumb")
         status = resp.status_code
         resp.raise_for_status()
     except Exception:
-        logger.info("rumble-thumb fetch %s status=%s result=fallback", remote_url, status or "error")
+        logger.info(
+            "rumble-thumb fetch %s status=%s result=fallback", origin_url, status or "error"
+        )
         return None
 
     content_type = resp.headers.get("Content-Type", "").split(";")[0].lower()
+    if not content_type.startswith("image/"):
+        logger.info(
+            "rumble-thumb fetch %s status=%s result=fallback", origin_url, status
+        )
+        return None
+    if len(resp.content) > 5 * 1024 * 1024:
+        logger.info(
+            "rumble-thumb fetch %s status=%s result=too_large", origin_url, status
+        )
+        return None
     ext = _EXTENSION_MAP.get(content_type)
     if not ext:
-        logger.info("rumble-thumb fetch %s status=%s result=fallback", remote_url, status)
+        logger.info(
+            "rumble-thumb fetch %s status=%s result=fallback", origin_url, status
+        )
         return None
 
     path = base.with_suffix(f".{ext}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as fh:
         fh.write(resp.content)
-    logger.info("rumble-thumb fetch %s status=%s result=stored", remote_url, status)
-    return f"{settings.MEDIA_URL}thumbs/{path.name}"
+    logger.info(
+        "rumble-thumb fetch %s status=%s result=stored", origin_url, status
+    )
+    return f"{settings.MEDIA_URL}thumbs/rumble/{path.name}"
 
 
 def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
@@ -265,7 +284,7 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         thumb = fetch_og_image(canon_url)
         status = getattr(fetch_og_image, "last_status", None)
         if thumb and direct_og and "rumble.com" in domain:
-            cached = cache_remote_image(thumb, canon_url)
+            cached = cache_remote_image(thumb)
             if cached:
                 thumb = cached
             else:
@@ -274,7 +293,7 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         thumb = _provider_fallback(canon_url, fetch_remote)
         if thumb and "rumble.com" in domain:
             if thumb.startswith("https://"):
-                cached = cache_remote_image(thumb, canon_url)
+                cached = cache_remote_image(thumb)
                 if cached:
                     thumb = cached
                 else:
