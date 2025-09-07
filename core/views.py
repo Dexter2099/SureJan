@@ -556,13 +556,12 @@ def post_submit(request):
                 post.image = form.cleaned_data.get("image")
             post.save()
             if post_type == "link":
-                src, alt = resolve_thumbnail(
-                    content_url, form.cleaned_data["title"], fetch_remote=True
+                resolve_thumbnail(
+                    content_url,
+                    form.cleaned_data["title"],
+                    fetch_remote=True,
+                    post=post,
                 )
-                if src and src.startswith(settings.MEDIA_URL):
-                    post.thumbnail_url = src
-                    post.thumbnail_alt = alt
-                    post.save(update_fields=["thumbnail_url", "thumbnail_alt"])
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
