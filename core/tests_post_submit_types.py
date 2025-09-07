@@ -61,6 +61,27 @@ class PostSubmitTests(TestCase):
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "YT")
 
+    def test_link_post_remote_thumb_not_saved(self):
+        link = "https://example.com/page"
+        with patch(
+            "core.utils.thumbnails.resolve_thumbnail",
+            return_value=("https://cdn.example.com/thumb.jpg", "alt"),
+        ):
+            resp = self.client.post(
+                reverse("post_submit"),
+                {
+                    "community": self.community.id,
+                    "post_type": "link",
+                    "title": "NoThumb",
+                    "content_url": link,
+                },
+                follow=True,
+            )
+        self.assertEqual(resp.status_code, 200)
+        post = Post.objects.get(title="NoThumb")
+        self.assertEqual(post.thumbnail_url, "")
+        self.assertEqual(post.thumbnail_alt, "")
+
     def test_rumble_link_post_fetches_og_image(self):
         link = "https://rumble.com/v1abc"
         called = {}
