@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
 from ..http_client import fetch_html
-from .video_urls import canonicalize_video_url
+from .url_cleanup import cleanup_url
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 def scrape_og_image(url: str) -> tuple[Optional[str], Optional[int]]:
     """Return the first OpenGraph image URL for ``url`` if present."""
+    url = cleanup_url(url)
     provider = urlparse(url).netloc
     status = None
     image = None
@@ -59,6 +60,8 @@ FALLBACK_ALT = "Preview image unavailable"  # alt text for missing thumbnails
 
 def fetch_og_image(url: str) -> Optional[str]:
     """Fetch the OpenGraph image for ``url`` with caching."""
+
+    url = cleanup_url(url)
 
     # During tests we bypass caching to avoid cross-test interference.
     if os.getenv("PYTEST_CURRENT_TEST"):
@@ -140,6 +143,8 @@ def rumble_fallback_thumb(url: str) -> str | None:
 
 def x_fallback_thumb(url: str) -> str | None:
     """Scrape the X status page for a pbs.twimg.com image."""
+
+    url = cleanup_url(url)
 
     try:
         resp = fetch_html(url, source="x-thumb")
@@ -273,7 +278,7 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
         )
     )
 
-    canon_url = url if direct_og else canonicalize_video_url(url)
+    canon_url = cleanup_url(url)
 
     success_key = f"{_THUMB_KEY_PREFIX}{canon_url}"
     cached = cache.get(success_key)
