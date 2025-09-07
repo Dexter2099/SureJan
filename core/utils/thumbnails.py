@@ -5,11 +5,14 @@ import logging
 import os
 import re
 import hashlib
+from pathlib import Path
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 from django.core.cache import cache
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 from ..http_client import fetch_html
 from .video_urls import canonicalize_video_url
@@ -184,21 +187,26 @@ _EXTENSION_MAP = {
 
 
 def cache_remote_image(origin_url: str) -> str | None:
-    """Fetch ``origin_url`` and cache locally under a stable name.
+    """Fetch ``origin_url`` and cache under a stable name.
 
     The origin URL is hashed to derive the filename. A previously cached file is
     returned without fetching the remote again. On a fetch failure we return
-    ``None`` so callers can fall back.
+    ``None`` so callers can fall back. The result is the URL as provided by the
+    active storage backend.
     """
 
     digest = hashlib.sha1(origin_url.encode("utf-8")).hexdigest()
-    base = settings.THUMB_CACHE_DIR / "rumble" / digest
+    # Store thumbnails under ``thumbs/rumble/<digest>.<ext>`` using the
+    # configured storage backend. ``THUMB_CACHE_DIR`` controls the root
+    # directory under ``MEDIA_ROOT``.
+    base_dir = Path(settings.THUMB_CACHE_DIR).name
+    base = f"{base_dir}/rumble/{digest}"
 
     for ext in _EXTENSION_MAP.values():
-        candidate = base.with_suffix(f".{ext}")
-        if candidate.exists():
+        candidate = f"{base}.{ext}"
+        if default_storage.exists(candidate):
             logger.info("rumble-thumb cache %s result=hit", origin_url)
-            return f"{settings.MEDIA_URL}thumbs/rumble/{candidate.name}"
+            return default_storage.url(candidate)
 
     status = None
     try:
@@ -229,14 +237,12 @@ def cache_remote_image(origin_url: str) -> str | None:
         )
         return None
 
-    path = base.with_suffix(f".{ext}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "wb") as fh:
-        fh.write(resp.content)
+    path = f"{base}.{ext}"
+    stored = default_storage.save(path, ContentFile(resp.content))
     logger.info(
         "rumble-thumb fetch %s status=%s result=stored", origin_url, status
     )
-    return f"{settings.MEDIA_URL}thumbs/rumble/{path.name}"
+    return default_storage.url(stored)
 
 
 def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
