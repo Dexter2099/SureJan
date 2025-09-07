@@ -94,17 +94,6 @@ class Community(models.Model):
         return f"c/{self.slug}"
 
 
-class Embed(models.Model):
-    """DEPRECATED: stored sanitized embed HTML for a given media URL."""
-
-    url = models.URLField()
-    html = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:  # pragma: no cover - simple representation
-        return self.url
-
-
 class Post(models.Model):
     community = models.ForeignKey(
         Community, on_delete=models.CASCADE, related_name="posts"
@@ -118,10 +107,6 @@ class Post(models.Model):
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
     content_url = models.URLField(blank=True)
-    # Deprecated: use thumbnail_url/thumbnail_alt instead.
-    embed = models.ForeignKey(
-        "Embed", null=True, blank=True, on_delete=models.SET_NULL, related_name="posts"
-    )
     link_domain = models.CharField(max_length=120, blank=True)
     image = models.ImageField(
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
