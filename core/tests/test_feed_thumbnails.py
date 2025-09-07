@@ -2,6 +2,7 @@ import re
 from io import BytesIO
 
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -35,7 +36,7 @@ def test_feed_thumbnails_are_images(client):
         post_type="link",
         title="Link",
         content_url="https://example.com",
-        thumbnail_url="https://example.com/thumb.jpg",
+        thumbnail_url=f"{settings.MEDIA_URL}thumb.jpg",
     )
 
     # Link post without thumbnail should use placeholder
