@@ -14,11 +14,7 @@
     {% include "partials/post_thumbnail.html" with post=post %}
     {% elif post.image_thumb or post.image %}
     <a href="{{ detail_url }}" class="thumb">
-      {% if post.image_thumb %}
-      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}">
-      {% elif post.image %}
-      <img src="{{ post.image.url }}" alt="{{ post.title }}">
-      {% endif %}
+      <img src="{{ post.image_thumb.url|default:post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
     </a>
     {% endif %}
     <div class="post-actions">
