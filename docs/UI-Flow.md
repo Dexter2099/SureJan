@@ -22,7 +22,7 @@
 **Key UI:**
 
 * Header logo (home), centered sort tabs (Hot · New · Top)
-* Post cards: community link, author link, timeago, static thumbnail (click → provider in new tab), title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
+* Post cards: community link, author link, timeago, title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
 
 ### 2) **Community feed**
 
@@ -32,7 +32,7 @@
 **Key UI:**
 
 * H1 community title, same sort tabs semantics as home
-* Post cards: community link, author link, timeago, static thumbnail (click → provider in new tab), title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
+* Post cards: community link, author link, timeago, title (link → `/r/<c>/comments/<id>/<slug>/`), excerpt, vote snippet, comments count
 
 ### 3) **Post detail**
 
@@ -43,7 +43,6 @@
 
 * Title (H1)
 * Meta: **by** {username} **in** {community} · {timeago}
-* **Media priority:** gallery → uploaded image → static thumbnail (YouTube/Rumble/X; click opens provider in new tab) → plain link
 * Body (optional; require media **or** body)
 * **Actions row:** ▲ score ▼ · **Astro chip** (green/amber/red)
 * **Comment composer:** empty box + Cancel/Comment buttons (auth-gated)
@@ -71,13 +70,13 @@
 
 1. **Home feed** → click a **community** (e.g., `r/brisbane`) → **Community feed**
 2. Click a **post title** → **Post detail** (`/r/<c>/comments/<id>/<slug>/`)
-3. Click the **thumbnail** → provider opens in new tab
+3. View linked content in a new tab
 4. Attempt to **comment** → redirect to **Login** → back to **Post detail** after auth
 
 ### B) Engaging as an authenticated user
 
-1. **Home**/**Community** → vote on cards; click title to **Post detail** (`/r/<c>/comments/<id>/<slug>/`); click thumbnail → provider opens in new tab
-2. In **Post detail**: static thumbnail at top; clicking opens provider in new tab; body below; actions row includes astro chip
+1. **Home**/**Community** → vote on cards; click title to **Post detail** (`/r/<c>/comments/<id>/<slug>/`)
+2. In **Post detail**: media (if present) appears above the body; actions row includes astro chip
 3. **Comment:** write + submit; thread updates; reply at any depth
 
 ### C) Submitting content
@@ -93,10 +92,7 @@
 flowchart LR
   A[Home /] -->|click community| B[Community /r/<slug>/]
   A -->|click post title| C[Post detail /r/<c>/comments/<id>/<slug>/]
-  A -->|click thumbnail| X[Provider site (new tab)]
   B -->|click post title| C
-  B -->|click thumbnail| X
-  C -->|click thumbnail| X
   C -->|comment (guest)| D[Login /accounts/login/]
   D -->|success| C
   C -->|submit comment| C
@@ -108,13 +104,12 @@ flowchart LR
 flowchart TB
   subgraph PostDetail
     P1[Title + meta]
-    P2[Media: gallery→image→static thumbnail]
+    P2[Media: gallery→image]
     P3[Body (optional)]
     P4[Actions: ▲ score ▼ + Astro chip]
     P5[Composer]
     P6[Thread: nested comments]
     P1 --> P2 --> P3 --> P4 --> P5 --> P6
-    P2 --> L[Provider opens in new tab]
   end
 ```
 
@@ -129,14 +124,6 @@ flowchart TB
 
 ---
 
-## Image preview contract (feeds)
-
-* **Preview:** if `image_thumb` present, show that; **else** show `image`
-* **If neither:** (optional) use first `PostImageLink` if available
-* **Thumb framing:** `aspect-ratio: 16/9; object-fit: cover; border-radius: 12px`
-* **Click:** thumbnail opens provider in new tab; title links to `/r/<c>/comments/<id>/<slug>/`
-
----
 
 ## Route & params reference
 
@@ -165,9 +152,6 @@ flowchart TB
 
 * Decide canonical community prefix (`/r/` vs `/c/`) and update all URL tags accordingly
 * Confirm comment sort/search query names (`c_sort`, `q`)
-* Decide whether to fall back to first `PostImageLink` in feeds when no upload/thumbnail exists
-
----
 
 ## Changelog
 
@@ -175,7 +159,5 @@ flowchart TB
 * (append entries as flows change)
 
 ## See also (authoritative sources)
-- [Video thumbnail spec](video-thumbnail-spec.md)
 - [UI Contract V3](UI-contract-V3.md)
-- [Wireframes](wireframes/README.md)
 

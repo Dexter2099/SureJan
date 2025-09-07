@@ -1,7 +1,0 @@
-Input URL: https://twitter.com/jack/status/20
-Canonical URL: https://x.com/jack/status/20
-
-Preview sequence:
-1. OpenGraph metadata
-2. Provider fallback (oEmbed)
-3. SVG placeholder
