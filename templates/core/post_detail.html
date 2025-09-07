@@ -21,11 +21,17 @@
   <p class="post-link">from: {{ post.content_url|escape }}</p>
   {% endif %}
 
-  {% if post.image %}
-  <div class="post-image">
-    <img src="{{ post.image.url }}" alt="{{ post.title }}">
-  </div>
-  {% endif %}
+    {% if post.post_type == "link" %}
+    {% include "partials/post_thumbnail.html" with post=post %}
+    {% elif post.image_thumb or post.image %}
+    <figure class="post-media">
+      {% if post.image_thumb %}
+      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}">
+      {% elif post.image %}
+      <img src="{{ post.image.url }}" alt="{{ post.title }}">
+      {% endif %}
+    </figure>
+    {% endif %}
 
   {% if post.body %}
   <div class="post-body prose">

@@ -10,9 +10,15 @@
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
-    {% if (post.post_type == 'image' or post.image) and post.image_thumb %}
-    <a href="{{ detail_url }}" class="post-image-link">
-      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}" class="post-image-thumb">
+    {% if post.post_type == "link" %}
+    {% include "partials/post_thumbnail.html" with post=post %}
+    {% elif post.image_thumb or post.image %}
+    <a href="{{ detail_url }}" class="thumb">
+      {% if post.image_thumb %}
+      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}">
+      {% elif post.image %}
+      <img src="{{ post.image.url }}" alt="{{ post.title }}">
+      {% endif %}
     </a>
     {% endif %}
     <div class="post-actions">
