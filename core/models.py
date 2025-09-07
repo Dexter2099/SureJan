@@ -200,8 +200,9 @@ class Post(models.Model):
         recompute = kwargs.pop("recompute_hot", True)
 
         if self.content_url:
-            self.content_url = canonicalize_video_url(self.content_url)
-            self.link_domain = urlparse(self.content_url).netloc
+            canon_url = canonicalize_video_url(self.content_url)
+            self.content_url = canon_url
+            self.link_domain = urlparse(canon_url).netloc.lower().lstrip("www.")
 
         # Apply domain throttling weight on every save
         from .mod import domain_weight  # avoid circular import at module load
