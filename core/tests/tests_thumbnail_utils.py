@@ -2,7 +2,9 @@ import pytest
 import requests
 from django.core.cache import cache
 from pathlib import Path
+from django.contrib.auth import get_user_model
 
+from core.models import Community, Post
 from core.utils import thumbnails
 
 
@@ -253,3 +255,54 @@ def test_scrape_og_image_timeout_logs_elapsed(monkeypatch, caplog):
 
     assert "result=http_timeout" in caplog.text
     assert "elapsed=1.00" in caplog.text
+
+
+@pytest.mark.django_db
+def test_resolve_thumbnail_attaches_image(monkeypatch, settings, tmp_path):
+    cache.clear()
+    settings.MEDIA_ROOT = tmp_path / "media"
+    settings.MEDIA_URL = "/media/"
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+    post = Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="Link",
+        content_url="https://example.com",
+    )
+
+    monkeypatch.setattr(
+        thumbnails, "fetch_og_image", lambda url: "https://cdn.example.com/thumb.jpg"
+    )
+
+    from io import BytesIO
+    from PIL import Image
+
+    buf = BytesIO()
+    Image.new("RGB", (1, 1), "white").save(buf, format="PNG")
+    img_bytes = buf.getvalue()
+
+    class Resp:
+        status_code = 200
+        headers = {"Content-Type": "image/png"}
+        content = img_bytes
+
+        def raise_for_status(self):
+            return None
+
+    monkeypatch.setattr(
+        thumbnails, "fetch_og_html", lambda url, source="thumb-fetch": Resp()
+    )
+
+    src, alt = thumbnails.resolve_thumbnail(
+        post.content_url, "label", fetch_remote=True, post=post
+    )
+    assert src.startswith(settings.MEDIA_URL)
+    post.refresh_from_db()
+    assert src == post.image.url
+    assert post.image
+    assert post.image_thumb
+    assert post.thumbnail_alt == "label"
+    assert alt == "label"

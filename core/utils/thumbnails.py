@@ -8,7 +8,7 @@ import hashlib
 import time
 import requests
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from urllib.parse import parse_qs, urlparse
 
 from django.core.cache import cache
@@ -18,6 +18,9 @@ from django.core.files.storage import default_storage
 
 from ..http_client import fetch_og_html
 from .url_cleanup import cleanup_url
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from ..models import Post
 
 OG_IMAGE_RE = re.compile(
     r"<meta\s+property=['\"]og:image['\"]\s+content=['\"]([^'\"]+)['\"]",
@@ -266,7 +269,9 @@ def cache_remote_image(origin_url: str) -> str | None:
     return default_storage.url(stored)
 
 
-def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple[str, str]:
+def resolve_thumbnail(
+    url: str, label: str, fetch_remote: bool = False, *, post: "Post | None" = None
+) -> tuple[str, str]:
     """Return thumbnail URL and alt text.
 
     The URL is first canonicalised. We then check caches for a prior
@@ -327,6 +332,27 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
                     thumb = None
             else:
                 thumb = None
+
+    if thumb and thumb.startswith("http") and post is not None:
+        try:
+            resp = fetch_og_html(thumb, source="thumb-fetch")
+            status = resp.status_code
+            resp.raise_for_status()
+            content_type = resp.headers.get("Content-Type", "").split(";")[0].lower()
+            ext = _EXTENSION_MAP.get(content_type)
+            if not ext or len(resp.content) > 5 * 1024 * 1024:
+                raise ValueError("unsupported image")
+            path = f"posts/{post.id}/thumb.{ext}"
+            stored = default_storage.save(path, ContentFile(resp.content))
+            post.image.name = stored
+            post.thumbnail_alt = label
+            post.save(
+                update_fields=["image", "image_thumb", "thumbnail_alt"],
+                recompute_hot=False,
+            )
+            thumb = post.image.url
+        except Exception:
+            thumb = None
 
     if thumb and (thumb.startswith("https://") or thumb.startswith(settings.MEDIA_URL)):
         cache.set(success_key, thumb, _THUMB_TTL)
