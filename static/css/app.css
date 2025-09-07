@@ -269,10 +269,11 @@ body.layout-root {
 /* Post detail media */
 .post-media{ margin:16px 0; }
 .post-media img{
-  display:block;
-  max-width:100%;
+  max-width:800px;
+  width:100%;
   height:auto;
-  border-radius:12px;
+  display:block;
+  margin:0 auto;
 }
 @media (min-width:1024px){
   .post-media img{ max-height:80vh; } /* don’t get too tall */
