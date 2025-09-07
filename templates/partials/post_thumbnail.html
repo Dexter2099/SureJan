@@ -1,24 +1,20 @@
 {% load thumbnails %}
-{% if post.image_thumb %}
-  {% with src=post.image_thumb.url alt=post.title %}
-  <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
-    <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
-    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-  </a>
-  {% endwith %}
-{% elif post.image %}
-  {% with src=post.image.url alt=post.title %}
-  <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
-    <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
-    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-  </a>
-  {% endwith %}
-{% else %}
-  {% svg_placeholder post.title as ph %}
-  {% with src=ph.src alt=ph.alt %}
-  <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
-    <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
-    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-  </a>
-  {% endwith %}
-{% endif %}
+{% with href=href|default:post.content_url target=target|default:"_blank" rel=rel|default:"noopener noreferrer" aria=aria_label|default:"" %}
+  {% if post.image and post.image.url|local_thumb %}
+    <a href="{{ href }}" class="thumb" style="aspect-ratio:16/9;"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if aria %} aria-label="{{ aria }}"{% endif %}>
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+      {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+    </a>
+  {% elif post.thumbnail_url|local_thumb %}
+    <a href="{{ href }}" class="thumb" style="aspect-ratio:16/9;"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if aria %} aria-label="{{ aria }}"{% endif %}>
+      <img src="{{ post.thumbnail_url }}" alt="{{ post.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+      {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+    </a>
+  {% else %}
+    {% svg_placeholder post.title as ph %}
+    <a href="{{ href }}" class="thumb" style="aspect-ratio:16/9;"{% if target %} target="{{ target }}"{% endif %}{% if rel %} rel="{{ rel }}"{% endif %}{% if aria %} aria-label="{{ aria }}"{% endif %}>
+      <img src="{{ ph.src }}" alt="{{ ph.alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
+      {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
+    </a>
+  {% endif %}
+{% endwith %}

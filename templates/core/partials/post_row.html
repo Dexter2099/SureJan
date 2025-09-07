@@ -2,15 +2,8 @@
   {% with detail_url=post.get_absolute_url %}
     {% if post.post_type == 'link' %}
     {% include "partials/post_thumbnail.html" with post=post %}
-    {% elif post.image_thumb or post.image %}
-    <a href="{{ detail_url }}" class="thumb" style="aspect-ratio:16/9;" aria-label="Open post">
-      {% if post.image_thumb %}
-      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-      {% else %}
-      <img src="{{ post.image.url }}" alt="{{ post.title }}" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-      {% endif %}
-      {% if post.link_domain %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-    </a>
+    {% elif post.image %}
+    {% include "partials/post_thumbnail.html" with post=post href=detail_url target='' rel='' aria_label='Open post' %}
     {% endif %}
     <div class="post-meta">
       <a href="{% url 'community' post.community.slug %}">c/{{ post.community.slug }}</a> ·
