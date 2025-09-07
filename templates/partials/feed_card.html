@@ -14,9 +14,9 @@
       {% if post.post_type == "link" %}
         {% include "partials/post_thumbnail.html" with post=post %}
       {% elif post.image_thumb or post.image %}
-      <a href="{{ detail_url }}" class="thumb">
+      <div class="thumb">
         <img src="{{ post.image_thumb.url|default:post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
-      </a>
+      </div>
       {% endif %}
       <div class="post-actions">
       {% if show_vote_widget is not False %}
@@ -26,14 +26,10 @@
     {% endif %}
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% if post.astro_score %}
-    <details class="astro-why">
-      <summary class="chip {{ post.astro_score.score|astro_band }}">Astro {{ post.astro_score.score }}</summary>
-      <ul>
-        <li>Vote rate 15m: {{ post.astro_score.rate15 }}</li>
-        <li>Early new-account share: {{ post.astro_score.early_new_share|floatformat:2 }}</li>
-        <li>Discuss ratio: {{ post.astro_score.discuss_ratio|floatformat:2 }}</li>
-      </ul>
-    </details>
+      <div class="astro-meter">
+        <div class="astro-chip {{ post.astro_score.score|astro_band }}">{{ post.astro_score.score }}</div>
+        <span class="sr-only">Astro score</span>
+      </div>
     {% endif %}
   </div>
 {% endwith %}
