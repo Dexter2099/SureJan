@@ -166,3 +166,43 @@ def test_backfill_thumbs_uses_fallback_after_og(monkeypatch):
     assert post.thumbnail_url == "https://fallback.example.com/thumb.jpg"
     assert order == ["og", "fb"]
     assert cache.get("thumb:https://rumble.com/v1abcd") == "https://fallback.example.com/thumb.jpg"
+
+
+@pytest.mark.django_db
+def test_backfill_thumbs_caches_rumble_thumbnails(monkeypatch):
+    cache.clear()
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+    post = Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="Link",
+        content_url="https://rumble.com/v1abc",
+        thumbnail_url="https://sp.rmbl.ws/s8/1/v1abc.jpg",
+    )
+
+    from core.management.commands import backfill_thumbs
+
+    def fake_cache(remote_url, canon_url):
+        return "/media/thumbs/cache.jpg"
+
+    monkeypatch.setattr(backfill_thumbs, "cache_remote_image", fake_cache)
+    call_command("backfill_thumbs", days=365)
+    post.refresh_from_db()
+    assert post.thumbnail_url == "/media/thumbs/cache.jpg"
+
+    post.thumbnail_url = "https://sp.rmbl.ws/s8/1/v1abc.jpg"
+    post.save(update_fields=["thumbnail_url"])
+    calls: list[str] = []
+
+    def fake_cache2(remote_url, canon_url):
+        calls.append(remote_url)
+        return "/media/thumbs/cache2.jpg"
+
+    monkeypatch.setattr(backfill_thumbs, "cache_remote_image", fake_cache2)
+    call_command("backfill_thumbs", days=365, dry_run=True)
+    post.refresh_from_db()
+    assert post.thumbnail_url == "https://sp.rmbl.ws/s8/1/v1abc.jpg"
+    assert calls == ["https://sp.rmbl.ws/s8/1/v1abc.jpg"]
