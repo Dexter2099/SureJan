@@ -1,6 +1,7 @@
 {% load thumbnails %}
 {% if post.thumbnail_url %}
   {% with src=post.thumbnail_url alt=post.thumbnail_alt|default:post.title %}
+  {# ``thumbnail_url`` points to a cached file under MEDIA_URL/thumbs/ when available #}
   <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
     <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
     {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
