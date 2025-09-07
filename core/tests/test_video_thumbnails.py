@@ -3,6 +3,9 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from io import BytesIO
+from PIL import Image
 
 from core.models import Community, Post
 
@@ -27,7 +30,11 @@ def test_post_thumbnail_uses_img_not_iframe(url):
         post_type="link",
         title="Video",
         content_url=url,
-        thumbnail_url=f"{settings.MEDIA_URL}thumb.jpg",
+        image=SimpleUploadedFile(
+            "thumb.png",
+            (lambda buf: (Image.new("RGB", (1, 1), "white").save(buf, format="PNG"), buf.getvalue()))(BytesIO())[1],
+            content_type="image/png",
+        ),
     )
 
     html = render_to_string("partials/post_thumbnail.html", {"post": post})

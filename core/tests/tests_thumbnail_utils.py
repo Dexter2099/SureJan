@@ -303,8 +303,8 @@ def test_resolve_thumbnail_attaches_image(monkeypatch, settings, tmp_path):
     post.refresh_from_db()
     assert src == post.image.url
     assert post.image
-    assert post.image_thumb
-    assert post.thumbnail_alt == "label"
+    assert not post.image_thumb
+    assert post.thumbnail_alt == ""
     assert alt == "label"
 
 
@@ -349,4 +349,39 @@ def test_resolve_thumbnail_uses_existing_image(monkeypatch, settings, tmp_path):
 
     assert called["og"] is False
     assert src == post.image.url
-    assert alt == "stored"
+    assert alt == "label"
+    assert post.thumbnail_alt == "stored"
+
+
+@pytest.mark.django_db
+def test_resolve_thumbnail_overrides_url(monkeypatch, settings, tmp_path):
+    cache.clear()
+    settings.MEDIA_ROOT = tmp_path / "media"
+    settings.MEDIA_URL = "/media/"
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+    post = Post.objects.create(
+        community=com,
+        author=user,
+        post_type="link",
+        title="Link",
+        content_url="https://example.com/real",
+    )
+
+    captured = {}
+
+    def fake_fetch(url):
+        captured["url"] = url
+        return None
+
+    monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
+
+    thumbnails.resolve_thumbnail(
+        "https://ignored.com/elsewhere",
+        "label",
+        fetch_remote=True,
+        post=post,
+    )
+
+    assert captured["url"] == "https://example.com/real"

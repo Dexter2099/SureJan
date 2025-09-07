@@ -37,6 +37,7 @@ def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
         MEDIA_ROOT=tmp_path / "media",
         THUMB_CACHE_DIR=tmp_path / "media" / "thumbs",
         MEDIA_URL="/media/",
+        RUMBLE_DIRECT_OG=False,
     ):
         expected = settings.THUMB_CACHE_DIR / "rumble" / f"{digest}.jpg"
 
