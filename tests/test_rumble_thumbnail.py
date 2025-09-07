@@ -24,11 +24,11 @@ def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
 
     calls = []
 
-    def fake_fetch_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown"):
         calls.append(url)
         return Resp()
 
-    monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
+    monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch_og_html)
 
     url = "https://rumble.com/v1"
     digest = hashlib.sha1(remote_url.encode("utf-8")).hexdigest()
@@ -83,12 +83,12 @@ def test_resolve_thumbnail_rumble_direct_og_cached(monkeypatch, tmp_path):
 
     calls = []
 
-    def fake_fetch_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown"):
         calls.append(url)
         return Resp()
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch_og)
-    monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
+    monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch_og_html)
 
     url = "https://rumble.com/v1abc"
     digest = hashlib.sha1(remote_url.encode("utf-8")).hexdigest()
@@ -133,11 +133,11 @@ def test_resolve_thumbnail_rumble_direct_og_error(monkeypatch, settings, tmp_pat
         def raise_for_status(self):
             raise Exception("boom")
 
-    def fake_fetch_html(url, source="unknown"):
+    def fake_fetch_og_html(url, source="unknown"):
         return Resp()
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch_og)
-    monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
+    monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch_og_html)
 
     src, alt = thumbnails.resolve_thumbnail("https://rumble.com/v1abc", "label", fetch_remote=True)
     assert src.startswith("data:image/svg+xml")
