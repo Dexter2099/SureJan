@@ -280,6 +280,8 @@ def resolve_thumbnail(
     provider-specific heuristics. A missing thumbnail results in an inline
     SVG placeholder.
     """
+    if post is not None and post.image:
+        return post.image.url, post.thumbnail_alt or label
 
     domain = urlparse(url).netloc.lower()
     direct_og = (
