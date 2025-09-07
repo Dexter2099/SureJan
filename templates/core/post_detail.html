@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load static %}
+{% load static astro_filters %}
 {% url 'post_detail' post.community.slug post.pk post.slug as post_url %}
 
 {% block head_extra %}
@@ -43,14 +43,7 @@
     <div class="post-actions">
       {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
 
-      {% if severity_band %}
-        <div class="astro-meter" title="Astro severity: {{ severity|floatformat:0 }}/100">
-          <div class="astro-chip {{ severity_band }}">
-            {{ severity|floatformat:0 }}
-          </div>
-          <span class="astro-label">Astro</span>
-        </div>
-      {% endif %}
+      {% include "core/partials/astro_chip_inline.html" with score=post.astro_score.score|default:severity %}
 
       {% if request.user == post.author or request.user.is_staff %}
         <form method="post" action="{% url 'post_delete_owner' post.pk %}" hx-post="{% url 'post_delete_owner' post.pk %}" style="display:inline">
@@ -62,9 +55,6 @@
     </div>
   {% else %}
     <em>[deleted by author]</em>
-  {% endif %}
-  {% if ASTROTURF_WATCH %}
-  <div hx-get="{% url 'post_signals_chips' post.pk %}" hx-trigger="load"></div>
   {% endif %}
 </article>
 
