@@ -804,6 +804,16 @@ def post_edit(request, pk):
             if post.content_url:
                 post.content_url = canonicalize_video_url(post.content_url)
             post.save()
+            if post.post_type == "link" and post.content_url:
+                try:
+                    resolve_thumbnail(
+                        post.content_url,
+                        post.title,
+                        fetch_remote=True,
+                        post=post,
+                    )
+                except Exception:
+                    pass
             messages.success(request, "Post updated")
             return redirect(
                 "post_detail",
