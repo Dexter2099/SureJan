@@ -107,18 +107,16 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-    _img_src = [
-        "'self'",
-        "https://surejan-media.fly.storage.tigris.dev",
-        "data:",
-    ]
+    MEDIA_STORAGE_HOST = os.getenv(
+        "MEDIA_STORAGE_HOST", "https://surejan-media.fly.storage.tigris.dev"
+    )
 
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": tuple(_img_src),
+            "img-src": ("'self'", "data:", MEDIA_STORAGE_HOST),
             "connect-src": ("'self'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
