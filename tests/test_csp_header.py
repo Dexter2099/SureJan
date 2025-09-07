@@ -4,13 +4,22 @@ from config import settings as conf_settings
 
 
 def test_csp_header_has_img_directive(client):
-    csp = {"DIRECTIVES": {"img-src": ("'self'", "data:")}}
+    csp = {
+        "DIRECTIVES": {
+            "img-src": (
+                "'self'",
+                "data:",
+                "https://surejan-media.fly.storage.tigris.dev",
+            )
+        }
+    }
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
         resp = client.get("/healthz")
     csp_header = resp["Content-Security-Policy"]
     assert "img-src" in csp_header
     assert "'self'" in csp_header
     assert "data:" in csp_header
+    assert "https://surejan-media.fly.storage.tigris.dev" in csp_header
 
 
 def test_no_legacy_csp_settings():

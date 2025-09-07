@@ -24,7 +24,11 @@ def test_csp_headers_include_expected_hosts(client):
         "/",
         reverse("post_detail", args=[community.slug, post.pk, post.slug]),
     ]
-    expected_hosts = ["'self'", "data:"]
+    expected_hosts = [
+        "'self'",
+        "data:",
+        "https://surejan-media.fly.storage.tigris.dev",
+    ]
     csp = {"DIRECTIVES": {"img-src": tuple(expected_hosts)}}
     with override_settings(DEBUG=False, CONTENT_SECURITY_POLICY=csp):
         for url in urls:
