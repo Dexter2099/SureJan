@@ -2,7 +2,7 @@
 {% if ASTROTURF_WATCH and signals.score %}
 <div class="post-context-chips">
   <details class="astro-why">
-    <summary class="chip {{ signals.score|astro_band }}">Astro {{ signals.score }}</summary>
+    <summary><div class="astro-chip {{ signals.score|astro_band }}">{{ signals.score }}</div><span class="astro-label">Astro</span></summary>
     <ul>
       <li>Vote rate 15m: {{ signals.rate15 }}</li>
       <li>Early new-account share: {{ signals.early_new_share|floatformat:2 }}</li>
