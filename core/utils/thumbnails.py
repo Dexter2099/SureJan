@@ -280,8 +280,10 @@ def resolve_thumbnail(
     provider-specific heuristics. A missing thumbnail results in an inline
     SVG placeholder.
     """
-    if post is not None and post.image:
-        return post.image.url, post.thumbnail_alt or label
+    if post is not None:
+        if post.image:
+            return post.image.url, label
+        url = post.content_url or url
 
     domain = urlparse(url).netloc.lower()
     direct_og = (
@@ -346,12 +348,8 @@ def resolve_thumbnail(
                 raise ValueError("unsupported image")
             path = f"posts/{post.id}/thumb.{ext}"
             stored = default_storage.save(path, ContentFile(resp.content))
-            post.image.name = stored
-            post.thumbnail_alt = label
-            post.save(
-                update_fields=["image", "image_thumb", "thumbnail_alt"],
-                recompute_hot=False,
-            )
+            post.image = stored
+            post.save(update_fields=["image"], recompute_hot=False)
             thumb = post.image.url
         except Exception:
             thumb = None
