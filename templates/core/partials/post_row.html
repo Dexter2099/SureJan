@@ -1,10 +1,5 @@
 <article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
   {% with detail_url=post.get_absolute_url %}
-    {% if post.post_type == 'link' %}
-    {% include "partials/post_thumbnail.html" with post=post %}
-    {% elif post.image %}
-    {% include "partials/post_thumbnail.html" with post=post href=detail_url target='' rel='' aria_label='Open post' %}
-    {% endif %}
     <div class="post-meta">
       <a href="{% url 'community' post.community.slug %}">c/{{ post.community.slug }}</a> ·
       {% if post.author %}

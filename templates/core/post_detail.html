@@ -17,10 +17,6 @@
     </div>
   </header>
 
-{% if post.post_type == 'link' or post.image %}
-  {% include "partials/post_thumbnail.html" with post=post %}
-{% endif %}
-
   {% if post.body %}
   <div class="post-body prose">
     {{ post.body|safe }}

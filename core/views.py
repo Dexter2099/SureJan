@@ -50,8 +50,6 @@ from .services.votes import (
 )
 from . import mod
 from .http import login_required_htmx
-from .utils.video_urls import canonicalize_video_url
-from .utils.thumbnails import resolve_thumbnail
 
 
 def _is_banned(user):
@@ -545,9 +543,7 @@ def post_submit(request):
                 title=form.cleaned_data["title"],
                 body=form.cleaned_data.get("body", ""),
                 content_url=(
-                    canonicalize_video_url(
-                        form.cleaned_data.get("content_url", "")
-                    )
+                    form.cleaned_data.get("content_url", "")
                     if post_type == "link"
                     else ""
                 ),
@@ -555,13 +551,6 @@ def post_submit(request):
             if post_type == "image":
                 post.image = form.cleaned_data.get("image")
             post.save()
-            if post_type == "link":
-                resolve_thumbnail(
-                    post.content_url,
-                    post.title,
-                    fetch_remote=True,
-                    post=post,
-                )
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
@@ -801,19 +790,7 @@ def post_edit(request, pk):
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             post = form.save(commit=False)
-            if post.content_url:
-                post.content_url = canonicalize_video_url(post.content_url)
             post.save()
-            if post.post_type == "link" and post.content_url:
-                try:
-                    resolve_thumbnail(
-                        post.content_url,
-                        post.title,
-                        fetch_remote=True,
-                        post=post,
-                    )
-                except Exception:
-                    pass
             messages.success(request, "Post updated")
             return redirect(
                 "post_detail",
