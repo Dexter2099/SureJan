@@ -64,12 +64,15 @@ class PostSubmitTests(TestCase):
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "YT")
 
-    def test_link_post_remote_thumb_not_saved(self):
+    def test_link_post_remote_thumb_saved(self):
         link = "https://example.com/page"
+        def fake_persist(post, url, label):
+            post.image = make_image("thumb.jpg")
+            post.save(update_fields=["image"])
         with patch(
             "core.utils.thumbnails.resolve_thumbnail",
             return_value=("https://cdn.example.com/thumb.jpg", "alt"),
-        ):
+        ), patch("core.utils.thumbnails.persist_thumbnail", side_effect=fake_persist):
             resp = self.client.post(
                 reverse("post_submit"),
                 {
@@ -82,8 +85,7 @@ class PostSubmitTests(TestCase):
             )
         self.assertEqual(resp.status_code, 200)
         post = Post.objects.get(title="NoThumb")
-        self.assertFalse(post.image)
-        self.assertFalse(post.image_thumb)
+        self.assertTrue(post.image)
 
     def test_rumble_link_post_fetches_og_image(self):
         link = "https://rumble.com/v1abc"
