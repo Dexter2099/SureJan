@@ -9,6 +9,7 @@ from datetime import timedelta
 
 import bleach
 import mistune
+from PIL import Image, UnidentifiedImageError
 from django.utils.safestring import mark_safe
 
 from django.contrib import messages
@@ -30,6 +31,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import F
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 
 from django.core.cache import cache
@@ -549,7 +551,12 @@ def post_submit(request):
                 ),
             )
             if post_type == "image":
-                post.image = form.cleaned_data.get("image")
+                uploaded = form.cleaned_data.get("image")
+                try:
+                    Image.open(uploaded).verify()
+                except UnidentifiedImageError:
+                    raise ValidationError("Uploaded file is not a valid image.")
+                post.image = uploaded
             post.save()
             messages.success(request, "Post submitted")
             return redirect(
