@@ -17,25 +17,8 @@
     </div>
   </header>
 
-{% if post.post_type == 'link' %}
+{% if post.post_type == 'link' or post.image %}
   {% include "partials/post_thumbnail.html" with post=post %}
-{% elif post.image_thumb or post.image %}
-  <a href="{{ post.content_url }}" target="_blank" rel="noreferrer noopener" class="thumb" style="aspect-ratio:16/9;" aria-label="Open content">
-    {% if post.image_thumb %}
-      <img
-        src="{{ post.image_thumb.url }}"
-        alt="{{ post.title }}"
-        loading="lazy" decoding="async" referrerpolicy="no-referrer"
-        width="640" height="360">
-    {% else %}
-      <img
-        src="{{ post.image.url }}"
-        alt="{{ post.title }}"
-        loading="lazy" decoding="async" referrerpolicy="no-referrer"
-        width="640" height="360">
-    {% endif %}
-    {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
-  </a>
 {% endif %}
 
   {% if post.body %}

@@ -60,7 +60,6 @@ def test_feed_thumbnails_are_images(client):
     )
     assert len(cards) == 3
     imgs = re.findall(r'<img[^>]+src="([^"]+)"', html)
-    img_src = img_post.image_thumb.url if img_post.image_thumb else img_post.image.url
-    assert img_src in imgs
+    assert img_post.image.url in imgs
     assert link_post.image.url in imgs
     assert any(src.startswith("data:image/svg+xml") for src in imgs)
