@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 
 import bleach
@@ -41,7 +42,12 @@ class PostForm(forms.Form):
         widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
     )
     content_url = forms.URLField(required=False)
-    image = forms.FileField(required=False)
+    image = forms.ImageField(
+        required=False,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "gif", "webp"])
+        ],
+    )
 
     def clean_body(self):
         body = (self.cleaned_data.get("body") or "").strip()
