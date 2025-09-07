@@ -538,26 +538,26 @@ def post_submit(request):
             return render(request, "core/submit.html", {"form": form}, status=429)
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
-
-            content_url = ""
-            if post_type == "link":
-                content_url = canonicalize_video_url(
-                    form.cleaned_data.get("content_url", "")
-                )
             post = Post(
                 community=form.cleaned_data["community"],
                 author=request.user,
                 post_type=post_type,
                 title=form.cleaned_data["title"],
                 body=form.cleaned_data.get("body", ""),
-                content_url=content_url,
+                content_url=(
+                    canonicalize_video_url(
+                        form.cleaned_data.get("content_url", "")
+                    )
+                    if post_type == "link"
+                    else ""
+                ),
             )
             if post_type == "image":
                 post.image = form.cleaned_data.get("image")
             post.save()
             if post_type == "link":
                 resolve_thumbnail(
-                    content_url,
+                    post.content_url,
                     form.cleaned_data["title"],
                     fetch_remote=True,
                     post=post,
