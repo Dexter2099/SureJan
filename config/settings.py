@@ -99,7 +99,7 @@ YT_DIRECT_OG = os.environ.get("YT_DIRECT_OG", "0") in (
     "true",
     "True",
 )
-RUMBLE_DIRECT_OG = os.environ.get("RUMBLE_DIRECT_OG", "0") in (
+RUMBLE_DIRECT_OG = os.environ.get("RUMBLE_DIRECT_OG", "1") in (
     "1",
     "true",
     "True",

@@ -2,10 +2,11 @@
 
 Certain providers can fetch their OpenGraph poster images directly instead of
 using deterministic CDN fallbacks. Three environment variables control this
-behaviour and default to `0` (disabled):
+behaviour. `RUMBLE_DIRECT_OG` defaults to `1` (enabled) while the others
+default to `0` (disabled):
 
 - `YT_DIRECT_OG` – YouTube
-- `RUMBLE_DIRECT_OG` – Rumble
+- `RUMBLE_DIRECT_OG` – Rumble (default `1`)
 - `X_DIRECT_OG` – X/Twitter
 
 When enabled (`1`), SureJan skips URL canonicalisation and provider-specific

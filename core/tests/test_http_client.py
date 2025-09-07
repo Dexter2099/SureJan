@@ -47,6 +47,7 @@ def test_logging_and_counters(monkeypatch, caplog):
         http_client.fetch_json("https://example.com/data", source="test")
     assert http_client.COUNTERS["example.com"]["success"] == 1
     assert "provider=example.com" in caplog.text
+    assert "Mozilla/5.0" in caplog.text
 
     class BadResp:
         status_code = 404
@@ -56,3 +57,4 @@ def test_logging_and_counters(monkeypatch, caplog):
         http_client.fetch_html("https://example.com/miss", source="test")
     assert http_client.COUNTERS["example.com"]["error"] == 1
     assert "status=404" in caplog.text
+    assert "Mozilla/5.0" in caplog.text

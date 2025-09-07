@@ -5,8 +5,8 @@ SureJan downloads poster images for Rumble links and stores them under
 
 ## Configuration
 
-* Set `RUMBLE_DIRECT_OG=1` to fetch Rumble's OpenGraph thumbnails directly.
-  The fallback CDN thumbnail is cached in the same location.
+* `RUMBLE_DIRECT_OG` enables direct OpenGraph thumbnail fetching for Rumble and
+  defaults to `1`. The fallback CDN thumbnail is cached in the same location.
 * Ensure `MEDIA_ROOT` and `MEDIA_URL` are configured to serve media files.
   `THUMB_CACHE_DIR` controls the cache directory and defaults to
   `MEDIA_ROOT/thumbs`.

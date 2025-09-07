@@ -13,7 +13,7 @@ from core.models import Community, Post
 
 
 @pytest.mark.django_db
-def test_signup_submit_sort_and_commands(client):
+def test_signup_submit_sort_and_commands(client, monkeypatch):
     # signup flow
     r = client.get('/accounts/signup/')
     a, b = client.session['signup_captcha_q']
@@ -36,6 +36,7 @@ def test_signup_submit_sort_and_commands(client):
         'body': 'body',
     }, follow=True)
     # submit link
+    monkeypatch.setattr('core.utils.thumbnails.resolve_thumbnail', lambda *a, **kw: ('data:image/svg+xml;base64,ph', 'alt'))
     client.post(reverse('post_submit'), {
         'community': com.id,
         'post_type': 'link',

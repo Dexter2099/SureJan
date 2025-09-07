@@ -51,6 +51,7 @@ from .services.votes import (
 from . import mod
 from .http import login_required_htmx
 from .utils.video_urls import canonicalize_video_url
+from .utils.thumbnails import resolve_thumbnail
 
 
 def _is_banned(user):
@@ -554,6 +555,11 @@ def post_submit(request):
             if post_type == "image":
                 post.image = form.cleaned_data.get("image")
             post.save()
+            if post_type == "link":
+                src, alt = resolve_thumbnail(content_url, form.cleaned_data["title"], fetch_remote=True)
+                post.thumbnail_url = src
+                post.thumbnail_alt = alt
+                post.save(update_fields=["thumbnail_url", "thumbnail_alt"])
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
