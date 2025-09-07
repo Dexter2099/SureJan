@@ -98,18 +98,23 @@ class PostLinkTests(TestCase):
         self.assertIn(f'href="{user_url}"', html)
 
     def test_feed_card_thumbnail_links_to_content_url(self):
+        image_data = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00"
+            b"\x00\x00\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
         post = Post.objects.create(
             community=self.community,
             author=self.user,
             post_type="link",
             title="Link",
             content_url="https://example.com/article",
+            image_thumb=SimpleUploadedFile("thumb.png", image_data, content_type="image/png"),
         )
-        Post.objects.filter(pk=post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
-        post.refresh_from_db()
         request = self.factory.get("/")
         html = render_to_string("partials/feed_card.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
+        self.assertIn(f'src="{post.image_thumb.url}"', html)
         self.assertIn(
             f'href="{post.content_url}" target="_blank" rel="noopener noreferrer"',
             html,
@@ -119,18 +124,23 @@ class PostLinkTests(TestCase):
         self.assertIn(f'href="{detail_url}#comments"', html)
 
     def test_post_row_thumbnail_links_to_content_url(self):
+        image_data = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00"
+            b"\x00\x00\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
         post = Post.objects.create(
             community=self.community,
             author=self.user,
             post_type="link",
             title="Link",
             content_url="https://example.com/article",
+            image_thumb=SimpleUploadedFile("thumb.png", image_data, content_type="image/png"),
         )
-        Post.objects.filter(pk=post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
-        post.refresh_from_db()
         request = self.factory.get("/")
         html = render_to_string("core/partials/post_row.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
+        self.assertIn(f'src="{post.image_thumb.url}"', html)
         self.assertIn(
             f'href="{post.content_url}" target="_blank" rel="noopener noreferrer" class="thumb"',
             html,
