@@ -27,7 +27,7 @@ def test_backfill_thumbs_skips_cached_failures(monkeypatch):
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert not post.thumbnail_url
+    assert not post.image
     assert cache.get(f"thumbfail:{post.content_url}")
 
     calls = []
@@ -46,10 +46,16 @@ def test_backfill_thumbs_skips_cached_failures(monkeypatch):
         return "https://cdn.example.com/thumb.jpg"
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch3)
+    from core.management.commands import backfill_thumbs as backfill_mod
+
+    def fake_persist(post_obj, img_url, label):
+        Post.objects.filter(pk=post_obj.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post_obj.image = "thumb.jpg"
+
+    monkeypatch.setattr(backfill_mod, "persist_thumbnail", fake_persist)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert post.thumbnail_url == "https://cdn.example.com/thumb.jpg"
-    assert post.thumbnail_alt == post.title
+    assert post.image.name == "thumb.jpg"
 
 
 @pytest.mark.django_db
@@ -72,7 +78,7 @@ def test_backfill_thumbs_rejects_http(monkeypatch):
     monkeypatch.setattr(thumbnails, "resolve_thumbnail", fake_resolve)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert not post.thumbnail_url
+    assert not post.image
 
 
 @pytest.mark.django_db
@@ -128,9 +134,16 @@ def test_backfill_thumbs_og_first_and_caches_canonical(monkeypatch):
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
     monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
+    from core.management.commands import backfill_thumbs as backfill_mod
+
+    def fake_persist(post_obj, img_url, label):
+        Post.objects.filter(pk=post_obj.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post_obj.image = "thumb.jpg"
+
+    monkeypatch.setattr(backfill_mod, "persist_thumbnail", fake_persist)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert post.thumbnail_url == "https://cdn.example.com/thumb.jpg"
+    assert post.image.name == "thumb.jpg"
     assert cache.get("thumb:https://youtube.com/watch?v=abc123") == "https://cdn.example.com/thumb.jpg"
     assert fb_called is False
 
@@ -161,9 +174,18 @@ def test_backfill_thumbs_uses_fallback_after_og(monkeypatch):
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
     monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
+    persist_calls = []
+    from core.management.commands import backfill_thumbs as backfill_mod
+
+    def fake_persist(post_obj, img_url, label):
+        persist_calls.append(img_url)
+        Post.objects.filter(pk=post_obj.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post_obj.image = "thumb.jpg"
+
+    monkeypatch.setattr(backfill_mod, "persist_thumbnail", fake_persist)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert post.thumbnail_url == "https://fallback.example.com/thumb.jpg"
+    assert persist_calls == ["https://fallback.example.com/thumb.jpg"]
     assert order == ["og", "fb"]
     assert (
         cache.get("thumb:https://rumble.com/v1abcd.html")

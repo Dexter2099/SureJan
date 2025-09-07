@@ -1,13 +1,14 @@
 from io import BytesIO
 from PIL import Image
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import TestCase
 from unittest.mock import patch
 
 from core.utils import thumbnails
-from .models import Community, Post
+from .models import Community, Post, RateLimitCounter
 
 
 def make_image(name="test.jpg"):
@@ -19,6 +20,8 @@ def make_image(name="test.jpg"):
 
 class PostSubmitTests(TestCase):
     def setUp(self):
+        cache.clear()
+        RateLimitCounter.objects.all().delete()
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(
@@ -79,8 +82,8 @@ class PostSubmitTests(TestCase):
             )
         self.assertEqual(resp.status_code, 200)
         post = Post.objects.get(title="NoThumb")
-        self.assertEqual(post.thumbnail_url, "")
-        self.assertEqual(post.thumbnail_alt, "")
+        self.assertFalse(post.image)
+        self.assertFalse(post.image_thumb)
 
     def test_rumble_link_post_fetches_og_image(self):
         link = "https://rumble.com/v1abc"

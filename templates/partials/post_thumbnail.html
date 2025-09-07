@@ -1,13 +1,13 @@
 {% load thumbnails %}
 {% if post.image_thumb %}
-  {% with src=post.image_thumb.url alt=post.thumbnail_alt|default:post.title %}
+  {% with src=post.image_thumb.url alt=post.title %}
   <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
     <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
     {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}
   </a>
   {% endwith %}
 {% elif post.image %}
-  {% with src=post.image.url alt=post.thumbnail_alt|default:post.title %}
+  {% with src=post.image.url alt=post.title %}
   <a href="{{ post.content_url }}" target="_blank" rel="noopener noreferrer" class="thumb" style="aspect-ratio:16/9;">
     <img src="{{ src }}" alt="{{ alt }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="640" height="360">
     {% if post.provider_name %}<span class="thumb-label">{{ post.provider_name }}</span>{% endif %}

@@ -18,8 +18,6 @@ def test_refetch_thumbs_replaces_remote(monkeypatch):
         post_type="link",
         title="Link",
         content_url="https://example.com",
-        thumbnail_url="https://cdn.example.com/old.jpg",
-        thumbnail_alt="old",
     )
 
     def fake_resolve(url, label, fetch_remote=False):
@@ -28,5 +26,4 @@ def test_refetch_thumbs_replaces_remote(monkeypatch):
     monkeypatch.setattr(thumbnails, "resolve_thumbnail", fake_resolve)
     call_command("refetch_thumbs", limit=1)
     post.refresh_from_db()
-    assert post.thumbnail_url == f"{settings.MEDIA_URL}thumbs/new.jpg"
-    assert post.thumbnail_alt == "new"
+    assert post.image.url == f"{settings.MEDIA_URL}thumbs/new.jpg"

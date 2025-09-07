@@ -2,7 +2,6 @@ import re
 from io import BytesIO
 
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -30,14 +29,14 @@ def test_feed_thumbnails_are_images(client):
     )
 
     # Link post with explicit thumbnail
-    Post.objects.create(
+    link_post = Post.objects.create(
         community=com,
         author=user,
         post_type="link",
         title="Link",
         content_url="https://example.com",
-        thumbnail_url=f"{settings.MEDIA_URL}thumb.jpg",
     )
+    Post.objects.filter(pk=link_post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
 
     # Link post without thumbnail should use placeholder
     Post.objects.create(

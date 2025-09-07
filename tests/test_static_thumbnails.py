@@ -1,5 +1,4 @@
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from core.models import Community, Post
@@ -16,8 +15,9 @@ def test_feed_and_detail_render_thumbnails(client):
         post_type="link",
         title="Link",
         content_url="https://example.com",
-        thumbnail_url=f"{settings.MEDIA_URL}thumb.jpg",
     )
+    Post.objects.filter(pk=post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+    post.refresh_from_db()
 
     for url in ["/", post.get_absolute_url()]:
         html = client.get(url).content.decode()

@@ -156,6 +156,7 @@ def test_resolve_thumbnail_falls_back_after_og(monkeypatch):
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
     monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
+    monkeypatch.setattr(thumbnails, "cache_remote_image", lambda url: url)
 
     src, alt = thumbnails.resolve_thumbnail(
         "https://rumble.com/embed/v1abcd", "label", fetch_remote=True
@@ -303,7 +304,6 @@ def test_resolve_thumbnail_attaches_image(monkeypatch, settings, tmp_path):
     assert src == post.image.url
     assert post.image
     assert not post.image_thumb
-    assert post.thumbnail_alt == ""
     assert alt == "label"
 
 
@@ -331,7 +331,6 @@ def test_resolve_thumbnail_uses_existing_image(monkeypatch, settings, tmp_path):
         title="Link",
         content_url="https://example.com",
         image=img,
-        thumbnail_alt="stored",
     )
 
     called = {"og": False}
@@ -349,7 +348,6 @@ def test_resolve_thumbnail_uses_existing_image(monkeypatch, settings, tmp_path):
     assert called["og"] is False
     assert src == post.image.url
     assert alt == "label"
-    assert post.thumbnail_alt == "stored"
 
 
 @pytest.mark.django_db

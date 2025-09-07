@@ -19,23 +19,24 @@ def test_clear_thumb_fails_command(monkeypatch):
         post_type="link",
         title="Link",
         content_url="https://example.com",
-        thumbnail_url="data:image/svg+xml;base64,abc",
-        thumbnail_alt="Preview",
     )
     cache.set("thumbfail:https://example.com", True, 60)
 
     call_command("clear_thumb_fails")
 
-    post.refresh_from_db()
-    assert post.thumbnail_url == ""
-    assert post.thumbnail_alt == ""
     assert cache.get("thumbfail:https://example.com") is None
 
     def fake_fetch(url):
         return "https://cdn.example.com/thumb.jpg"
 
     monkeypatch.setattr(thumbnails, "fetch_og_image", fake_fetch)
+    from core.management.commands import backfill_thumbs as backfill_mod
+
+    def fake_persist(post_obj, img_url, label):
+        Post.objects.filter(pk=post_obj.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post_obj.image = "thumb.jpg"
+
+    monkeypatch.setattr(backfill_mod, "persist_thumbnail", fake_persist)
     call_command("backfill_thumbs", limit=1, days=365)
     post.refresh_from_db()
-    assert post.thumbnail_url == "https://cdn.example.com/thumb.jpg"
-    assert post.thumbnail_alt == post.title
+    assert post.image.name == "thumb.jpg"

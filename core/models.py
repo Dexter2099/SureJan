@@ -112,8 +112,6 @@ class Post(models.Model):
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
     )
     image_thumb = models.ImageField(upload_to="posts/thumbs/", blank=True, null=True)
-    thumbnail_url = models.URLField(blank=True)
-    thumbnail_alt = models.CharField(max_length=200, blank=True)
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)

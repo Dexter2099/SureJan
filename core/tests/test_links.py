@@ -4,7 +4,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.conf import settings
 from io import BytesIO
 from PIL import Image
 
@@ -106,7 +105,8 @@ class PostLinkTests(TestCase):
             title="Link",
             content_url="https://example.com/article",
         )
-        post.thumbnail_url = f"{settings.MEDIA_URL}thumb.jpg"
+        Post.objects.filter(pk=post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post.refresh_from_db()
         request = self.factory.get("/")
         html = render_to_string("partials/feed_card.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
@@ -126,7 +126,8 @@ class PostLinkTests(TestCase):
             title="Link",
             content_url="https://example.com/article",
         )
-        post.thumbnail_url = f"{settings.MEDIA_URL}thumb.jpg"
+        Post.objects.filter(pk=post.pk).update(image="thumb.jpg", image_thumb="thumb.jpg")
+        post.refresh_from_db()
         request = self.factory.get("/")
         html = render_to_string("core/partials/post_row.html", {"post": post}, request=request)
         detail_url = post.get_absolute_url()
