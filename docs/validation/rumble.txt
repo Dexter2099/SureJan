@@ -1,7 +1,0 @@
-Input URL: https://rumble.com/vxyz-test.html?foo=bar
-Canonical URL: https://rumble.com/vxyz-test.html
-
-Preview sequence:
-1. OpenGraph metadata
-2. Provider fallback (oEmbed)
-3. SVG placeholder

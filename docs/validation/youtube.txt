@@ -1,7 +1,0 @@
-Input URL: https://youtu.be/dQw4w9WgXcQ
-Canonical URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-
-Preview sequence:
-1. OpenGraph metadata
-2. Provider fallback (oEmbed)
-3. SVG placeholder

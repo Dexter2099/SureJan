@@ -14,10 +14,6 @@ The `ASTROTURF_WATCH` environment variable (default `1`) controls all
 astroturf-detection features. Set `ASTROTURF_WATCH=0` to hide engagement
 chips and block transparency pages; related endpoints will return 404.
 
-`YT_DIRECT_OG`, `RUMBLE_DIRECT_OG`, and `X_DIRECT_OG` opt a provider into direct
-OpenGraph thumbnail lookups. `RUMBLE_DIRECT_OG` defaults to `1` while the
-others default to `0`. See
-[direct-og-rollout.md](direct-og-rollout.md) for rollout and rollback steps.
 
 ### CSP / Hosts
 
@@ -25,15 +21,7 @@ Define public domains with `DJANGO_ALLOWED_HOSTS` (comma-separated) so Django
 and the CSP allowlist match your deployment URLs. Additional trusted origins
 for form posts can be added with `DJANGO_CSRF_TRUSTED`.
 
-The production CSP allows external images only from a small, documented set:
-
-* `https://i.ytimg.com` – YouTube thumbnails.
-* `https://*.twimg.com` – images in tweet thumbnails.
-* `https://*.rumblecdn.com` and `https://*.rmbl.ws` – Rumble thumbnails.
-  Rumble embeds are disabled and no `frame-src` allowance is needed.
-* `data:` – inline SVG placeholders.
-
-Other resource types are restricted to `'self'`.
+The production CSP allows external images only from trusted origins. Other resource types are restricted to `'self'`.
 
 ### Moderation
 
@@ -52,23 +40,6 @@ flyctl ssh console -a surejan -C "python manage.py seed_basics"
 flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collectstatic"
 ```
 
-### Link thumbnails
-
-OpenGraph images are fetched with a browser-like User-Agent and
-`Accept-Language` header. Requests timeout after roughly 4 s and each fetch
-logs the provider domain, HTTP status, and whether an image URL or SVG
-placeholder was returned.
-
-Run the backfill command periodically (cron or CI) to populate thumbnails for
-recent link posts:
-
-```
-flyctl ssh console -a surejan -C "python manage.py backfill_thumbs --limit 50 --days 3"
-```
-
-The command fetches provider poster or OpenGraph images asynchronously with
-short timeouts and caches results before saving `thumbnail_url` and
-`thumbnail_alt` on each `Post`.
 
 ## Smoke checklist
 
