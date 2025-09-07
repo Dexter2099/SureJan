@@ -1,6 +1,0 @@
-youtube:
-  img_hosts: ["i.ytimg.com"]
-x:
-  img_hosts: ["*.twimg.com"]
-rumble:
-  img_hosts: ["*.rumblecdn.com", "*.rmbl.ws"]

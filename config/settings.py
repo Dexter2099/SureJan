@@ -81,49 +81,7 @@ SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG
 
-THUMBNAILS_ONLY = os.environ.get("THUMBNAILS_ONLY", "1") in (
-    "1",
-    "true",
-    "True",
-)
-THUMBNAIL_CACHE_SECONDS = int(os.environ.get("THUMBNAIL_CACHE_SECONDS", "3600"))
-
-# Opt-in provider-specific direct OpenGraph lookups
-YT_DIRECT_OG = os.environ.get("YT_DIRECT_OG", "0") in (
-    "1",
-    "true",
-    "True",
-)
-RUMBLE_DIRECT_OG = os.environ.get("RUMBLE_DIRECT_OG", "1") in (
-    "1",
-    "true",
-    "True",
-)
-X_DIRECT_OG = os.environ.get("X_DIRECT_OG", "0") in (
-    "1",
-    "true",
-    "True",
-)
-
-EMBED_PROVIDERS = {
-    "YOUTUBE": {
-        "img_hosts": ["https://*.ytimg.com"],
-    },
-    "X": {
-        "img_hosts": [
-            "https://*.twimg.com",
-            "https://pbs.twimg.com",
-        ],
-    },
-    "RUMBLE": {
-        "img_hosts": [
-            "https://rumblecdn.com",
-            "https://*.rumblecdn.com",
-            "https://i.rmbl.ws",
-            "https://*.rmbl.ws",
-        ],
-    },
-}
+# Removed legacy thumbnail and provider-specific settings
 
 # Simple per-user rate limits
 RATE_POSTS_PER_DAY_NEW = int(os.getenv("RATE_POSTS_PER_DAY_NEW", "10"))
@@ -149,11 +107,11 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-    _img_src = ["'self'"]
-    for provider in EMBED_PROVIDERS.values():
-        _img_src.extend(provider["img_hosts"])
-    _img_src.append("https://surejan-media.fly.storage.tigris.dev")
-    _img_src.append("data:")
+    _img_src = [
+        "'self'",
+        "https://surejan-media.fly.storage.tigris.dev",
+        "data:",
+    ]
 
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
@@ -309,12 +267,10 @@ if USE_S3 and all(required) and not IS_BUILD:
     AWS_S3_SIGNATURE_VERSION = "s3v4"
     AWS_DEFAULT_ACL = "public-read"
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=94608000"}
-    THUMB_CACHE_DIR = BASE_DIR / "media" / "thumbs"
 else:
     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
-    THUMB_CACHE_DIR = MEDIA_ROOT / "thumbs"
 
 # Ensure STORAGES['default'] points to the active storage backend
 STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}
