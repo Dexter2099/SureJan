@@ -157,6 +157,7 @@ if not DEBUG:
     _img_src = ["'self'"]
     for provider in EMBED_PROVIDERS.values():
         _img_src.extend(provider["img_hosts"])
+    _img_src.append("https://surejan-media.fly.storage.tigris.dev")
     _img_src.append("data:")
 
     CONTENT_SECURITY_POLICY = {
