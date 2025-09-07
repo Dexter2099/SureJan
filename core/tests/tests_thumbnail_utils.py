@@ -138,7 +138,10 @@ def test_resolve_thumbnail_falls_back_after_og(monkeypatch):
     assert src == "https://fallback.example/thumb.jpg"
     assert alt == "label"
     assert order == ["og", "fb"]
-    assert cache.get("thumb:https://rumble.com/v1abcd") == "https://fallback.example/thumb.jpg"
+    assert (
+        cache.get("thumb:https://rumble.com/v1abcd.html")
+        == "https://fallback.example/thumb.jpg"
+    )
 
 
 @pytest.mark.django_db

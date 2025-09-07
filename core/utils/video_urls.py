@@ -37,19 +37,26 @@ def canonicalize_youtube(url: str) -> str | None:
     return f"https://youtube.com/watch?v={vid}"
 
 
-def canonicalize_rumble(url: str) -> str | None:
-    """Return canonical Rumble URL of the form ``https://rumble.com/v...``."""
-    parsed = urlparse(url)
-    host = parsed.netloc.lower().lstrip("www.")
-    if host != "rumble.com":
+def is_rumble_url(url: str) -> bool:
+    """Return ``True`` if ``url`` points to rumble.com."""
+    host = urlparse(url).netloc.lower().lstrip("www.")
+    return host == "rumble.com"
+
+
+def canonicalize_rumble_url(url: str) -> str | None:
+    """Return canonical ``https://rumble.com/v...-slug.html`` for Rumble URLs."""
+    if not is_rumble_url(url):
         return None
+    parsed = urlparse(url)
     path = parsed.path
     if path.startswith("/embed/"):
         path = "/" + path[len("/embed/"):]
-    m = re.search(r"/(v[0-9a-z]+)", path)
+    m = re.search(r"/(v[0-9a-z]+(?:-[\w-]+)?)", path)
     if not m:
         return None
     slug = m.group(1)
+    if not slug.endswith(".html"):
+        slug += ".html"
     return f"https://rumble.com/{slug}"
 
 
@@ -70,7 +77,7 @@ def canonicalize_x(url: str) -> str | None:
     return urlunparse(("https", "x.com", path, "", "", ""))
 
 
-_CANONICALIZERS = [canonicalize_youtube, canonicalize_rumble, canonicalize_x]
+_CANONICALIZERS = [canonicalize_youtube, canonicalize_rumble_url, canonicalize_x]
 
 
 def canonicalize_video_url(url: str) -> str:
