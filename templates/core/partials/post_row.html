@@ -10,6 +10,11 @@
     {% if post.excerpt %}
     <p class="post-excerpt">{{ post.excerpt }}</p>
     {% endif %}
+    {% if (post.post_type == 'image' or post.image) and post.image_thumb %}
+    <a href="{{ detail_url }}" class="post-image-link">
+      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}" class="post-image-thumb">
+    </a>
+    {% endif %}
     <div class="post-actions">
       {% if show_vote_widget is not False %}
         {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
