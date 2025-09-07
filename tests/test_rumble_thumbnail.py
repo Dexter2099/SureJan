@@ -8,17 +8,51 @@ from core.utils import thumbnails
 from core.utils.video_urls import canonicalize_video_url
 
 
-def test_resolve_thumbnail_rumble(monkeypatch):
+def test_resolve_thumbnail_rumble(monkeypatch, tmp_path):
     cache.clear()
+    remote_url = "https://sp.rmbl.ws/s8/1/testslug.jpg"
+
     monkeypatch.setattr(thumbnails, "fetch_og_image", lambda url: None)
-    monkeypatch.setattr(
-        thumbnails, "rumble_fallback_thumb", lambda url: "https://rumble.example/thumb.jpg"
-    )
-    src, alt = thumbnails.resolve_thumbnail(
-        "https://rumble.com/v1", "label", fetch_remote=True
-    )
-    assert src == "https://rumble.example/thumb.jpg"
-    assert alt == "label"
+    monkeypatch.setattr(thumbnails, "rumble_fallback_thumb", lambda url: remote_url)
+
+    class Resp:
+        status_code = 200
+        headers = {"Content-Type": "image/jpeg"}
+        content = b"img"
+
+        def raise_for_status(self):
+            pass
+
+    calls = []
+
+    def fake_fetch_html(url, source="unknown"):
+        calls.append(url)
+        return Resp()
+
+    monkeypatch.setattr(thumbnails, "fetch_html", fake_fetch_html)
+
+    url = "https://rumble.com/v1"
+    canon = canonicalize_video_url(url)
+    digest = hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+    with override_settings(
+        MEDIA_ROOT=tmp_path / "media",
+        THUMB_CACHE_DIR=tmp_path / "media" / "thumbs",
+        MEDIA_URL="/media/",
+    ):
+        expected = settings.THUMB_CACHE_DIR / f"{digest}.jpg"
+
+        src, alt = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
+        assert src.startswith(settings.MEDIA_URL)
+        assert src.endswith(expected.name)
+        assert expected.exists()
+        assert alt == "label"
+        assert calls == [remote_url]
+
+        calls.clear()
+        src2, _ = thumbnails.resolve_thumbnail(url, "label", fetch_remote=True)
+        assert src2 == src
+        assert calls == []
 
 def test_resolve_thumbnail_rumble_rejects_http(monkeypatch):
     cache.clear()

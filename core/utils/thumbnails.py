@@ -272,6 +272,15 @@ def resolve_thumbnail(url: str, label: str, fetch_remote: bool = False) -> tuple
                 thumb = None
     if not thumb and not direct_og:
         thumb = _provider_fallback(canon_url, fetch_remote)
+        if thumb and "rumble.com" in domain:
+            if thumb.startswith("https://"):
+                cached = cache_remote_image(thumb, canon_url)
+                if cached:
+                    thumb = cached
+                else:
+                    thumb = None
+            else:
+                thumb = None
 
     if thumb and (thumb.startswith("https://") or thumb.startswith(settings.MEDIA_URL)):
         cache.set(success_key, thumb, _THUMB_TTL)
