@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
-from ..http_client import fetch_html
+from ..http_client import fetch_og_html
 from .url_cleanup import cleanup_url
 
 OG_IMAGE_RE = re.compile(
@@ -33,7 +33,7 @@ def scrape_og_image(url: str) -> tuple[Optional[str], Optional[int]]:
     image = None
     result = "og_missing"
     try:
-        resp = fetch_html(url, source="og-image")
+        resp = fetch_og_html(url, source="og-image")
         status = resp.status_code
         resp.raise_for_status()
         match = OG_IMAGE_RE.search(resp.text)
@@ -118,7 +118,7 @@ def youtube_fallback_thumb(url: str, fetch_remote: bool = False) -> str | None:
     if fetch_remote:
         hi_res = f"{base}/maxresdefault.jpg"
         try:
-            resp = fetch_html(hi_res, source="youtube-thumb")
+            resp = fetch_og_html(hi_res, source="youtube-thumb")
             if resp.status_code != 404:
                 return hi_res
         except Exception:
@@ -147,7 +147,7 @@ def x_fallback_thumb(url: str) -> str | None:
     url = cleanup_url(url)
 
     try:
-        resp = fetch_html(url, source="x-thumb")
+        resp = fetch_og_html(url, source="x-thumb")
         resp.raise_for_status()
     except Exception:
         return None
@@ -215,7 +215,7 @@ def cache_remote_image(origin_url: str) -> str | None:
 
     status = None
     try:
-        resp = fetch_html(origin_url, source="rumble-thumb")
+        resp = fetch_og_html(origin_url, source="rumble-thumb")
         status = resp.status_code
         resp.raise_for_status()
     except Exception:

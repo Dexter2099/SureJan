@@ -210,7 +210,7 @@ def _fake_resp(text):
 def test_fetch_og_image_from_fixture(monkeypatch):
     html = Path("tests/fixtures/youtube/ogonly.html").read_text()
     monkeypatch.setattr(
-        thumbnails, "fetch_html", lambda url, source=None: _fake_resp(html)
+        thumbnails, "fetch_og_html", lambda url, source=None: _fake_resp(html)
     )
     assert (
         thumbnails.fetch_og_image("https://youtu.be/abc123")
@@ -221,7 +221,7 @@ def test_fetch_og_image_from_fixture(monkeypatch):
 def test_x_fallback_thumb_from_fixture(monkeypatch):
     html = Path("tests/fixtures/x/fallback.html").read_text()
     monkeypatch.setattr(
-        thumbnails, "fetch_html", lambda url, source=None: _fake_resp(html)
+        thumbnails, "fetch_og_html", lambda url, source=None: _fake_resp(html)
     )
     assert (
         thumbnails.x_fallback_thumb("https://x.com/user/status/1")

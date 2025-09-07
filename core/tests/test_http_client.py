@@ -1,4 +1,5 @@
 import requests
+import pytest
 
 from core import http_client
 
@@ -58,3 +59,50 @@ def test_logging_and_counters(monkeypatch, caplog):
     assert http_client.COUNTERS["example.com"]["error"] == 1
     assert "status=404" in caplog.text
     assert "Mozilla/5.0" in caplog.text
+
+
+def test_fetch_og_html_retries_on_timeout(monkeypatch):
+    http_client._OG_SESSION = None
+    monkeypatch.setattr(http_client, "OG_FETCH_DISABLE_RETRIES", False)
+    calls = []
+
+    def fake_get(url, timeout):
+        calls.append(1)
+        if len(calls) < 3:
+            raise requests.exceptions.Timeout()
+        return type("R", (), {"status_code": 200})()
+
+    monkeypatch.setattr(http_client, "_robots_allowed", lambda url: True)
+    session = http_client.get_og_session()
+    monkeypatch.setattr(session, "get", fake_get)
+    monkeypatch.setattr(http_client.time, "sleep", lambda s: None)
+    resp = http_client.fetch_og_html("https://example.com")
+    assert len(calls) == 3
+    assert resp.status_code == 200
+
+
+def test_fetch_og_html_no_retry_on_404(monkeypatch):
+    http_client._OG_SESSION = None
+    monkeypatch.setattr(http_client, "OG_FETCH_DISABLE_RETRIES", False)
+    calls = []
+
+    class Resp:
+        status_code = 404
+
+    def fake_get(url, timeout):
+        calls.append(1)
+        return Resp()
+
+    monkeypatch.setattr(http_client, "_robots_allowed", lambda url: True)
+    session = http_client.get_og_session()
+    monkeypatch.setattr(session, "get", fake_get)
+    monkeypatch.setattr(http_client.time, "sleep", lambda s: None)
+    resp = http_client.fetch_og_html("https://example.com")
+    assert len(calls) == 1
+    assert resp.status_code == 404
+
+
+def test_fetch_og_html_robots_block(monkeypatch):
+    monkeypatch.setattr(http_client, "_robots_allowed", lambda url: False)
+    with pytest.raises(PermissionError):
+        http_client.fetch_og_html("https://example.com")
