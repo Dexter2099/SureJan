@@ -167,7 +167,7 @@ def test_resolve_thumbnail_falls_back_after_og(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_resolve_thumbnail_direct_skips_canon_and_fallback(settings, monkeypatch):
+def test_resolve_thumbnail_direct_canonizes_no_fallback(settings, monkeypatch):
     cache.clear()
     settings.YT_DIRECT_OG = True
     called = {
@@ -175,7 +175,7 @@ def test_resolve_thumbnail_direct_skips_canon_and_fallback(settings, monkeypatch
         "fallback": False,
     }
 
-    def fake_canon(url):
+    def fake_cleanup(url):
         called["canon"] = True
         return url
 
@@ -183,14 +183,14 @@ def test_resolve_thumbnail_direct_skips_canon_and_fallback(settings, monkeypatch
         called["fallback"] = True
         return "https://example.com/thumb.jpg"
 
-    monkeypatch.setattr(thumbnails, "canonicalize_video_url", fake_canon)
+    monkeypatch.setattr(thumbnails, "cleanup_url", fake_cleanup)
     monkeypatch.setattr(thumbnails, "_provider_fallback", fake_fallback)
     monkeypatch.setattr(thumbnails, "fetch_og_image", lambda url: None)
 
     src, alt = thumbnails.resolve_thumbnail("https://youtu.be/abc123", "label", fetch_remote=True)
     assert src.startswith("data:image/svg+xml")
     assert alt == thumbnails.FALLBACK_ALT
-    assert called["canon"] is False
+    assert called["canon"] is True
     assert called["fallback"] is False
 
 
