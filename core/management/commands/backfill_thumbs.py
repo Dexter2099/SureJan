@@ -10,7 +10,7 @@ from datetime import timedelta
 
 from core import http_client
 from core.models import Post, _make_thumb
-from core.utils.thumbnails import resolve_thumbnail
+from core.utils.thumbnails import resolve_thumbnail, cache_remote_image
 from core.utils.video_urls import canonicalize_video_url
 
 
@@ -35,6 +35,11 @@ class Command(BaseCommand):
             default=10,
             help="Number of concurrent thumbnail fetches",
         )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Fetch thumbnails without saving changes",
+        )
 
     def handle(self, *args, **opts):
         qs_img = (
@@ -49,6 +54,28 @@ class Command(BaseCommand):
             .exclude(content_url="")
             .order_by("-created_at")
         )
+        qs_rumble = (
+            Post.objects.filter(post_type="link", created_at__gte=cutoff)
+            .exclude(thumbnail_url__isnull=True)
+            .exclude(thumbnail_url="")
+            .filter(
+                Q(thumbnail_url__icontains="rmbl.ws")
+                | Q(thumbnail_url__icontains="rumblecdn.com")
+            )
+        )
+        converted = 0
+        for p in qs_rumble.iterator():
+            try:
+                canon = canonicalize_video_url(p.content_url or "")
+                cached = cache_remote_image(p.thumbnail_url or "", canon)
+                if cached:
+                    converted += 1
+                    if not opts["dry_run"]:
+                        p.thumbnail_url = cached
+                        p.save(update_fields=["thumbnail_url"])
+                        connection.commit()
+            except Exception as e:
+                self.stderr.write(f"Post {p.id}: {e}")
         count = 0
         for p in qs_img.iterator():
             try:
@@ -122,4 +149,4 @@ class Command(BaseCommand):
                     return sum(await asyncio.gather(*(run(p) for p in posts)))
 
                 count += asyncio.run(runner())
-        self.stdout.write(f"Backfilled {count} thumbnails")
+        self.stdout.write(f"Backfilled {count} thumbnails; converted {converted} thumbnails")
