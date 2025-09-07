@@ -140,6 +140,72 @@ def test_post_detail_rumble_youtube(link, flag, patch_cache, client, settings, m
 
 
 @pytest.mark.django_db
+def test_rumble_post_thumbnail(client, settings, monkeypatch, tmp_path):
+    cache.clear()
+    settings.MEDIA_ROOT = tmp_path / "media"
+    settings.MEDIA_URL = "/media/"
+    settings.RUMBLE_DIRECT_OG = True
+
+    User = get_user_model()
+    user = User.objects.create_user("alice", password="pw")
+    com = Community.objects.create(slug="t", name="Test", title="Test", created_by=user)
+    client.login(username="alice", password="pw")
+
+    og_url = "https://img.test/og.jpg"
+    buf = BytesIO()
+    Image.new("RGB", (1, 1), "white").save(buf, format="PNG")
+    img_bytes = buf.getvalue()
+
+    class HtmlResp:
+        status_code = 200
+        text = f"<meta property='og:image' content='{og_url}'>"
+        headers = {}
+        content = b""
+
+        def raise_for_status(self):
+            pass
+
+    class ImgResp:
+        status_code = 200
+        headers = {"Content-Type": "image/png"}
+        content = img_bytes
+        text = ""
+
+        def raise_for_status(self):
+            pass
+
+    def fake_fetch_og_html(url, source="og-image", fallback=True):
+        if url == og_url:
+            return ImgResp()
+        return HtmlResp()
+
+    monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch_og_html)
+    monkeypatch.setattr(thumbnails, "cache_remote_image", lambda u: u)
+
+    resp = client.post(
+        reverse("post_submit"),
+        {
+            "community": com.id,
+            "post_type": "link",
+            "title": "Rumble",
+            "content_url": "https://rumble.com/v1abc",
+        },
+        follow=True,
+    )
+    assert resp.status_code == 200
+
+    post = Post.objects.get(title="Rumble")
+    assert post.image
+    assert post.image.url.startswith(settings.MEDIA_URL)
+
+    feed_html = client.get(reverse("home")).content.decode()
+    detail_html = client.get(post.get_absolute_url()).content.decode()
+    prefix = re.escape(settings.MEDIA_URL)
+    assert re.search(f'<img[^>]+src="{prefix}[^\"]+"', feed_html)
+    assert re.search(f'<img[^>]+src="{prefix}[^\"]+"', detail_html)
+
+
+@pytest.mark.django_db
 def test_post_detail_og_image_403(client, settings, monkeypatch, tmp_path):
     cache.clear()
     settings.MEDIA_ROOT = tmp_path / "media"
