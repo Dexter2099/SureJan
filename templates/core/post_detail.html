@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load permissions static %}
+{% load static %}
 {% url 'post_detail' post.community.slug post.pk post.slug as post_url %}
 
 {% block head_extra %}
@@ -16,6 +16,10 @@
       • <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }} ago</time>
     </div>
   </header>
+
+  {% if post.content_url %}
+  <p class="post-link">from: {{ post.content_url|escape }}</p>
+  {% endif %}
 
   {% if post.body %}
   <div class="post-body prose">

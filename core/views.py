@@ -652,7 +652,7 @@ def post_detail(request, community, pk, slug):
     """Display a single post and its comments."""
 
     post = get_object_or_404(
-        Post.objects.filter(is_deleted=False).prefetch_related("image_links"),
+        Post.objects.filter(is_deleted=False),
         pk=pk,
         community__slug=community,
     )
@@ -678,8 +678,6 @@ def post_detail(request, community, pk, slug):
     else:  # best
         comments = comments.order_by("-score", "path")
 
-    images = list(post.image_links.all())
-
     severity = None
     band = None
     try:
@@ -704,7 +702,6 @@ def post_detail(request, community, pk, slug):
     context = {
         "post": post,
         "comments": comments,
-        "images": images,
         "c_sort": c_sort,
         "q": q,
         "severity": severity,
@@ -717,7 +714,7 @@ def post_detail_id(request, pk):
     """Simpler post detail view addressed by ID only."""
 
     post = get_object_or_404(
-        Post.objects.filter(is_deleted=False).prefetch_related("image_links"),
+        Post.objects.filter(is_deleted=False),
         pk=pk,
     )
     c_sort = request.GET.get("c_sort", "best")
@@ -742,8 +739,6 @@ def post_detail_id(request, pk):
     else:  # best
         comments = comments.order_by("-score", "path")
 
-    images = list(post.image_links.all())
-
     severity = None
     band = None
     try:
@@ -768,7 +763,6 @@ def post_detail_id(request, pk):
     context = {
         "post": post,
         "comments": comments,
-        "images": images,
         "c_sort": c_sort,
         "q": q,
         "severity": severity,
