@@ -289,12 +289,11 @@ def test_resolve_thumbnail_attaches_image(monkeypatch, settings, tmp_path):
         headers = {"Content-Type": "image/png"}
         content = img_bytes
 
-        def raise_for_status(self):
-            return None
+    def fake_get(url, timeout=(8, 8)):
+        assert url == "https://cdn.example.com/thumb.jpg"
+        return Resp()
 
-    monkeypatch.setattr(
-        thumbnails, "fetch_og_html", lambda url, source="thumb-fetch": Resp()
-    )
+    monkeypatch.setattr(thumbnails.requests, "get", fake_get)
 
     src, alt = thumbnails.resolve_thumbnail(
         post.content_url, "label", fetch_remote=True, post=post

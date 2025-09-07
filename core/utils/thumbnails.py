@@ -269,6 +269,42 @@ def cache_remote_image(origin_url: str) -> str | None:
     return default_storage.url(stored)
 
 
+def persist_thumbnail(post: "Post", img_url: str, label: str) -> None:
+    """Fetch ``img_url`` and persist it as ``post.image``.
+
+    The function is idempotent and returns silently on any failure. Images are
+    stored under ``posts/<post.id>/thumb<ext>`` where ``ext`` is derived from the
+    response ``Content-Type``.
+    """
+
+    # Return early if an image already exists (idempotency)
+    if post.image:
+        return
+
+    try:
+        resp = requests.get(img_url, timeout=(8, 8))
+    except Exception:
+        return
+
+    content_type = resp.headers.get("Content-Type", "").split(";")[0].lower()
+    if resp.status_code != 200 or not content_type.startswith("image/"):
+        return
+
+    if "png" in content_type:
+        ext = ".png"
+    else:
+        ext = ".jpg"
+
+    path = f"posts/{post.id}/thumb{ext}"
+    try:
+        stored = default_storage.save(path, ContentFile(resp.content))
+    except Exception:
+        return
+
+    post.image = stored
+    post.save(update_fields=["image"], recompute_hot=False)
+
+
 def resolve_thumbnail(
     url: str, label: str, fetch_remote: bool = False, *, post: "Post | None" = None
 ) -> tuple[str, str]:
@@ -338,21 +374,8 @@ def resolve_thumbnail(
                 thumb = None
 
     if thumb and thumb.startswith("http") and post is not None:
-        try:
-            resp = fetch_og_html(thumb, source="thumb-fetch")
-            status = resp.status_code
-            resp.raise_for_status()
-            content_type = resp.headers.get("Content-Type", "").split(";")[0].lower()
-            ext = _EXTENSION_MAP.get(content_type)
-            if not ext or len(resp.content) > 5 * 1024 * 1024:
-                raise ValueError("unsupported image")
-            path = f"posts/{post.id}/thumb.{ext}"
-            stored = default_storage.save(path, ContentFile(resp.content))
-            post.image = stored
-            post.save(update_fields=["image"], recompute_hot=False)
-            thumb = post.image.url
-        except Exception:
-            thumb = None
+        persist_thumbnail(post, thumb, label)
+        thumb = post.image.url if post.image else None
 
     if thumb and (thumb.startswith("https://") or thumb.startswith(settings.MEDIA_URL)):
         cache.set(success_key, thumb, _THUMB_TTL)

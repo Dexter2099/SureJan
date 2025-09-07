@@ -116,6 +116,12 @@ def test_post_detail_rumble_youtube(link, flag, patch_cache, client, settings, m
     if patch_cache:
         monkeypatch.setattr(thumbnails, "cache_remote_image", lambda u: u)
 
+    def fake_get(url, timeout=(8, 8)):
+        assert url == og_url
+        return ImgResp()
+
+    monkeypatch.setattr(thumbnails.requests, "get", fake_get)
+
     resp = client.post(
         reverse("post_submit"),
         {
@@ -181,6 +187,12 @@ def test_rumble_post_thumbnail(client, settings, monkeypatch, tmp_path):
 
     monkeypatch.setattr(thumbnails, "fetch_og_html", fake_fetch_og_html)
     monkeypatch.setattr(thumbnails, "cache_remote_image", lambda u: u)
+
+    def fake_get(url, timeout=(8, 8)):
+        assert url == og_url
+        return ImgResp()
+
+    monkeypatch.setattr(thumbnails.requests, "get", fake_get)
 
     resp = client.post(
         reverse("post_submit"),
