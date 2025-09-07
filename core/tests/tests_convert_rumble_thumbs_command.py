@@ -16,8 +16,9 @@ def test_convert_rumble_thumbs(monkeypatch):
         post_type="link",
         title="Link",
         content_url="https://rumble.com/v1abc",
-        thumbnail_url="https://sp.rmbl.ws/s8/1/v1abc.jpg",
     )
+    Post.objects.filter(pk=post.pk).update(image="https://sp.rmbl.ws/s8/1/v1abc.jpg")
+    post.refresh_from_db()
 
     from core.management.commands import convert_rumble_thumbs
 
@@ -27,10 +28,10 @@ def test_convert_rumble_thumbs(monkeypatch):
     monkeypatch.setattr(convert_rumble_thumbs, "cache_remote_image", fake_cache)
     call_command("convert_rumble_thumbs")
     post.refresh_from_db()
-    assert post.thumbnail_url == "/media/thumbs/rumble/cache.jpg"
+    assert post.image.url == "/media/thumbs/rumble/cache.jpg"
 
-    post.thumbnail_url = "https://sp.rmbl.ws/s8/1/v1abc.jpg"
-    post.save(update_fields=["thumbnail_url"])
+    Post.objects.filter(pk=post.pk).update(image="https://sp.rmbl.ws/s8/1/v1abc.jpg")
+    post.refresh_from_db()
     calls: list[str] = []
 
     def fake_cache2(origin_url):
@@ -40,5 +41,5 @@ def test_convert_rumble_thumbs(monkeypatch):
     monkeypatch.setattr(convert_rumble_thumbs, "cache_remote_image", fake_cache2)
     call_command("convert_rumble_thumbs", dry_run=True)
     post.refresh_from_db()
-    assert post.thumbnail_url == "https://sp.rmbl.ws/s8/1/v1abc.jpg"
+    assert post.image.name == "https://sp.rmbl.ws/s8/1/v1abc.jpg"
     assert calls == ["https://sp.rmbl.ws/s8/1/v1abc.jpg"]

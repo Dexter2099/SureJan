@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.db.models import Q
@@ -15,22 +16,25 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         qs = (
             Post.objects.filter(post_type="link")
-            .exclude(thumbnail_url__isnull=True)
-            .exclude(thumbnail_url="")
+            .exclude(image__isnull=True)
+            .exclude(image="")
             .filter(
-                Q(thumbnail_url__icontains="rmbl.ws")
-                | Q(thumbnail_url__icontains="rumblecdn.com")
+                Q(image__icontains="rmbl.ws") | Q(image__icontains="rumblecdn.com")
             )
         )
         count = 0
         for p in qs.iterator():
             try:
-                cached = cache_remote_image(p.thumbnail_url or "")
+                cached = cache_remote_image(p.image.name if p.image else "")
                 if cached:
                     count += 1
                     if not opts["dry_run"]:
-                        p.thumbnail_url = cached
-                        p.save(update_fields=["thumbnail_url"])
+                        rel = (
+                            cached[len(settings.MEDIA_URL) :]
+                            if cached.startswith(settings.MEDIA_URL)
+                            else cached
+                        )
+                        Post.objects.filter(pk=p.pk).update(image=rel)
                         connection.commit()
             except Exception as e:
                 self.stderr.write(f"Post {p.id}: {e}")
