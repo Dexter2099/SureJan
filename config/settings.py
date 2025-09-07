@@ -81,11 +81,6 @@ SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEBUG
 
-EMBEDS_ENABLED = os.environ.get("EMBEDS_ENABLED", "0") in (
-    "1",
-    "true",
-    "True",
-)
 THUMBNAILS_ONLY = os.environ.get("THUMBNAILS_ONLY", "1") in (
     "1",
     "true",
