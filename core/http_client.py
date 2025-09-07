@@ -11,16 +11,15 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from .og_fetch_config import (
+    CONNECT_TIMEOUT,
+    OG_FETCH_DISABLE_RETRIES,
+    OG_HEADERS,
+    OG_RETRY_STATUSES,
+    READ_TIMEOUT,
+)
+
 _SESSION: Optional[requests.Session] = None
-_TIMEOUT = 5  # seconds
-_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "en-US,en;q=0.9",
-}
 
 logger = logging.getLogger(__name__)
 # provider -> Counter(success=, error=)
@@ -32,16 +31,19 @@ def get_session() -> requests.Session:
     global _SESSION
     if _SESSION is None:
         session = requests.Session()
-        session.headers.update(_HEADERS)
-        retries = Retry(
-            total=2,
-            backoff_factor=0.5,
-            status_forcelist=[500, 502, 503, 504],
-            allowed_methods=["GET", "HEAD", "OPTIONS"],
-        )
-        adapter = HTTPAdapter(max_retries=retries)
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
+        session.headers.update(OG_HEADERS)
+
+        if not OG_FETCH_DISABLE_RETRIES:
+            retries = Retry(
+                total=2,
+                backoff_factor=0.5,
+                status_forcelist=list(OG_RETRY_STATUSES),
+                allowed_methods=["GET", "HEAD", "OPTIONS"],
+            )
+            adapter = HTTPAdapter(max_retries=retries)
+            session.mount("http://", adapter)
+            session.mount("https://", adapter)
+
         _SESSION = session
     return _SESSION
 
@@ -65,7 +67,7 @@ def _log(url: str, source: str, status: int | None) -> None:
 
 def fetch_json(url: str, source: str = "unknown") -> dict:
     """Fetch ``url`` and return the parsed JSON response."""
-    resp = get_session().get(url, timeout=_TIMEOUT)
+    resp = get_session().get(url, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
     _log(url, source, getattr(resp, "status_code", None))
     resp.raise_for_status()
     return resp.json()
@@ -73,6 +75,6 @@ def fetch_json(url: str, source: str = "unknown") -> dict:
 
 def fetch_html(url: str, source: str = "unknown") -> requests.Response:
     """Fetch ``url`` and return the raw response object."""
-    resp = get_session().get(url, timeout=_TIMEOUT)
+    resp = get_session().get(url, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
     _log(url, source, getattr(resp, "status_code", None))
     return resp
