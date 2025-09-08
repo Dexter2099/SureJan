@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.validators import URLValidator
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
@@ -73,7 +74,7 @@ def _make_thumb(file, max_px=400):
 
 
 class Community(models.Model):
-    slug = models.SlugField(max_length=32, unique=True, db_index=True)
+    slug = models.SlugField(max_length=191, unique=True, db_index=True)
     name = models.CharField(max_length=80)
     title = models.CharField(max_length=80)
     description = models.TextField(blank=True)
@@ -102,10 +103,13 @@ class Post(models.Model):
         max_length=10,
         choices=[("text", "text"), ("link", "link"), ("image", "image")],
     )
-    title = models.CharField(max_length=300)
+    title = models.CharField(max_length=140)
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
-    content_url = models.URLField(blank=True)
+    slug = models.SlugField(max_length=191, db_index=True, blank=True, default="")
+    content_url = models.CharField(
+        max_length=2048, blank=True, validators=[URLValidator()]
+    )
     link_domain = models.CharField(max_length=120, blank=True)
     image = models.ImageField(
         upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
@@ -131,10 +135,6 @@ class Post(models.Model):
     slowmode = models.PositiveIntegerField(default=0)
     domain_weight = models.FloatField(default=1.0)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    @property
-    def slug(self):
-        return slugify(self.title)
 
     @property
     def excerpt(self):
@@ -180,6 +180,9 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         recompute = kwargs.pop("recompute_hot", True)
+
+        if not self.slug:
+            self.slug = slugify(self.title)[:191]
 
         if self.content_url:
             self.link_domain = urlparse(self.content_url).netloc.lower().lstrip("www.")

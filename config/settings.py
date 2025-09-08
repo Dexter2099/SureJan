@@ -151,8 +151,11 @@ INSTALLED_APPS = [
     "django_htmx",
     "csp",   # django-csp
     "storages",
+    "accounts",
     "core",
 ]
+
+AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

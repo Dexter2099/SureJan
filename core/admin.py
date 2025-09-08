@@ -107,7 +107,10 @@ class UserAdmin(BaseUserAdmin):
     inlines = [UserProfileInline]
 
 
-admin.site.unregister(get_user_model())
+try:
+    admin.site.unregister(get_user_model())
+except admin.sites.NotRegistered:
+    pass
 admin.site.register(get_user_model(), UserAdmin)
 
 
