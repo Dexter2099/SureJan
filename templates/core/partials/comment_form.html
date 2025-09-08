@@ -35,7 +35,7 @@
                 hx-swap="innerHTML">Preview</button>
       </div>
       {% include "core/partials/editor_toolbar.html" %} {# formatting toolbar #}
-      {{ form.body }}
+      <textarea name="{{ form.body.name }}" id="{{ form.body.id_for_label }}" rows="3" cols="40" data-editor="1" maxlength="10000" required>{{ form.body.value|default_if_none:'' }}</textarea>
       <div class="char-count"></div>
       <div id="{{ preview_id }}" class="preview" style="display:none"></div>
     </div>

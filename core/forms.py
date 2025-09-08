@@ -45,7 +45,7 @@ class PostForm(forms.Form):
         max_length=140, validators=[MaxLengthValidator(140)]
     )
     body = forms.CharField(
-        widget=forms.Textarea(attrs={"data-editor": "1"}),
+        widget=forms.Textarea(attrs={"data-editor": "1", "maxlength": 10000}),
         required=False,
         validators=[MaxLengthValidator(10000)],
     )
