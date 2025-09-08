@@ -38,5 +38,10 @@ if settings.DEBUG:
     urlpatterns += serve_static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
-handler400 = "core.views.disallowed_host"
+handler400 = "core.views.handler400"
+handler403 = "core.views.handler403"
+handler404 = "core.views.handler404"
+handler500 = "core.views.handler500"
+handler429 = "core.views.handler429"
+request_too_big = "core.views.request_too_big"
 

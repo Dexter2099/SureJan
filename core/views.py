@@ -34,7 +34,7 @@ from django.utils import timezone
 from django.db import DataError, IntegrityError
 from django.db.models import F
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, RequestDataTooBig
 from django.core.paginator import EmptyPage, Paginator
 from django.core.validators import MaxLengthValidator
 
@@ -64,6 +64,43 @@ logger = logging.getLogger(__name__)
 def disallowed_host(request, exception=None):
     """Render a friendly message for disallowed host errors."""
     return HttpResponseBadRequest("Unknown host—check the URL")
+
+
+def _error_template(request, code):
+    """Return full or HTMX partial error template path."""
+    if request.headers.get("HX-Request") == "true":
+        return f"errors/partials/{code}.html"
+    return f"errors/{code}.html"
+
+
+def handler400(request, exception=None):
+    """Render 400 Bad Request page."""
+    return render(request, _error_template(request, 400), status=400)
+
+
+def handler403(request, exception=None):
+    """Render 403 Forbidden page."""
+    return render(request, _error_template(request, 403), status=403)
+
+
+def handler404(request, exception=None):
+    """Render 404 Not Found page."""
+    return render(request, _error_template(request, 404), status=404)
+
+
+def handler500(request):
+    """Render 500 Server Error page."""
+    return render(request, _error_template(request, 500), status=500)
+
+
+def handler429(request, exception=None):
+    """Render 429 Too Many Requests page."""
+    return render(request, _error_template(request, 429), status=429)
+
+
+def request_too_big(request, exception: RequestDataTooBig | None = None):
+    """Render 413 Request Entity Too Large page."""
+    return render(request, _error_template(request, 413), status=413)
 
 
 def _is_banned(user):
