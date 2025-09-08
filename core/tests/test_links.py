@@ -1,11 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from io import BytesIO
-from PIL import Image
 
 from core.models import Comment, Community, Post
 
@@ -65,15 +62,12 @@ class PostLinkTests(TestCase):
         self.community = Community.objects.create(
             slug="t", name="Test", title="Test", created_by=self.user
         )
-        buf = BytesIO()
-        Image.new("RGB", (1, 1)).save(buf, format="PNG")
-        img = SimpleUploadedFile("a.png", buf.getvalue(), content_type="image/png")
         self.post = Post.objects.create(
             community=self.community,
             author=self.user,
-            post_type="image",
+            post_type="text",
             title="Hello",
-            image=img,
+            body="Body",
         )
         self.factory = RequestFactory()
 

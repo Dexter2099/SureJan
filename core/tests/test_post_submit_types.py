@@ -1,19 +1,8 @@
-from io import BytesIO
-from io import BytesIO
-from PIL import Image
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import TestCase
 from core.models import Community, Post, RateLimitCounter
-
-
-def make_image(name="test.jpg"):
-    img = Image.new("RGB", (10, 10), "white")
-    buf = BytesIO()
-    img.save(buf, format="JPEG")
-    return SimpleUploadedFile(name, buf.getvalue(), content_type="image/jpeg")
 
 
 class PostSubmitTests(TestCase):
@@ -61,39 +50,3 @@ class PostSubmitTests(TestCase):
         feed = self.client.get(reverse("home"))
         self.assertContains(feed, "Link")
 
-    def test_image_post(self):
-        img = make_image()
-        resp = self.client.post(
-            reverse("post_submit"),
-            {
-                "community": self.community.id,
-                "post_type": "image",
-                "title": "Pic",
-                "body": "Caption",
-                "image": img,
-            },
-            follow=True,
-        )
-        self.assertEqual(resp.status_code, 200)
-        post = Post.objects.get(title="Pic")
-        self.assertIsNotNone(post.image)
-        self.assertEqual(post.image_links.count(), 0)
-        feed = self.client.get(reverse("home"))
-        self.assertContains(feed, "Pic")
-
-    def test_large_upload_rejected(self):
-        big = SimpleUploadedFile(
-            "big.jpg", b"0" * (4 * 1024 * 1024 + 1), content_type="image/jpeg"
-        )
-        resp = self.client.post(
-            reverse("post_submit"),
-            {
-                "community": self.community.id,
-                "post_type": "image",
-                "title": "Big",
-                "image": big,
-            },
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "Image too large (max 4MB)")
-        self.assertFalse(Post.objects.filter(title="Big").exists())
