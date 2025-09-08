@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from core.models import Community, EngagementEvent, Post, CommunityBaseline
-from core.votes import apply_vote
+from core.services.votes import cast_vote_post_once, AlreadyVoted
 from core.services.astro import compute_post_signals
 
 
@@ -29,15 +29,14 @@ class AstroEngagementTests(TestCase):
         post = Post.objects.create(
             community=community, author=author, post_type="text", title="Hello"
         )
-        delta, old, new = apply_vote(voter, "post", post.pk, 1)
-        self.assertEqual(delta, 1)
+        score = cast_vote_post_once(voter, post, 1)
+        self.assertEqual(score, 1)
         event = EngagementEvent.objects.latest("id")
         self.assertEqual(event.voter_age_days, 7)
-        # removing the vote should record another event with age preserved
-        delta, old, new = apply_vote(voter, "post", post.pk, 1)
-        self.assertEqual(delta, -1)
-        event2 = EngagementEvent.objects.latest("id")
-        self.assertEqual(event2.voter_age_days, 7)
+        # second vote should raise and not create another event
+        with self.assertRaises(AlreadyVoted):
+            cast_vote_post_once(voter, post, 1)
+        self.assertEqual(EngagementEvent.objects.latest("id"), event)
 
     @freeze_time("2024-02-01 00:00:00")
     def test_ring_buffer_window_and_total(self):
@@ -54,7 +53,7 @@ class AstroEngagementTests(TestCase):
         for i in range(6):
             with freeze_time(base + timedelta(minutes=i)):
                 voter = User.objects.create_user(f"u{i}", password="pwd")
-                apply_vote(voter, "post", post.pk, 1)
+                cast_vote_post_once(voter, post, 1)
         burst = post.burst_state
         self.assertEqual(len(burst.buckets), 10)
         self.assertEqual(burst.total_5m, 5)
@@ -126,7 +125,7 @@ class AstroSignalFlagTests(TestCase):
         voters = new_voters + [old]
         for t, voter in zip(times, voters):
             with freeze_time(base + timedelta(minutes=t)):
-                apply_vote(voter, "post", post.pk, 1)
+                cast_vote_post_once(voter, post, 1)
         signals = compute_post_signals(post.pk)
         flags = signals["flags"]
         self.assertTrue(flags["unusual_5"])
@@ -149,7 +148,7 @@ class AstroEndpointTests(TestCase):
             post = Post.objects.create(
                 community=community, author=author, post_type="text", title="Hello"
             )
-        apply_vote(voter, "post", post.pk, 1)
+        cast_vote_post_once(voter, post, 1)
         url_json = reverse("post_signals_json", args=[post.pk])
         resp = self.client.get(url_json)
         self.assertEqual(resp.status_code, 200)

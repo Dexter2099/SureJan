@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from core.models import Community, EngagementEvent, Post
-from core.votes import apply_vote
+from core.services.votes import cast_vote_post_once
 
 
 class VoteEngagementTests(TestCase):
@@ -19,7 +19,7 @@ class VoteEngagementTests(TestCase):
 
     def test_engagement_and_burst_recorded_on_net_vote(self):
         initial_events = EngagementEvent.objects.count()
-        apply_vote(self.voter, "post", self.post.pk, 1)
+        cast_vote_post_once(self.voter, self.post, 1)
         self.assertEqual(EngagementEvent.objects.count(), initial_events + 1)
         event = EngagementEvent.objects.latest("id")
         self.assertEqual(event.voter_age_days, 0)
