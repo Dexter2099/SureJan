@@ -12,9 +12,9 @@
     {% endif %}
     {% if post.post_type == "link" %}
     {% include "partials/post_thumbnail.html" with post=post %}
-    {% elif post.image_thumb or post.image %}
+    {% elif post.image %}
     <div class="thumb">
-      <img src="{{ post.image_thumb.url|default:post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
     </div>
     {% endif %}
     <div class="post-actions">
