@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("core", "0030_remove_post_thumbnail_alt_remove_post_thumbnail_url"),
+        ("core", "0031b_schema_updates"),
     ]
 
     operations = [
