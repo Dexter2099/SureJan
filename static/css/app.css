@@ -107,6 +107,7 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .side-title{font-weight:600;margin-bottom:var(--space-3);}
 .comm-list a{display:block;padding:var(--space-2) 0;text-decoration:none;color:inherit;}
 .sidebar-cta{background:var(--color-surface);padding:var(--space-5);border-radius:var(--radius-lg);margin-top:var(--space-6);}
+.sidebar-auth{text-align:center;}
 .sidebar-link{display:block;margin-top:var(--space-3);text-decoration:none;color:inherit;}
 
 /* Form styles -------------------------------------------------- */
