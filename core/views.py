@@ -5,6 +5,8 @@ import secrets
 import string
 import hashlib
 import json
+import logging
+from types import SimpleNamespace
 from datetime import timedelta
 
 import bleach
@@ -29,6 +31,7 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.db import DataError, IntegrityError
 from django.db.models import F
 from django import forms
 from django.core.exceptions import ValidationError
@@ -55,6 +58,9 @@ from . import mod
 from .http import login_required_htmx
 
 
+logger = logging.getLogger(__name__)
+
+
 def _is_banned(user):
     return getattr(getattr(user, "profile", None), "is_banned", False)
 
@@ -74,6 +80,24 @@ def limit_or_429(request, group, rate):
         method=["POST"],
         increment=True,
     )
+
+
+def _find_offending_field(form):
+    for name, field in form.fields.items():
+        value = form.data.get(name)
+        if value is None:
+            continue
+        try:
+            length = len(value)
+        except TypeError:
+            continue
+        maxlen = getattr(field, "max_length", None)
+        if maxlen and length > maxlen:
+            return name, length
+        for validator in field.validators:
+            if isinstance(validator, MaxLengthValidator) and length > validator.limit_value:
+                return name, length
+    return "unknown", 0
 
 
 markdown_renderer = mistune.create_markdown()
@@ -539,7 +563,15 @@ def post_submit(request):
                 except UnidentifiedImageError:
                     raise ValidationError("Uploaded file is not a valid image.")
                 post.image = uploaded
-            post.save()
+            try:
+                post.save()
+            except (DataError, IntegrityError):
+                field, size = _find_offending_field(form)
+                logger.error("path=%s field=%s size=%s", request.path, field, size)
+                form.add_error(
+                    None, "One or more fields exceed the allowed length."
+                )
+                return render(request, "core/submit.html", {"form": form}, status=400)
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
@@ -831,14 +863,34 @@ def comment_reply(request, post_id):
         root_seq = post.comments.filter(parent__isnull=True).count() + 1
         path = f"{root_seq:04d}"
 
-    comment = Comment.objects.create(
-        post=post,
-        author=request.user,
-        parent=parent,
-        body=form.cleaned_data["body"],
-        path=path,
-    )
-    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
+    try:
+        comment = Comment.objects.create(
+            post=post,
+            author=request.user,
+            parent=parent,
+            body=form.cleaned_data["body"],
+            path=path,
+        )
+        Post.objects.filter(pk=post.pk).update(
+            comment_count=F("comment_count") + 1
+        )
+    except (DataError, IntegrityError):
+        field, size = _find_offending_field(form)
+        logger.error("path=%s field=%s size=%s", request.path, field, size)
+        form.add_error(
+            None, "One or more fields exceed the allowed length."
+        )
+        class Dummy(SimpleNamespace):
+            def __bool__(self):
+                return False
+
+        dummy = Dummy(pk=None)
+        return render(
+            request,
+            "core/partials/comment_form.html",
+            {"form": form, "post": post, "parent": parent or dummy, "comment": dummy},
+            status=400,
+        )
 
     if request.headers.get("HX-Request") == "true":
         depth = comment.path.count("/")
@@ -960,16 +1012,35 @@ def comment_create(request):
     else:
         root_seq = post.comments.filter(parent__isnull=True).count() + 1
         path = f"{root_seq:04d}"
+    try:
+        comment = Comment.objects.create(
+            post=post,
+            author=request.user,
+            parent=parent,
+            body=form.cleaned_data["body"],
+            path=path,
+        )
+        Post.objects.filter(pk=post.pk).update(
+            comment_count=F("comment_count") + 1
+        )
+        post.refresh_from_db(fields=["comment_count"])
+    except (DataError, IntegrityError):
+        field, size = _find_offending_field(form)
+        logger.error("path=%s field=%s size=%s", request.path, field, size)
+        form.add_error(
+            None, "One or more fields exceed the allowed length."
+        )
+        class Dummy(SimpleNamespace):
+            def __bool__(self):
+                return False
 
-    comment = Comment.objects.create(
-        post=post,
-        author=request.user,
-        parent=parent,
-        body=form.cleaned_data["body"],
-        path=path,
-    )
-    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
-    post.refresh_from_db(fields=["comment_count"])
+        dummy = Dummy(pk=None)
+        return render(
+            request,
+            "core/partials/comment_form.html",
+            {"form": form, "post": post, "parent": parent or dummy, "comment": dummy},
+            status=400,
+        )
 
     if request.headers.get("HX-Request") == "true":
         item_html = render_to_string(
