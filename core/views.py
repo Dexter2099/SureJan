@@ -35,7 +35,7 @@ from django.db import DataError, IntegrityError
 from django.db.models import F
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, Paginator
 from django.core.validators import MaxLengthValidator
 
 from django.core.cache import cache
@@ -217,8 +217,20 @@ def transparency_posts(request):
     rows.sort(key=lambda x: x.get(key, 0), reverse=reverse)
 
     paginator = Paginator(rows, 20)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    page_param = request.GET.get("page", "1")
+    try:
+        requested = int(page_param)
+    except (TypeError, ValueError):
+        messages.error(request, "Invalid page number.")
+        return redirect(request.path)
+    if requested < 1:
+        messages.error(request, "Invalid page number.")
+        return redirect(request.path)
+    page = max(1, min(requested, paginator.num_pages))
+    try:
+        page_obj = paginator.page(page)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
     ctx = {"page_obj": page_obj, "sort": sort}
     return render(request, "core/transparency_posts.html", ctx)
@@ -459,12 +471,24 @@ def feed_list(request):
         t = "all"
 
     if request.headers.get("HX-Request") == "true":
-        page = int(request.GET.get("page", "1") or 1)
+        page_param = request.GET.get("page", "1")
+        try:
+            requested = int(page_param)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid page number.")
+            return redirect(request.path)
+        if requested < 1:
+            messages.error(request, "Invalid page number.")
+            return redirect(request.path)
         size = int(request.GET.get("size", PAGE_SIZE) or PAGE_SIZE)
         base_qs = Post.objects.filter(is_deleted=False).select_related("community", "author")
         qs = feed_queryset(tab, t, base_qs=base_qs)
         paginator = Paginator(qs, size)
-        page_obj = paginator.get_page(page)
+        page = max(1, min(requested, paginator.num_pages))
+        try:
+            page_obj = paginator.page(page)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
         posts = list(page_obj.object_list)
         ctx = {
             "posts": posts,
@@ -641,15 +665,27 @@ def community(request, slug):
     if sort == "top" and t is None:
         t = "all"
 
-    page = int(request.GET.get("page", "1") or 1)
+    page_param = request.GET.get("page", "1")
+    try:
+        requested = int(page_param)
+    except (TypeError, ValueError):
+        messages.error(request, "Invalid page number.")
+        return redirect(request.path)
+    if requested < 1:
+        messages.error(request, "Invalid page number.")
+        return redirect(request.path)
 
     base_qs = community.posts.filter(is_deleted=False).select_related("author")
     qs = feed_queryset(sort, t, base_qs=base_qs)
 
-    offset = (page - 1) * PAGE_SIZE
-    posts = list(qs[offset : offset + PAGE_SIZE + 1])
-    next_page = page + 1 if len(posts) > PAGE_SIZE else None
-    posts = posts[:PAGE_SIZE]
+    paginator = Paginator(qs, PAGE_SIZE)
+    page = max(1, min(requested, paginator.num_pages))
+    try:
+        page_obj = paginator.page(page)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+    posts = list(page_obj.object_list)
+    next_page = page_obj.next_page_number() if page_obj.has_next() else None
 
     sort_query = ""
     if sort and sort != "hot":
