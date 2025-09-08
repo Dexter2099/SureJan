@@ -33,6 +33,7 @@ from django.db.models import F
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.core.validators import MaxLengthValidator
 
 from django.core.cache import cache
 from django.utils.cache import patch_cache_control
@@ -224,7 +225,9 @@ def post_signals_json(request, pk):
 
 
 class SignupForm(forms.Form):
-    username = forms.CharField(max_length=150)
+    username = forms.CharField(
+        max_length=191, validators=[MaxLengthValidator(191)]
+    )
     password = forms.CharField(widget=forms.PasswordInput)
     captcha = forms.IntegerField(required=False)
 

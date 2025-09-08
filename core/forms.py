@@ -1,5 +1,9 @@
 from django import forms
-from django.core.validators import FileExtensionValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxLengthValidator,
+    URLValidator,
+)
 from django.utils.text import slugify
 
 import bleach
@@ -37,11 +41,19 @@ class PostForm(forms.Form):
 
     community = forms.ModelChoiceField(queryset=Community.objects.all(), required=True)
     post_type = forms.ChoiceField(choices=POST_TYPES, widget=forms.RadioSelect)
-    title = forms.CharField(max_length=300)
-    body = forms.CharField(
-        widget=forms.Textarea(attrs={"data-editor": "1"}), required=False
+    title = forms.CharField(
+        max_length=140, validators=[MaxLengthValidator(140)]
     )
-    content_url = forms.URLField(required=False)
+    body = forms.CharField(
+        widget=forms.Textarea(attrs={"data-editor": "1"}),
+        required=False,
+        validators=[MaxLengthValidator(10000)],
+    )
+    content_url = forms.CharField(
+        max_length=2048,
+        validators=[MaxLengthValidator(2048), URLValidator()],
+        required=False,
+    )
     image = forms.ImageField(
         required=False,
         validators=[
@@ -106,10 +118,16 @@ class PostForm(forms.Form):
 
 
 class CommentForm(forms.ModelForm):
+    body = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"rows": 3, "data-editor": "1", "maxlength": 10000}
+        ),
+        validators=[MaxLengthValidator(10000)],
+    )
+
     class Meta:
         model = Comment
         fields = ["body"]
-        widgets = {"body": forms.Textarea(attrs={"rows": 3, "data-editor": "1"})}
 
     def clean_body(self):
         body = (self.cleaned_data.get("body") or "").strip()
@@ -125,6 +143,7 @@ class CommunityCreateForm(forms.ModelForm):
 
     def clean_slug(self):
         slug = slugify(self.cleaned_data.get("slug", ""))
+        MaxLengthValidator(191)(slug)
         if not slug:
             raise forms.ValidationError("Slug is required.")
         if Community.objects.filter(slug=slug).exists():
