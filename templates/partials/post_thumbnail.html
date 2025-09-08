@@ -1,11 +1,7 @@
 {% with detail_url=post.get_absolute_url %}
-{% if post.image_thumb or post.image %}
+{% if post.image %}
   <a href="{{ detail_url }}" class="thumb">
-    {% if post.image_thumb %}
-    <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}">
-    {% elif post.image %}
     <img src="{{ post.image.url }}" alt="{{ post.title }}">
-    {% endif %}
   </a>
 {% endif %}
 {% endwith %}

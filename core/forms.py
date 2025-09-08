@@ -57,7 +57,12 @@ class PostForm(forms.Form):
         validators=[MaxLengthValidator(2048), URLValidator()],
         required=False,
     )
-    image = forms.ImageField(required=False)
+    image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={"accept": "image/jpeg,image/png"}
+        ),
+    )
 
     def clean_body(self):
         body = (self.cleaned_data.get("body") or "").strip()

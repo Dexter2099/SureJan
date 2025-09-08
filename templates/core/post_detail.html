@@ -23,13 +23,9 @@
 
     {% if post.post_type == "link" %}
     {% include "partials/post_thumbnail.html" with post=post %}
-    {% elif post.image_thumb or post.image %}
+    {% elif post.image %}
     <figure class="post-media">
-      {% if post.image_thumb %}
-      <img src="{{ post.image_thumb.url }}" alt="{{ post.title }}">
-      {% elif post.image %}
       <img src="{{ post.image.url }}" alt="{{ post.title }}">
-      {% endif %}
     </figure>
     {% endif %}
 

@@ -59,7 +59,7 @@ class Post(models.Model):
         max_length=2048, blank=True, validators=[URLValidator()]
     )
     link_domain = models.CharField(max_length=120, blank=True)
-    image = models.ImageField(upload_to="posts/", null=True, blank=True)
+    image = models.ImageField(upload_to="posts/", blank=True, null=True)
     image_thumb = models.ImageField(
         upload_to="posts/thumbs/", null=True, blank=True
     )
