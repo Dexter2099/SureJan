@@ -1,6 +1,6 @@
 # Migration Runbook
 
-This runbook covers backing up the database and applying migrations for the `accounts` and `admin` apps.
+This runbook covers backing up the database and applying migrations for the built-in `admin` app.
 
 ## Confirm User Model
 
@@ -25,18 +25,17 @@ cp db.sqlite3 db_backup.sqlite3
 
 ## Capture Migration State
 
-Check migration status for the `accounts` and `admin` apps:
+Check migration status for the `admin` app:
 
 ```bash
-python manage.py showmigrations accounts admin
+python manage.py showmigrations admin
 ```
 
 ## Apply Migrations
 
-If the `accounts.0001` tables exist but are not recorded as applied, run:
+Run migrations:
 
 ```bash
-python manage.py migrate accounts 0001 --fake-initial
 python manage.py migrate --noinput
 ```
 
@@ -44,7 +43,6 @@ If errors persist, reset the admin app and retry:
 
 ```bash
 python manage.py migrate admin zero --fake
-python manage.py migrate accounts 0001 --fake-initial
 python manage.py migrate --noinput
 ```
 
@@ -54,7 +52,7 @@ Confirm all migrations are applied:
 
 ```bash
 python manage.py migrate --plan
-python manage.py showmigrations accounts admin
+python manage.py showmigrations admin
 ```
 
 The plan should show no pending operations and the migrations should be marked with `[X]`.
