@@ -32,12 +32,8 @@ PY
   echo "Set DJANGO_SECRET_KEY."
 fi
 
-# Deploy using the committed Dockerfile
+# Deploy using the committed Dockerfile; release_command in fly.toml runs migrations
 fly deploy --remote-only --dockerfile Dockerfile "$@"
-
-# Run database migrations
-fly ssh console -C "python manage.py migrate --noinput" || \
-  echo "WARNING: migrate failed via SSH; check logs."
 
 # Basic status and reachability
 fly status
