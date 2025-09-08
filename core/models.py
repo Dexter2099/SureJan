@@ -5,9 +5,7 @@ from django.db.models.functions import Lower
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
-from django import forms
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.core.validators import URLValidator
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -20,57 +18,7 @@ from urllib.parse import urlparse
 import logging
 import re
 
-from PIL import Image
-from io import BytesIO
-import os
-
 from .ranking import recompute_post_ranks
-
-
-MAX_BYTES = 4 * 1024 * 1024
-
-
-def validate_image_file(f):
-    if f.size > MAX_BYTES:
-        raise forms.ValidationError("Image too large (max 4MB).")
-    try:
-        Image.open(f).verify()
-    except Exception:
-        raise forms.ValidationError("Upload must be an image.")
-    finally:
-        f.seek(0)
-
-
-def _to_rgb(img):  # avoid RGBA in JPEG
-    return img.convert("RGB") if img.mode not in ("L", "RGB") else img
-
-
-def _reencode_jpeg(img: Image.Image, quality=85):
-    buf = BytesIO()
-    img = _to_rgb(img)
-    # no 'exif' param => EXIF stripped
-    img.save(buf, format="JPEG", quality=quality, optimize=True)
-    return ContentFile(buf.getvalue())
-
-
-def _resize_img(file, max_px=1600):
-    file.seek(0)
-    img = Image.open(file)
-    img.thumbnail((max_px, max_px), Image.LANCZOS)
-    new_file = _reencode_jpeg(img, quality=85)
-    name, _ = os.path.splitext(getattr(file, "name", "image"))
-    new_file.name = f"{name}.jpg"
-    return new_file
-
-
-def _make_thumb(file, max_px=400):
-    file.seek(0)
-    img = Image.open(file)
-    img.thumbnail((max_px, max_px), Image.LANCZOS)
-    new_file = _reencode_jpeg(img, quality=80)
-    name, _ = os.path.splitext(getattr(file, "name", "thumb"))
-    new_file.name = f"{name}_thumb.jpg"
-    return new_file
 
 
 class Community(models.Model):
@@ -106,15 +54,11 @@ class Post(models.Model):
     title = models.CharField(max_length=140)
     heading = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
-    slug = models.SlugField(max_length=191, db_index=True, blank=True, default="")
+    slug = models.SlugField(max_length=191, db_index=True)
     content_url = models.CharField(
         max_length=2048, blank=True, validators=[URLValidator()]
     )
     link_domain = models.CharField(max_length=120, blank=True)
-    image = models.ImageField(
-        upload_to="posts/", blank=True, null=True, validators=[validate_image_file]
-    )
-    image_thumb = models.ImageField(upload_to="posts/thumbs/", blank=True, null=True)
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)
@@ -167,6 +111,11 @@ class Post(models.Model):
             models.Index(fields=["-score", "-created_at"]),
             models.Index(fields=["-controversy", "-created_at"]),
         ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["community", "slug"], name="uniq_post_community_slug"
+            )
+        ]
 
     def clean(self):
         super().clean()
@@ -195,12 +144,6 @@ class Post(models.Model):
         else:
             self.domain_weight = 1.0
 
-        if self.image:
-            resized = _resize_img(self.image)
-            thumb = _make_thumb(resized)
-            self.image.save(resized.name, resized, save=False)
-            self.image_thumb.save(thumb.name, thumb, save=False)
-
         super().save(*args, **kwargs)
         if recompute and not kwargs.get("update_fields"):
             self.recompute_hot()
@@ -228,12 +171,6 @@ class Post(models.Model):
         self.body = ""
         self.content_url = ""
         self.link_domain = ""
-        if self.image:
-            self.image.delete(save=False)
-            self.image = None
-        if self.image_thumb:
-            self.image_thumb.delete(save=False)
-            self.image_thumb = None
         # Votes and anti-astroturf metrics are intentionally preserved; no
         # Vote rows are removed and aggregate metrics are left untouched.
         self.save(
@@ -246,8 +183,6 @@ class Post(models.Model):
                 "body",
                 "content_url",
                 "link_domain",
-                "image",
-                "image_thumb",
             ],
             recompute_hot=False,
         )

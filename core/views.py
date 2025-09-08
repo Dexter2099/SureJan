@@ -11,7 +11,6 @@ from datetime import timedelta
 
 import bleach
 import mistune
-from PIL import Image, UnidentifiedImageError
 from django.utils.safestring import mark_safe
 
 from django.contrib import messages
@@ -622,13 +621,6 @@ def post_submit(request):
                     else ""
                 ),
             )
-            if post_type == "image":
-                uploaded = form.cleaned_data.get("image")
-                try:
-                    Image.open(uploaded).verify()
-                except UnidentifiedImageError:
-                    raise ValidationError("Uploaded file is not a valid image.")
-                post.image = uploaded
             try:
                 post.save()
             except (DataError, IntegrityError):
