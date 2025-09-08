@@ -18,6 +18,10 @@ html,body{margin:0; padding:0; background:var(--color-bg); color:var(--color-tex
   background:var(--color-header-bg);
   display:flex; align-items:center; gap:var(--space-4);
   padding: var(--space-3) 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  width: 100%;
 }
 
 .nav-links a{ padding:4px 8px; border-radius:6px; text-decoration:none; }
