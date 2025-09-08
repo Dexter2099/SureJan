@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Community, Post
-from .pagination import PAGE_SIZE
+from core.models import Community, Post
+from core.pagination import PAGE_SIZE
 
 
 class PaginationTests(TestCase):

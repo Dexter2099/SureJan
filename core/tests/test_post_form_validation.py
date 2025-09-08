@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from .forms import PostForm
-from .models import Community
+from core.forms import PostForm
+from core.models import Community
 
 
 def make_image():

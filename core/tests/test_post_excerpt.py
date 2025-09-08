@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Community, Post
+from core.models import Community, Post
 
 
 class PostExcerptTests(TestCase):

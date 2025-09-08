@@ -10,9 +10,9 @@ from django.urls import reverse
 from django.utils import timezone
 from freezegun import freeze_time
 
-from ..models import Community, EngagementEvent, Post, CommunityBaseline
-from ..votes import apply_vote
-from ..services.astro import compute_post_signals
+from core.models import Community, EngagementEvent, Post, CommunityBaseline
+from core.votes import apply_vote
+from core.services.astro import compute_post_signals
 
 
 class AstroEngagementTests(TestCase):
