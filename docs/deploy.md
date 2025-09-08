@@ -35,7 +35,7 @@ git commit -m "alpha: public signup + header auth + submit CTA + seeds"
 # PowerShell
 $REV = (Get-Date).ToString("yyyyMMddHHmmss")
 flyctl deploy -a surejan --remote-only --build-arg BUILD_REV=$REV
-flyctl ssh console -a surejan -C "python manage.py migrate --noinput"
+# migrations run automatically via fly.toml release_command
 flyctl ssh console -a surejan -C "python manage.py seed_basics"
 flyctl logs -a surejan | Select-String -Pattern "ERROR|Traceback|favicon|collectstatic"
 ```
