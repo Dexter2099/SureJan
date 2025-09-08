@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0031b_schema_updates"),
+        ("core", "0031a_populate_slugs"),
     ]
 
     operations = []
