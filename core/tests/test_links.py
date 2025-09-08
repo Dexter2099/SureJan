@@ -7,7 +7,7 @@ from django.urls import reverse
 from io import BytesIO
 from PIL import Image
 
-from ..models import Comment, Community, Post
+from core.models import Comment, Community, Post
 
 
 class CommentLinkTests(TestCase):

@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from .models import Community, EngagementEvent, Post
-from .votes import apply_vote
+from core.models import Community, EngagementEvent, Post
+from core.votes import apply_vote
 
 
 class VoteEngagementTests(TestCase):

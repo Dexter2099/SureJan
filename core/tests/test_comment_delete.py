@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Comment, Community, Post
+from core.models import Comment, Community, Post, Vote
+from core.services.votes import cast_vote_comment_once
 
 
 class CommentDeleteTests(TestCase):
@@ -45,3 +48,44 @@ class CommentDeleteTests(TestCase):
         self.assertEqual(resp.status_code, 403)
         self.comment.refresh_from_db()
         self.assertFalse(self.comment.is_deleted)
+
+    def test_author_delete_redirect(self):
+        self.client.login(username="alice", password="pwd")
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 302)
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+
+    def test_staff_can_delete(self):
+        staff = get_user_model().objects.create_user(
+            "mod", password="pwd", is_staff=True
+        )
+        self.client.login(username="mod", password="pwd")
+        resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b"comment deleted", resp.content)
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+
+    def test_requires_login(self):
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 302)
+
+    def test_delete_preserves_votes_and_skips_recompute(self):
+        other = get_user_model().objects.create_user("charlie", password="pwd")
+        cast_vote_comment_once(other, self.comment, 1)
+        votes_before = Vote.objects.filter(
+            target_type="comment", target_id=self.comment.pk
+        ).count()
+        self.client.login(username="alice", password="pwd")
+        with patch("core.models.Vote.objects.filter") as mock_filter:
+            resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
+        self.assertEqual(resp.status_code, 200)
+        mock_filter.assert_not_called()
+        self.comment.refresh_from_db()
+        self.assertTrue(self.comment.is_deleted)
+        self.assertEqual(self.comment.score, 1)
+        votes_after = Vote.objects.filter(
+            target_type="comment", target_id=self.comment.pk
+        ).count()
+        self.assertEqual(votes_before, votes_after)

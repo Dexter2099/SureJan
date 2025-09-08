@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.test import TestCase
-from .models import Community, Post, RateLimitCounter
+from core.models import Community, Post, RateLimitCounter
 
 
 def make_image(name="test.jpg"):

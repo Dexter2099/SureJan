@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Community, Post
+from core.models import Community, Post
 
 
 class FeedRangeMixin:
