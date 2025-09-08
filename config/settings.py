@@ -57,7 +57,7 @@ else:
 ALLOWED_HOSTS = list(
     sorted(
         set(ALLOWED_HOSTS)
-        | {"surejan.app", "www.surejan.app", ".fly.dev", "127.0.0.1"}
+        | {"surejan.app", "www.surejan.app"}
     )
 )
 
