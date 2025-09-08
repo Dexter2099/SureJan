@@ -16,10 +16,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------------------------------------------------------------------
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") in ("1", "true", "True")
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or os.environ.get("SECRET_KEY")
 if not DEBUG:
     if not SECRET_KEY or SECRET_KEY == "dev-secret-key":
-        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production")
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY or SECRET_KEY must be set in production"
+        )
 else:
     SECRET_KEY = SECRET_KEY or "dev-secret-key"
 
