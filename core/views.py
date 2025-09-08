@@ -569,6 +569,7 @@ def communities_index(request):
     communities = [
         {"slug": "news", "name": "News"},
         {"slug": "brisbane", "name": "Brisbane"},
+        {"slug": "history", "name": "History"},
         {"slug": "politics", "name": "Politics"},
         {"slug": "social", "name": "Social"},
     ]
