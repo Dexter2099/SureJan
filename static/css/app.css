@@ -369,5 +369,7 @@ body.layout-root {
 .comment-meta .dot{ opacity:.6; }
 .comment-actions{ display:flex; align-items:center; gap:8px; margin-top:6px; }
 .comment .score{ min-width:1.5ch; text-align:center; }
-.astro-chip{ min-width:28px; height:18px; padding:0 6px; border-radius:9px; font-size:11px; line-height:18px; color:#fff; font-weight:600; }
-.astro-chip.green{ background:#16a34a; } .astro-chip.amber{ background:#f59e0b; } .astro-chip.red{ background:#dc2626; }
+.comment-meta .astro-chip{
+  min-width:28px; height:18px; padding:0 6px;
+  border-radius:9px; font-size:11px; line-height:18px;
+}
