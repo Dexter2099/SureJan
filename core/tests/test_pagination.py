@@ -11,7 +11,7 @@ class PaginationTests(TestCase):
         user_model = get_user_model()
         self.user = user_model.objects.create_user("alice", password="pwd")
         self.community = Community.objects.create(
-            slug="t", name="Test", title="Test", created_by=self.user
+            slug="news", name="News", title="News", created_by=self.user
         )
         for i in range(40):
             Post.objects.create(
@@ -41,4 +41,12 @@ class PaginationTests(TestCase):
 
     def test_last_page_no_next(self):
         resp = self.client.get(reverse("feed_list") + "?page=3", HTTP_HX_REQUEST="true")
+        self.assertIsNone(resp.context.get("next_page"))
+
+    def test_out_of_range_page_clamped(self):
+        url = reverse("community", kwargs={"slug": self.community.slug}) + "?page=9999"
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        # 40 posts with PAGE_SIZE 15 -> last page has 10 posts
+        self.assertEqual(len(resp.context["posts"]), 40 - 2 * PAGE_SIZE)
         self.assertIsNone(resp.context.get("next_page"))
