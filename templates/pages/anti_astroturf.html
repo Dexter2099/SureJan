@@ -4,12 +4,29 @@
 
 {% block content %}
 <div class="page container">
-  <h1>Our Anti-Astroturf Policy</h1>
-  <p>We are committed to ensuring discussions reflect authentic voices. Astroturfing—coordinated or paid campaigns masquerading as grassroots participation—is not welcome on SureJan.</p>
+  <h1>Anti-Astroturf Policy</h1>
+  <p>Our anti-astroturf system, <strong>AstroShield v1</strong>, continuously scores posts and accounts based on activity signals. The score ranges from 1–100 and helps moderators detect and slow down coordinated manipulation.</p>
+
+  <h2>Signals we monitor</h2>
   <ul>
-    <li>No undisclosed paid promotions or campaigns.</li>
-    <li>No vote manipulation or brigading.</li>
-    <li>Organizations and officials must identify themselves.</li>
+    <li><strong>Account age:</strong> New accounts (&lt;3 days) add risk.</li>
+    <li><strong>Vote velocity:</strong> Unusual spikes in votes per minute raise scores.</li>
+    <li><strong>Posting activity:</strong> Excessive posts per day increase risk.</li>
+    <li><strong>Discussion ratio:</strong> Accounts with very low comment-to-upvote ratios may be flagged.</li>
+    <li><strong>Domain repetition:</strong> Heavy link posting to the same domain triggers additional scrutiny.</li>
   </ul>
+
+  <h2>Score bands and actions</h2>
+  <ul>
+    <li><strong>0–39 (Normal):</strong> No action.</li>
+    <li><strong>40–69 (Watch):</strong> Amber chip appears.</li>
+    <li><strong>70–84 (High risk):</strong> Red chip appears, and slowmode (60s per user) is enforced.</li>
+    <li><strong>85+ (Severe risk):</strong> Extended slowmode (120s per user), flagged to moderators.</li>
+  </ul>
+  <p>Scores decay naturally as activity returns to normal. All signals are based on aggregate patterns, not individual identities.</p>
+
+  <h2>Privacy Assurances</h2>
+  <p>We never sell or share personal data. AstroShield reviews <em>patterns of activity only</em>, not private user information.</p>
 </div>
 {% endblock %}
+
