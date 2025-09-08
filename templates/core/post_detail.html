@@ -76,7 +76,7 @@
             hx-swap="beforeend"
             method="post">
         {% csrf_token %}
-        <textarea name="body" rows="4" required></textarea>
+        <textarea name="body" rows="4" maxlength="10000" data-max="10000" required></textarea>
         <div class="form-actions">
           <button type="reset">Cancel</button>
           <button type="submit">Comment</button>
