@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0031a_populate_slugs"),
+        ("core", "0030_remove_post_thumbnail_alt_remove_post_thumbnail_url"),
     ]
 
     operations = [
