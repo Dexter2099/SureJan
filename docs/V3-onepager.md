@@ -4,7 +4,7 @@
 
 ## Scope
 - Pages: Main, Submit Post, Post Detail
-- Communities: News, Brisbane, Politics, Social
+- Communities: News, Brisbane, History, Politics, Social
 
 ## Grid
 - Frame: 1440px
@@ -19,7 +19,7 @@
 
 ## Left Sidebar
 - Label: Communities
-- Links: News, Brisbane, Politics, Social
+- Links: News, Brisbane, History, Politics, Social
 
 ## Right Sidebar
 - Account/Login

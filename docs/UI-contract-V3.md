@@ -20,7 +20,7 @@
 
 ## Left Sidebar
 - Title: Communities
-- Links: News, Brisbane, Politics, Social
+- Links: News, Brisbane, History, Politics, Social
 
 ## Right Sidebar
 - Account/Login
