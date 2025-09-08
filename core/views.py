@@ -61,6 +61,11 @@ from .http import login_required_htmx
 logger = logging.getLogger(__name__)
 
 
+def disallowed_host(request, exception=None):
+    """Render a friendly message for disallowed host errors."""
+    return HttpResponseBadRequest("Unknown host—check the URL")
+
+
 def _is_banned(user):
     return getattr(getattr(user, "profile", None), "is_banned", False)
 

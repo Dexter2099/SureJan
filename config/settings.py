@@ -54,6 +54,13 @@ if _env_hosts:
 else:
     ALLOWED_HOSTS = DEFAULT_HOSTS
 
+ALLOWED_HOSTS = list(
+    sorted(
+        set(ALLOWED_HOSTS)
+        | {"surejan.app", "www.surejan.app", ".fly.dev", "127.0.0.1"}
+    )
+)
+
 CSRF_TRUSTED_ORIGINS = [
     "https://surejan.onrender.com",
     "https://surejan.fly.dev",
