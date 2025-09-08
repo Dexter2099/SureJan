@@ -24,6 +24,11 @@
         <span id="post-{{ post.pk }}-score" class="score">{{ post.score }}</span>
       {% endif %}
       <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
+      {% with s=post.astro_score.score|default:'' %}
+        {% if s %}
+          {% include "core/partials/astro_chip_inline.html" with score=s %}
+        {% endif %}
+      {% endwith %}
       {% if not post.is_deleted %}
         {% if request.user == post.author or request.user.is_staff %}
           <form method="post" action="{% url 'post_delete_owner' post.pk %}" style="display:inline"

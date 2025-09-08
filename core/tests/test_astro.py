@@ -138,7 +138,7 @@ class AstroSignalFlagTests(TestCase):
 class AstroEndpointTests(TestCase):
     @override_settings(ASTRO_EARLY_VOTES_N=5, ASTRO_MIN_EARLY_VOTES=3)
     @freeze_time("2024-04-01 00:00:00")
-    def test_json_and_chips_endpoints_feature_flag(self):
+    def test_json_endpoint_feature_flag(self):
         User = get_user_model()
         author = User.objects.create_user("author", password="pwd")
         voter = User.objects.create_user("voter", password="pwd")
@@ -151,16 +151,11 @@ class AstroEndpointTests(TestCase):
             )
         apply_vote(voter, "post", post.pk, 1)
         url_json = reverse("post_signals_json", args=[post.pk])
-        url_chips = reverse("post_signals_chips", args=[post.pk])
         resp = self.client.get(url_json)
         self.assertEqual(resp.status_code, 200)
         self.assertIn("rate5", resp.json())
-        resp = self.client.get(url_chips)
-        self.assertContains(resp, "post-context-chips")
         with override_settings(ASTROTURF_WATCH=False):
             resp = self.client.get(url_json)
-            self.assertEqual(resp.status_code, 404)
-            resp = self.client.get(url_chips)
             self.assertEqual(resp.status_code, 404)
 
 
@@ -185,13 +180,12 @@ class AstroFeatureFlagViewTests(TestCase):
             self.assertEqual(self.client.get(url_posts).status_code, 404)
 
     def test_chip_containers_removed(self):
-        chips_url = reverse("post_signals_chips", args=[self.post.pk])
         detail_url = reverse(
             "post_detail",
             args=[self.community.slug, self.post.pk, self.post.slug],
         )
-        self.assertNotContains(self.client.get(detail_url), chips_url)
-        self.assertNotContains(self.client.get(reverse("home")), chips_url)
+        self.assertNotContains(self.client.get(detail_url), "post-context-chips")
+        self.assertNotContains(self.client.get(reverse("home")), "post-context-chips")
 
 
 class AstroEnvVarToggleTests(SimpleTestCase):

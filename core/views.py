@@ -223,27 +223,6 @@ def post_signals_json(request, pk):
     return response
 
 
-@require_GET
-def post_signals_chips(request, pk):
-    if not settings.ASTROTURF_WATCH:
-        raise Http404
-    try:
-        data = _cached_post_signals(pk)
-    except Post.DoesNotExist:
-        raise Http404
-    response = render(
-        request,
-        "core/partials/post_context_chips.html",
-        {"signals": data},
-    )
-    etag = hashlib.md5(response.content).hexdigest()
-    if request.headers.get("If-None-Match") == etag:
-        return HttpResponse(status=304)
-    response["ETag"] = etag
-    patch_cache_control(response, max_age=30)
-    return response
-
-
 class SignupForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)

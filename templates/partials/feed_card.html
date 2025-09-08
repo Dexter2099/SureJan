@@ -25,7 +25,11 @@
         <span id="post-{{ post.pk }}-score-card" class="score">{{ post.score }}</span>
     {% endif %}
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
-    {% include "core/partials/astro_chip_inline.html" with score=post.astro_score.score|default:signals.score %}
+    {% with s=post.astro_score.score|default:'' %}
+      {% if s %}
+        {% include "core/partials/astro_chip_inline.html" with score=s %}
+      {% endif %}
+    {% endwith %}
   </div>
 {% endwith %}
 </article>
