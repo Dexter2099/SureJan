@@ -158,11 +158,10 @@ INSTALLED_APPS = [
     "django_htmx",
     "csp",   # django-csp
     "storages",
-    "accounts",
     "core",
 ]
-
-AUTH_USER_MODEL = "accounts.User"
+# explicitly lock the project to Django's built-in user
+AUTH_USER_MODEL = "auth.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

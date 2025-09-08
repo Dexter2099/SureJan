@@ -4,14 +4,14 @@ This runbook covers backing up the database and applying migrations for the `acc
 
 ## Confirm User Model
 
-Ensure Django is configured to use the custom user model:
+Ensure Django is configured to use Django's built-in user model:
 
 ```bash
 rg AUTH_USER_MODEL config/settings.py
 ```
 Expected output:
 ```
-AUTH_USER_MODEL = "accounts.User"
+AUTH_USER_MODEL = "auth.User"
 ```
 
 ## Back up Database
