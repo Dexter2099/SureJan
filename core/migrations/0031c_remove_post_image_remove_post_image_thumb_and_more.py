@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("core", "0032_fix_chain"),
+        ("core", "0031a_populate_slugs"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
