@@ -60,6 +60,9 @@ class Post(models.Model):
     )
     link_domain = models.CharField(max_length=120, blank=True)
     image = models.ImageField(upload_to="posts/", null=True, blank=True)
+    image_thumb = models.ImageField(
+        upload_to="posts/thumbs/", null=True, blank=True
+    )
     score = models.IntegerField(default=0)
     hot_rank = models.FloatField(default=0, db_index=True)
     rising_rank = models.FloatField(default=0, db_index=True)
