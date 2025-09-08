@@ -17,8 +17,8 @@ echo "Using Fly app name: ${APP}"
 fly apps create "${APP}" >/dev/null 2>&1 || true
 export FLY_APP="${APP}"
 
-# Optionally seed SECRET_KEY for new apps
-if ! fly secrets list 2>/dev/null | awk '{print $1}' | grep -q '^SECRET_KEY$'; then
+# Optionally seed DJANGO_SECRET_KEY for new apps
+if ! fly secrets list 2>/dev/null | awk '{print $1}' | grep -q '^DJANGO_SECRET_KEY$'; then
   if command -v python >/dev/null 2>&1; then
     SK="$(python - <<'PY'
 import secrets
@@ -28,8 +28,8 @@ PY
   else
     SK="$(openssl rand -base64 64 | tr -d '\n')"
   fi
-  fly secrets set SECRET_KEY="$SK" >/dev/null
-  echo "Set SECRET_KEY."
+  fly secrets set DJANGO_SECRET_KEY="$SK" >/dev/null
+  echo "Set DJANGO_SECRET_KEY."
 fi
 
 # Deploy using the committed Dockerfile
