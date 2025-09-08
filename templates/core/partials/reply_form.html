@@ -4,7 +4,7 @@
       hx-swap="beforeend"
       method="post">
   {% csrf_token %}
-  <textarea name="body" rows="3" required></textarea>
+  <textarea name="body" rows="3" maxlength="10000" data-max="10000" required></textarea>
   <input type="hidden" name="parent_id" value="{{ parent_id }}">
   <div class="form-actions">
     <button type="reset">Cancel</button>

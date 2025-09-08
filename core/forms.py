@@ -45,7 +45,9 @@ class PostForm(forms.Form):
         max_length=140, validators=[MaxLengthValidator(140)]
     )
     body = forms.CharField(
-        widget=forms.Textarea(attrs={"data-editor": "1", "maxlength": 10000}),
+        widget=forms.Textarea(
+            attrs={"data-editor": "1", "maxlength": 10000, "data-max": 10000}
+        ),
         required=False,
         validators=[MaxLengthValidator(10000)],
     )
@@ -120,7 +122,7 @@ class PostForm(forms.Form):
 class CommentForm(forms.ModelForm):
     body = forms.CharField(
         widget=forms.Textarea(
-            attrs={"rows": 3, "data-editor": "1", "maxlength": 10000}
+            attrs={"rows": 3, "data-editor": "1", "maxlength": 10000, "data-max": 10000}
         ),
         validators=[MaxLengthValidator(10000)],
     )
