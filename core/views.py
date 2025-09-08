@@ -615,12 +615,16 @@ def post_submit(request):
                 post_type=post_type,
                 title=form.cleaned_data["title"],
                 body=form.cleaned_data.get("body", ""),
-                content_url=(
-                    form.cleaned_data.get("content_url", "")
-                    if post_type == "link"
-                    else ""
-                ),
             )
+
+            if post_type == "image":
+                image = form.cleaned_data.get("image")
+                if image:
+                    post.image = image
+                else:
+                    post.content_url = form.cleaned_data.get("content_url", "")
+            elif post_type == "link":
+                post.content_url = form.cleaned_data.get("content_url", "")
             try:
                 post.save()
             except (DataError, IntegrityError):
