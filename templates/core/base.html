@@ -10,7 +10,8 @@
   <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
   {% block head %}{% endblock %}
 </head>
-<body class="layout-root">
+<body class="layout-root" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div hidden>{% csrf_token %}</div>
   {% include "core/partials/header.html" %}
   <main id="app-main" class="layout-main" role="main">
     <div class="page">
@@ -34,7 +35,7 @@
   <!-- HTMX (local) -->
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
   <script src="{% static 'js/htmx-guard.js' %}" defer></script>
-  <script src="{% static 'js/htmx-csrf.js' %}" defer></script>
+  <script src="{% static 'js/htmx-errors.js' %}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
