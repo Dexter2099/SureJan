@@ -119,6 +119,18 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .hdr-center{margin-left:auto;margin-right:auto;}
 .hdr-right{margin-left:auto;}
 
+/* Login/register links */
+.hdr-right a{
+  color:var(--color-header-link);
+  text-decoration:none;
+}
+.hdr-right a:visited{color:var(--color-header-link);}
+.hdr-right a:hover,
+.hdr-right a:focus{
+  color:var(--color-header-link);
+  text-decoration:underline;
+}
+
 /* Page: left communities (200–240) + main shell */
 .page{display:grid;grid-template-columns:minmax(200px,240px) 1fr}
 .left-communities{border-right:1px solid #eee;padding:24px 12px}
@@ -145,6 +157,17 @@ html,body{background:var(--color-bg); color:var(--color-text); font-family:var(-
 .nav-tabs a {
   margin: 0 16px;
   text-decoration: none;
+  color: var(--color-header-link);
+}
+.nav-tabs a:visited { color: var(--color-header-link); }
+.nav-tabs a:hover,
+.nav-tabs a:focus {
+  color: var(--color-header-link);
+  text-decoration: underline;
+}
+.nav-tabs a[aria-current="page"] {
+  font-weight: bold;
+  text-decoration: underline;
 }
 .nav-tabs { display:flex; justify-content:center; gap:32px; }
 
