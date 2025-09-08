@@ -1,9 +1,0 @@
-{% load astro_filters %}{% comment %}Display engagement signal chips for a post{% endcomment %}
-{% if ASTROTURF_WATCH and signals.score %}
-<div class="post-context-chips">
-  <div class="astro-meter">
-    <div class="astro-chip {{ signals.score|astro_band }}">{{ signals.score }}</div>
-    <span class="astro-label">Astro</span>
-  </div>
-</div>
-{% endif %}
