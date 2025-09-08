@@ -27,7 +27,7 @@ primary_region = "syd"
     timeout  = "5s"
     method   = "GET"
     path     = "/healthz"
-    headers  = { Host = "localhost" }
+    headers  = { Host = "surejan.app" }
 
 [[vm]]
   cpu_kind = "shared"
