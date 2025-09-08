@@ -1,68 +1,37 @@
-
----
-
 # SureJan
 
-SureJan is an independent, Brisbane-built community forum inspired by the old Reddit layout. It is designed to provide a fast and simple way for locals to post, comment, and vote without interference from algorithms, astroturfing, or excessive big-tech influence.
+SureJan is a lightweight, local-first forum inspired by old Reddit, built with Django + HTMX + Postgres, deployed on Fly.io.
 
-**Live site:** back under development as of 31/08/2025
+## Anti-astroturfing
 
-## V3 UI Specs
-- [V3 One-Pager](docs/V3-onepager.md) — quick summary
-- [UI Contract](docs/UI-contract-V3.md) — full layout and selectors
+SureJan includes a built‑in defence against coordinated manipulation:
 
-## Features (MVP)
+- Early votes are analysed in 30‑second buckets and grouped over 300 seconds.
+- Votes from new accounts are weighted differently to limit sockpuppet impact.
+- A threshold-based flagging system slows posts when the risk score rises, placing them in slowmode for review.
+- Only aggregate patterns are reviewed; personal data is never stored.
 
-* **Community Feeds**: Old-Reddit style feeds with sorting options (Hot, New, Top). Pagination set to 25 posts per page.
-* **Time Filters**: When sorting by Top, buttons let you view posts from the last 24 hours, last 7 days, or all time.
-* **Seed Communities**: Two initial communities, `news` and `brisbane`, seeded via a management command.
-* **User Accounts**: Username and password based authentication (email optional). Accounts display total “points” (sum of post and comment votes).
-* **Posts**: Supports text or link submissions. Posts can be assigned to communities and rendered with basic Markdown formatting.
-* **Comments**: Threaded comment trees with reply support, relative timestamps, and Markdown.
-* **Voting**: Upvote and downvote support for posts and comments. Voting updates dynamically with HTMX requests. Rate limits apply to reduce spam.
-* **Profiles**: Public user profiles with tabs for Overview, Posts, and Comments. Pagination provided for long histories.
-* **Authentication & Security**: Secure session cookies, CSRF protection, CAPTCHA during signup, recovery codes for account resets, and basic rate limiting.
+## Run locally
 
-## Tech Stack
-
-* **Backend**: Django 5, Python 3.12+
-* **Frontend**: HTMX for partial page updates, Django templates for rendering
-* **Database**: Postgres, SQLite fallback for development
-* **Deployment**: Fly.io with Docker-based builds
-* **Static Files**: WhiteNoise for static file serving, S3-compatible storage for media (Tigris),
-  with a local `/media/` fallback when S3 credentials are missing or placeholders
-* **Security**: django-csp, CSRF protection, secure session and cookie handling
-* **Testing**: Django test framework with HTMX request coverage
-
-## Development Setup
-
-```bash
-git clone https://github.com/Dexter2099/SureJan.git
-cd SureJan
+```powershell
 python -m venv .venv
-source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+copy .env.example .env   # Or create manually on Windows
 python manage.py migrate
-python manage.py seed_basics
 python manage.py runserver
 ```
 
-Visit `http://127.0.0.1:8000` to access the dev server.
+### Environment variables
 
-### Feature flags
+- `DJANGO_SECRET_KEY` – random string, required
+- `DATABASE_URL`
+- `MEDIA_URL`
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+- `SENTRY_DSN` – optional
 
-Set the `ASTROTURF_WATCH` environment variable to control astroturf-detection
-features. It defaults to `1`; set `ASTROTURF_WATCH=0` to hide engagement chips
-and transparency pages.
+Production secrets are set via `fly secrets` and should never be committed to the repo.
 
-## Status
+## License
 
-SureJan is an early-stage MVP. Contributions, bug reports, and feedback are welcome.
-This project was developed and MVP shipped in three weeks with the use of AI coding agents.
-
----
-
-
-
-<img width="673" height="718" alt="Surejan Public beta" src="https://github.com/user-attachments/assets/6086515d-cfd1-44b7-8591-b21057b975ff" />
-
+This project is licensed under the [MIT License](LICENSE).
