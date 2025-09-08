@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Community, Post
-from core.votes import apply_vote
+from core.services.votes import cast_vote_post_once
 
 
 @override_settings(ASTRO_EARLY_VOTES_N=5, ASTRO_MIN_EARLY_VOTES=3, ASTRO_EARLY_SHARE_RED=0.5)
@@ -27,7 +27,7 @@ class TransparencyPostsTests(TestCase):
         )
         for i in range(3):
             voter = self._new_user(f"u{i}")
-            apply_vote(voter, "post", flagged.pk, 1)
+            cast_vote_post_once(voter, flagged, 1)
 
         old_user = self._new_user("old")
         old_user.date_joined -= timedelta(days=10)
@@ -35,7 +35,7 @@ class TransparencyPostsTests(TestCase):
         ok = Post.objects.create(
             community=self.community, author=self.author, post_type="text", title="OK"
         )
-        apply_vote(old_user, "post", ok.pk, 1)
+        cast_vote_post_once(old_user, ok, 1)
 
         url = reverse("transparency_posts")
         resp = self.client.get(url)
