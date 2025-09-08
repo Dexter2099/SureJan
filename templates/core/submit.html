@@ -19,6 +19,7 @@
     </div>
     <div class="form-row">
       {{ form.title.label_tag }} {{ form.title }}
+      <div class="char-count"></div>
       {{ form.title.errors }}
     </div>
     <div class="form-row">
@@ -34,6 +35,7 @@
       <div class="editor-container prose">
         {% include "core/partials/editor_toolbar.html" %}
         {{ form.body }}
+        <div class="char-count"></div>
       </div>
       {{ form.body.errors }}
     </div>

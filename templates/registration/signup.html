@@ -5,7 +5,7 @@
 <form method="post" hx-boost="false" hx-swap="none">
   {% csrf_token %}
   {{ form.username.errors }}
-  <p>{{ form.username.label_tag }} {{ form.username }}</p>
+  <p>{{ form.username.label_tag }} {{ form.username }}<span class="char-count"></span></p>
   {{ form.password.errors }}
   <p>{{ form.password.label_tag }} {{ form.password }}</p>
   {% if captcha_question %}
