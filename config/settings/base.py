@@ -150,10 +150,11 @@ INSTALLED_APPS = [
     "django_htmx",
     "csp",   # django-csp
     "storages",
-    "communities",
     "core",
+    "posts",
     "comments",
     "votes",
+    "communities",
 ]
 # explicitly lock the project to Django's built-in user
 AUTH_USER_MODEL = "auth.User"
