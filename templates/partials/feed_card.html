@@ -13,13 +13,7 @@
         <p class="post-excerpt">{{ post.excerpt }}</p>
       </div>
       {% endif %}
-      {% if post.post_type == "link" %}
-        {% include "partials/post_thumbnail.html" with post=post %}
-      {% elif post.image %}
-      <div class="thumb">
-        <img src="{{ post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
-      </div>
-      {% endif %}
+      {% include "partials/post_thumbnail.html" with post=post %}
       <div class="post-actions">
       {% if show_vote_widget is not False %}
         {% include "votes/partials/vote_widget.html" with post=post user=user request=request only %}
