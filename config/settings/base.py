@@ -112,12 +112,24 @@ if not DEBUG:
         "MEDIA_STORAGE_HOST", "https://surejan-media.fly.storage.tigris.dev"
     )
 
+    # Build a safe img-src list and include MEDIA_URL origin if set
+    _img_src = ["'self'", "data:", MEDIA_STORAGE_HOST]
+    _media = os.getenv("MEDIA_URL", "").strip()
+    if _media:
+        from urllib.parse import urlparse
+
+        _p = urlparse(_media)
+        if _p.scheme and _p.netloc:
+            _origin = f"{_p.scheme}://{_p.netloc}"
+            if _origin not in _img_src:
+                _img_src.append(_origin)
+
     CONTENT_SECURITY_POLICY = {
         "DIRECTIVES": {
             "default-src": ("'self'",),
             "script-src": ("'self'",),
             "style-src": ("'self'", "'unsafe-inline'"),
-            "img-src": ("'self'", "data:", MEDIA_STORAGE_HOST),
+            "img-src": tuple(_img_src),
             "connect-src": ("'self'",),
             "frame-ancestors": ("'self'",),
             "upgrade-insecure-requests": True,
