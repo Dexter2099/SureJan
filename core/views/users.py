@@ -19,7 +19,7 @@ from django_ratelimit.decorators import ratelimit
 
 from ..models import Post, RecoveryCode
 from comments.models import Comment
-from ..services.astro import compute_user_post_summary
+from core.services import compute_user_post_summary
 from ..utils.view_helpers import _is_banned
 
 

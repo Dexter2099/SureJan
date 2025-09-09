@@ -13,7 +13,7 @@ from freezegun import freeze_time
 from communities.models import Community, CommunityBaseline
 from core.models import EngagementEvent, Post
 from votes.services import cast_vote_post_once, AlreadyVoted
-from core.services.astro import compute_post_signals
+from core.services import compute_post_signals
 
 
 class AstroEngagementTests(TestCase):

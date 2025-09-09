@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from PIL import Image
 
-from core.forms import PostForm
+from posts.forms import PostForm
 from communities.models import Community
 
 
@@ -112,7 +112,7 @@ class PostFormValidationTests(TestCase):
             form.errors["image"],
         )
 
-    @patch("core.forms.requests.head")
+    @patch("posts.forms.requests.head")
     def test_image_post_valid_content_url(self, mock_head):
         mock_head.return_value = Mock(
             headers={"Content-Type": "image/png", "Content-Length": "100"}
@@ -128,7 +128,7 @@ class PostFormValidationTests(TestCase):
         self.assertTrue(form.is_valid())
         mock_head.assert_called_once()
 
-    @patch("core.forms.requests.head")
+    @patch("posts.forms.requests.head")
     def test_image_post_invalid_content_url_type(self, mock_head):
         mock_head.return_value = Mock(
             headers={"Content-Type": "text/html", "Content-Length": "100"}

@@ -20,7 +20,7 @@ from django.core.paginator import EmptyPage, Paginator
 from django.contrib import messages
 
 from ..models import Post
-from ..services.astro import compute_post_signals
+from core.services import compute_post_signals
 from .. import mod
 
 

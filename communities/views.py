@@ -8,7 +8,7 @@ from django_ratelimit.core import is_ratelimited
 from .forms import CommunityCreateForm
 from .models import Community
 from core.pagination import PAGE_SIZE
-from core.services.feed import TAB_ORDER, feed_queryset
+from core.services import TAB_ORDER, feed_queryset
 from core.utils.view_helpers import SORT_TABS, _is_banned
 
 
