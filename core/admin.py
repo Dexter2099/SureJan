@@ -5,7 +5,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     Community,
     Post,
-    Comment,
     Vote,
     UserProfile,
     Report,
@@ -13,6 +12,7 @@ from .models import (
     PostBurstState,
     CommunityBaseline,
 )
+from comments.models import Comment
 
 
 @admin.register(Community)

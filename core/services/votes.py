@@ -6,11 +6,12 @@ from django.utils import timezone
 from ..models import (
     Vote,
     Post,
-    Comment,
     UserProfile,
     EngagementEvent,
     PostBurstState,
 )
+from comments.models import Comment
+
 from ..ranking import recompute_post_ranks
 
 

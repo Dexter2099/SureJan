@@ -6,7 +6,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from core.models import Comment, Community, Post
+from core.models import Community, Post
+from comments.models import Comment
 
 
 class CommentReplyTests(TestCase):

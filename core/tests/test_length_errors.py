@@ -44,7 +44,7 @@ class LengthErrorHandlingTests(TestCase):
     def test_comment_reply_data_error(self):
         url = reverse("comment_reply", args=[self.post.pk])
         with patch(
-            "core.views.Comment.objects.create", side_effect=DataError("too long")
+            "comments.views.Comment.objects.create", side_effect=DataError("too long")
         ):
             resp = self.client.post(
                 url, {"body": "Hi"}, HTTP_HX_REQUEST="true"
@@ -59,7 +59,7 @@ class LengthErrorHandlingTests(TestCase):
         url = reverse("comment_create")
         data = {"post": self.post.pk, "body": "Hi"}
         with patch(
-            "core.views.Comment.objects.create", side_effect=DataError("too long")
+            "comments.views.Comment.objects.create", side_effect=DataError("too long")
         ):
             resp = self.client.post(url, data, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 400)

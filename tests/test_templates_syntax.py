@@ -6,11 +6,11 @@ def test_post_row_template_parses():
 
 
 def test_comment_item_template_parses():
-    loader.get_template("core/partials/comment_item.html")
+    loader.get_template("comments/comment_item.html")
 
 
 def test_comment_row_template_parses():
-    loader.get_template("core/partials/comment_row.html")
+    loader.get_template("comments/comment_row.html")
 
 
 def test_post_detail_template_parses():

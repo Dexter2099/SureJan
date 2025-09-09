@@ -1,7 +1,7 @@
 {% load permissions %}
 {% url 'post_detail' comment.post.community.slug comment.post.pk comment.post.slug as post_url %}
 {% if comment.is_deleted %}
-  {% include "core/partials/comment_deleted_stub.html" with comment=comment %}
+  {% include "comments/comment_deleted_stub.html" with comment=comment %}
 {% else %}
 <div id="comment-{{ comment.pk }}" class="comment" data-comment-id="{{ comment.pk }}" data-depth="{{ comment.depth }}">
   <a id="c{{ comment.pk }}"></a>
@@ -38,7 +38,7 @@
   {% if comment.depth < 5 %}
   <div class="children">
     {% for child in comment.children.all %}
-      {% include "core/partials/comment_item.html" with comment=child %}
+      {% include "comments/comment_item.html" with comment=child %}
     {% endfor %}
   </div>
   {% else %}

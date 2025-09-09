@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Comment, Community, Post
+from core.models import Community, Post
+from comments.models import Comment
 
 
 class UserProfileTests(TestCase):

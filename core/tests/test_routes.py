@@ -3,7 +3,8 @@ from django.template.loader import render_to_string
 from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
-from core.models import Comment, Community, Post
+from core.models import Community, Post
+from comments.models import Comment
 
 
 class RouteTests(TestCase):
@@ -153,7 +154,7 @@ class RouteTests(TestCase):
         rf = RequestFactory()
         request = rf.get("/")
         html = render_to_string(
-            "core/partials/comment_row.html",
+            "comments/comment_row.html",
             {"comment": self.comment, "show_vote_widget": False},
             request=request,
         )

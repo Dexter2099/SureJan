@@ -1,5 +1,5 @@
 {% for child in children %}
-  {% include "core/partials/comment_item.html" with comment=child %}
+  {% include "comments/comment_item.html" with comment=child %}
 {% endfor %}
 {% if remaining > 0 %}
   <button class="linklike load-more"
