@@ -8,7 +8,9 @@
     </div>
     <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
     {% if post.excerpt %}
-    <p class="post-excerpt">{{ post.excerpt }}</p>
+    <div class="post-content">
+      <p class="post-excerpt">{{ post.excerpt }}</p>
+    </div>
     {% endif %}
     {% if post.post_type == "link" %}
     {% include "partials/post_thumbnail.html" with post=post %}

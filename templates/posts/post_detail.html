@@ -18,7 +18,7 @@
   </header>
 
   {% if post.content_url %}
-  <p class="post-link">from: {{ post.content_url|escape }}</p>
+  <p class="post-link post-content">from: {{ post.content_url|escape }}</p>
   {% endif %}
 
     {% if post.post_type == "link" %}
@@ -30,7 +30,7 @@
     {% endif %}
 
   {% if post.body %}
-  <div class="post-body prose">
+  <div class="post-body prose post-content">
     {{ post.body|safe }}
   </div>
   {% endif %}
@@ -98,4 +98,3 @@
 <script src="{% static 'js/editor.js' %}" defer></script>
 <script src="{% static 'js/comments.js' %}" defer></script>
 {% endblock %}
-
