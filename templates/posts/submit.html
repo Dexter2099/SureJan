@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="submit-wrapper">
+  <a href="{% url 'home' %}">← Back to feed</a>
+  <h1>Submit Post</h1>
+  <p class="form-helper">Title is required. Include body <strong>or</strong> media.</p>
+  <form id="post-form" method="post" action="{% url 'post_submit' %}" enctype="multipart/form-data" class="submit-form" data-testid="submit-form">
+    {% csrf_token %}
+    <div id="form-errors" aria-live="assertive">{{ form.non_field_errors }}</div>
+    <div class="form-row">
+      {{ form.community.label_tag }} {{ form.community }}
+      {{ form.community.errors }}
+    </div>
+    <div class="form-row">
+      {{ form.post_type.label_tag }} {{ form.post_type }}
+      {{ form.post_type.errors }}
+    </div>
+    <div class="form-row">
+      {{ form.title.label_tag }} {{ form.title }}
+      <div class="char-count"></div>
+      {{ form.title.errors }}
+    </div>
+    <div class="form-row">
+      {{ form.content_url.label_tag }} {{ form.content_url }}
+      {{ form.content_url.errors }}
+    </div>
+    {% if form.post_type.value == "image" %}
+    <div class="form-row">
+      {{ form.image.label_tag }} {{ form.image }}
+      {{ form.image.errors }}
+    </div>
+    {% endif %}
+    <div class="form-row">
+      {{ form.body.label_tag }}
+      <div class="editor-container prose">
+        {% include "core/partials/editor_toolbar.html" %}
+        {{ form.body }}
+        <div class="char-count"></div>
+      </div>
+      {{ form.body.errors }}
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="button primary" id="post-btn">Post</button>
+      <a href="{% url 'home' %}" class="button secondary">Cancel</a>
+    </div>
+  </form>
+  <div id="link-preview"></div>
+  <div id="md-preview" data-markdown-url="{% url 'markdown_preview' %}"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+  <script src="{% static 'js/editor.js' %}" defer></script>
+  <script src="{% static 'js/post_submit_preview.js' %}" defer></script>
+  <script src="{% static 'js/post_submit_validate.js' %}" defer></script>
+  {% endblock %}

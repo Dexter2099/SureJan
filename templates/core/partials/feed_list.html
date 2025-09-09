@@ -1,14 +1,1 @@
-{% url 'feed_list' as feed_url %}
-{% for post in posts %}
-  {% if forloop.last and next_page %}
-    {% if t and t != 'all' %}
-      {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&t='|add:t|add:'&page='|add:next_page %}
-    {% else %}
-      {% include "partials/feed_card.html" with post=post load_more_url=feed_url|add:'?tab='|add:tab|add:'&page='|add:next_page %}
-    {% endif %}
-  {% else %}
-    {% include "partials/feed_card.html" with post=post %}
-  {% endif %}
-  {% empty %}
-    <div class="empty-state" data-testid="empty-state">No posts yet.</div>
-  {% endfor %}
+{% include "posts/partials/feed_list.html" %}

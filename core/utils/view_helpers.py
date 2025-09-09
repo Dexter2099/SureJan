@@ -63,7 +63,7 @@ SORT_TABS = [
 def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
     """Render a list of posts and optional pagination link."""
     html = render_to_string(
-        "core/partials/post_list.html",
+        "posts/partials/post_list.html",
         {
             "posts": posts,
             "show_community": show_community,
