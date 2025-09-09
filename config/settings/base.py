@@ -151,10 +151,10 @@ INSTALLED_APPS = [
     "csp",   # django-csp
     "storages",
     "core",
+    "communities",   # needed because core.0001 depends on communities.0001
     "posts",
     "comments",
     "votes",
-    "communities",
 ]
 # explicitly lock the project to Django's built-in user
 AUTH_USER_MODEL = "auth.User"
