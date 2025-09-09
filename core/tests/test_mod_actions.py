@@ -3,7 +3,8 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Comment, Community, Post
+from core.models import Community, Post
+from comments.models import Comment
 
 
 class ModActionTests(TestCase):

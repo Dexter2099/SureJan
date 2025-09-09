@@ -1,7 +1,8 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from core.models import Community, Post, Comment
+from core.models import Community, Post
+from comments.models import Comment
 
 
 @pytest.fixture

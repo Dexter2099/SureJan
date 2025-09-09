@@ -5,7 +5,8 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Comment, Community, Post, Vote
+from core.models import Community, Post, Vote
+from comments.models import Comment
 from core.services.votes import cast_vote_comment_once
 
 

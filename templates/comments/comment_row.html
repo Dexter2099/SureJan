@@ -42,7 +42,7 @@
     {% if kids %}
       <div class="comment-children">
         {% for child in kids %}
-          {% include "core/partials/comment_row.html" with comment=child depth=depth|add:1 request=request user=user show_vote_widget=show_vote_widget only %}
+          {% include "comments/comment_row.html" with comment=child depth=depth|add:1 request=request user=user show_vote_widget=show_vote_widget only %}
         {% endfor %}
       </div>
     {% endif %}

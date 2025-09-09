@@ -29,6 +29,7 @@ urlpatterns = [
         "c/<slug:slug>/",
         RedirectView.as_view(pattern_name="community", permanent=True),
     ),
+    path("", include("comments.urls")),
     path("", include("core.urls")),
 ]
 

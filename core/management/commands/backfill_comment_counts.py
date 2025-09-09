@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 
-from core.models import Post, Comment
+from core.models import Post
+from comments.models import Comment
 
 
 class Command(BaseCommand):

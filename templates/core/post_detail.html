@@ -85,7 +85,7 @@
 
   <div id="comment-tree">
     {% for c in comments %}
-      {% include "core/partials/comment_row.html" with comment=c depth=0 request=request user=request.user only %}
+      {% include "comments/comment_row.html" with comment=c depth=0 request=request user=request.user only %}
     {% empty %}
       <p class="muted">No comments yet.</p>
     {% endfor %}

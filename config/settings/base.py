@@ -159,6 +159,7 @@ INSTALLED_APPS = [
     "csp",   # django-csp
     "storages",
     "core",
+    "comments",
 ]
 # explicitly lock the project to Django's built-in user
 AUTH_USER_MODEL = "auth.User"
