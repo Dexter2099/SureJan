@@ -34,6 +34,11 @@ python manage.py runserver
 
 Production secrets are set via `fly secrets` and should never be committed to the repo.
 
+## Docs
+
+- [Architecture](docs/architecture.md)
+- [Smoke Tests](docs/runbooks/smoke.md)
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
