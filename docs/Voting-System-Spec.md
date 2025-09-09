@@ -41,10 +41,11 @@
 **Posts** (comments are identical, substituting `comment` for `post`):
 
 ```python
-# core/services/votes.py
+# votes/services.py
 from django.db import transaction
 from django.db.models import Sum
-from core.models import Vote, Post
+from votes.models import Vote
+from core.models import Post
 
 class AlreadyVoted(Exception):
     pass
@@ -78,13 +79,13 @@ def cast_vote_post_once(user, post: Post, want: int) -> int:
 ## Views (POST‑only)
 
 ```python
-# core/views.py
+# votes/views.py
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseConflict
 from django.shortcuts import get_object_or_404, render
 from core.models import Post, Comment
-from core.services.votes import cast_vote_post_once, AlreadyVoted
+from votes.services import cast_vote_post_once, AlreadyVoted
 
 @login_required
 @require_POST

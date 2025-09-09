@@ -19,7 +19,6 @@ from django.db import DataError, IntegrityError
 from core.views import _is_banned, is_new_user, limit_or_429, _find_offending_field
 from core.pagination import PAGE_SIZE
 from core.models import Post
-from core.services.votes import AlreadyVoted, cast_vote_comment_once
 from core.http import login_required_htmx
 
 from .models import Comment
@@ -328,31 +327,3 @@ def comment_delete(request, pk):
         pk=comment.post.pk,
         slug=comment.post.slug,
     )
-
-
-@require_POST
-@login_required_htmx
-def vote_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-
-    try:
-        want = int(request.POST["v"])
-    except (KeyError, TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid vote")
-    if want not in (1, -1):
-        return HttpResponseBadRequest("Invalid vote")
-
-    try:
-        new_score = cast_vote_comment_once(request.user, comment, want)
-    except AlreadyVoted:
-        return HttpResponse(status=409)
-
-    if request.headers.get("HX-Request") == "true":
-        comment.refresh_from_db()
-        return render(
-            request,
-            "core/partials/vote_widget.html",
-            {"comment": comment, "voted": True},
-        )
-
-    return HttpResponse(f"<span id='comment-{comment.pk}-score'>{new_score}</span>")

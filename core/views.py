@@ -49,7 +49,6 @@ from comments.models import Comment
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
-from .services.votes import AlreadyVoted, cast_vote_post_once
 from . import mod
 from .http import login_required_htmx
 
@@ -1000,44 +999,6 @@ def post_domain_throttle(request, pk):
     post.refresh_from_db()
     html = render_to_string("core/partials/mod_controls.html", {"post": post}, request=request)
     return HttpResponse(html)
-
-
-@login_required
-@require_POST
-@csrf_protect
-
-
-@require_POST
-@login_required_htmx
-def vote_post(request, pk):
-    post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
-
-    try:
-        want = int(request.POST["v"])
-    except (KeyError, TypeError, ValueError):
-        return HttpResponseBadRequest("Invalid vote")
-    if want not in (1, -1):
-        return HttpResponseBadRequest("Invalid vote")
-
-    try:
-        new_score = cast_vote_post_once(request.user, post, want)
-    except AlreadyVoted:
-        return HttpResponse(status=409)
-
-    if request.headers.get("HX-Request") == "true":
-        post.refresh_from_db()
-        return render(
-            request,
-            "core/partials/vote_widget.html",
-            {"post": post, "voted": True},
-        )
-
-    return HttpResponse(f"<span id='post-{post.pk}-score'>{new_score}</span>")
-
-
-@require_POST
-@login_required_htmx
-
 
 @login_required
 @require_http_methods(["GET", "POST"])

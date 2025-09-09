@@ -37,7 +37,7 @@
 
   {% if not post.is_deleted %}
     <div class="post-actions">
-      {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
+      {% include "votes/partials/vote_widget.html" with post=post user=user request=request only %}
 
       {% include "core/partials/astro_chip_inline.html" with score=post.astro_score.score|default:severity %}
 

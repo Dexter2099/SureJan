@@ -30,6 +30,7 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="community", permanent=True),
     ),
     path("", include("comments.urls")),
+    path("", include("votes.urls")),
     path("", include("core.urls")),
 ]
 

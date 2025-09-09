@@ -6,7 +6,8 @@ Usage:
 
 from django.core.management.base import BaseCommand
 
-from core.models import Post, Vote
+from core.models import Post
+from votes.models import Vote
 from core.ranking import recompute_post_ranks
 
 

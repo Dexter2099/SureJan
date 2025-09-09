@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Community, Post
-from core.services.votes import cast_vote_post_once
+from votes.services import cast_vote_post_once
 
 
 @override_settings(ASTRO_EARLY_VOTES_N=5, ASTRO_MIN_EARLY_VOTES=3, ASTRO_EARLY_SHARE_RED=0.5)

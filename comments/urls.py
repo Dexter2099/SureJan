@@ -10,5 +10,4 @@ urlpatterns = [
     path("comments/new", views.comment_new, name="comment_new"),
     path("comments/create", views.comment_create, name="comment_create"),
     path("comments/children", views.comment_children, name="comment_children"),
-    path("comments/vote/<int:pk>/", views.vote_comment, name="vote_comment"),
 ]

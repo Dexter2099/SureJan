@@ -62,12 +62,12 @@ class RouteTests(TestCase):
         rf = RequestFactory()
         request = rf.get("/")
         html_post = render_to_string(
-            "core/partials/vote_widget.html", {"post": self.post}, request=request
+            "votes/partials/vote_widget.html", {"post": self.post}, request=request
         )
         self.assertIn("Log in to vote", html_post)
         self.assertIn(f'id="post-{self.post.pk}-score"', html_post)
         html_comment = render_to_string(
-            "core/partials/vote_widget.html", {"comment": self.comment}, request=request
+            "votes/partials/vote_widget.html", {"comment": self.comment}, request=request
         )
         self.assertIn("Log in to vote", html_comment)
         self.assertIn(f'id="comment-{self.comment.pk}-score"', html_comment)

@@ -5,9 +5,10 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community, Post, Vote
+from core.models import Community, Post
+from votes.models import Vote
 from comments.models import Comment
-from core.services.votes import cast_vote_comment_once
+from votes.services import cast_vote_comment_once
 
 
 class CommentDeleteTests(TestCase):
@@ -79,7 +80,7 @@ class CommentDeleteTests(TestCase):
             target_type="comment", target_id=self.comment.pk
         ).count()
         self.client.login(username="alice", password="pwd")
-        with patch("core.models.Vote.objects.filter") as mock_filter:
+        with patch("votes.models.Vote.objects.filter") as mock_filter:
             resp = self.client.post(self.url, HTTP_HX_REQUEST="true")
         self.assertEqual(resp.status_code, 200)
         mock_filter.assert_not_called()

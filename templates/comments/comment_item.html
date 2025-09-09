@@ -14,7 +14,7 @@
       <span class="edited" title="Edited {{ comment.edited_at|date:'Y-m-d H:i' }}">edited</span>
     {% endif %}
       {% if show_vote_widget is not False %}
-        {% include "core/partials/vote_widget.html" with comment=comment user=user request=request only %}
+        {% include "votes/partials/vote_widget.html" with comment=comment user=user request=request only %}
       {% else %}
         <span id="comment-{{ comment.pk }}-score-item" class="score">{{ comment.score }}</span>
       {% endif %}

@@ -6,7 +6,7 @@ from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
 
 from core.models import Community, Post, get_points
 from comments.models import Comment
-from core.services.votes import cast_vote_post_once, cast_vote_comment_once, AlreadyVoted
+from votes.services import cast_vote_post_once, cast_vote_comment_once, AlreadyVoted
 
 
 class VoteServiceTests(TestCase):

@@ -19,6 +19,7 @@ import logging
 import re
 
 from .ranking import recompute_post_ranks
+from votes.models import Vote
 
 
 class Community(models.Model):
@@ -209,27 +210,6 @@ class PostImageLink(models.Model):
 
         super().save(*args, **kwargs)
 
-
-
-class Vote(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    target_type = models.CharField(
-        max_length=10, choices=[("post", "post"), ("comment", "comment")]
-    )
-    target_id = models.PositiveBigIntegerField()
-    value = models.SmallIntegerField()
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=Q(target_type__in=["post", "comment"]),
-                name="vote_valid_target_type",
-            ),
-            models.UniqueConstraint(
-                fields=["user", "target_type", "target_id"],
-                name="uniq_vote_user_target",
-            ),
-        ]
 
 
 class RecoveryCode(models.Model):

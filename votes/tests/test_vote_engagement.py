@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from core.models import Community, EngagementEvent, Post
-from core.services.votes import cast_vote_post_once
+from votes.services import cast_vote_post_once
 
 
 class VoteEngagementTests(TestCase):

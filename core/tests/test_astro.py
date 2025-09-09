@@ -11,7 +11,7 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from core.models import Community, EngagementEvent, Post, CommunityBaseline
-from core.services.votes import cast_vote_post_once, AlreadyVoted
+from votes.services import cast_vote_post_once, AlreadyVoted
 from core.services.astro import compute_post_signals
 
 
