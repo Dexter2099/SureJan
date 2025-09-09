@@ -4,7 +4,7 @@ from django.conf.urls.static import static as serve_static
 from django.contrib import admin
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import TemplateView
 from django.http import HttpResponse
 
 from core import views as core
@@ -23,12 +23,7 @@ urlpatterns = [
     path("terms/", TemplateView.as_view(template_name="legal/terms.html"), name="terms"),
     path("privacy/", TemplateView.as_view(template_name="legal/privacy.html"), name="privacy"),
     path("rules/", TemplateView.as_view(template_name="legal/rules.html"), name="rules"),
-    path("r", core.communities_index, name="communities_index"),
-    path("r/<slug:slug>/", core.community, name="community"),
-    path(
-        "c/<slug:slug>/",
-        RedirectView.as_view(pattern_name="community", permanent=True),
-    ),
+    path("", include("communities.urls")),
     path("", include("comments.urls")),
     path("", include("votes.urls")),
     path("", include("core.urls")),

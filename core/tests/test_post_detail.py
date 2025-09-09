@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils.html import escape
 from django.contrib.auth import get_user_model
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 
 
 @pytest.mark.django_db

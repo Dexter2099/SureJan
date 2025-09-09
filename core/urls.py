@@ -33,12 +33,6 @@ urlpatterns = [
         name="recovery_codes_regenerate",
     ),
 
-    # Create a community
-    path("c/new/", core_views.create_community, name="community_create"),
-
-    # Community pages (slug-based, /r/<slug>/…)
-    path("r/<slug:slug>/wiki", core_views.community_wiki, name="community_wiki"),
-
     # Post detail (nested under community, with id + slug)
     path(
         "r/<slug:community>/comments/<int:pk>/<slug:slug>",

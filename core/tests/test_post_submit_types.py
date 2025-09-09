@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.urls import reverse
 from django.test import TestCase
-from core.models import Community, Post, RateLimitCounter
+from communities.models import Community
+from core.models import Post, RateLimitCounter
 
 
 class PostSubmitTests(TestCase):

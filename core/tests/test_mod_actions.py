@@ -3,7 +3,8 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 from comments.models import Comment
 
 

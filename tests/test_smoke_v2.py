@@ -4,7 +4,8 @@ from django.core.management import call_command
 from django.urls import reverse
 import re
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 
 
 @pytest.mark.django_db

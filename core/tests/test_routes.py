@@ -3,7 +3,8 @@ from django.template.loader import render_to_string
 from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 from comments.models import Comment
 
 

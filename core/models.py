@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
-from django.db.models.functions import Lower
 from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.hashers import make_password, check_password
@@ -18,29 +17,9 @@ from urllib.parse import urlparse
 import logging
 import re
 
+from communities.models import Community
 from .ranking import recompute_post_ranks
 from votes.models import Vote
-
-
-class Community(models.Model):
-    slug = models.SlugField(max_length=191, unique=True, db_index=True)
-    name = models.CharField(max_length=80)
-    title = models.CharField(max_length=80)
-    description = models.TextField(blank=True)
-    wiki_html = models.TextField(blank=True, null=True)
-    is_system = models.BooleanField(default=False, db_index=True)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="communities"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(Lower("name"), name="uniq_community_name_ci"),
-        ]
-
-    def __str__(self) -> str:
-        return f"c/{self.slug}"
 
 
 class Post(models.Model):
@@ -301,16 +280,6 @@ class PostBurstState(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
 
-class CommunityBaseline(models.Model):
-    community = models.OneToOneField(
-        Community, on_delete=models.CASCADE, related_name="baseline"
-    )
-    p95_votes_5m = models.FloatField(default=0)
-    p95_votes_15m = models.FloatField(default=0)
-    p10_comments_per_100_upvotes = models.FloatField(default=0)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class AstroScore(models.Model):
     post = models.OneToOneField(
         Post, on_delete=models.CASCADE, related_name="astro_score"
@@ -333,15 +302,6 @@ class AstroScore(models.Model):
 class AstroUserSummary(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="astro_summary"
-    )
-    avg_score = models.FloatField(default=0)
-    post_count = models.IntegerField(default=0)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-class AstroCommunitySummary(models.Model):
-    community = models.OneToOneField(
-        Community, on_delete=models.CASCADE, related_name="astro_summary"
     )
     avg_score = models.FloatField(default=0)
     post_count = models.IntegerField(default=0)

@@ -7,7 +7,7 @@ from django.test import TestCase
 from PIL import Image
 
 from core.forms import PostForm
-from core.models import Community
+from communities.models import Community
 
 
 class PostFormValidationTests(TestCase):

@@ -3,7 +3,8 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from urllib.parse import quote
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 from comments.models import Comment
 
 

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from core.models import Community
+from communities.models import Community
 
 class Command(BaseCommand):
     help = "Seed initial communities"

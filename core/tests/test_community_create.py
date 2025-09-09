@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community
+from communities.models import Community
 
 
 class CommunityCreateTests(TestCase):

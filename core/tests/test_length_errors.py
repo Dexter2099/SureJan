@@ -6,7 +6,8 @@ from django.db import DataError
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 
 
 class LengthErrorHandlingTests(TestCase):

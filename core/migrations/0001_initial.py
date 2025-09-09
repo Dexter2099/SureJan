@@ -2,7 +2,6 @@
 
 import django.core.validators
 import django.db.models.deletion
-import django.db.models.functions.text
 import django.utils.timezone
 from django.conf import settings
 from django.db import migrations, models
@@ -15,6 +14,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('communities', '0001_initial'),
     ]
 
     operations = [
@@ -26,41 +26,6 @@ class Migration(migrations.Migration):
                 ('post_count', models.IntegerField(default=0)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='astro_summary', to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Community',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(max_length=191, unique=True)),
-                ('name', models.CharField(max_length=80)),
-                ('title', models.CharField(max_length=80)),
-                ('description', models.TextField(blank=True)),
-                ('wiki_html', models.TextField(blank=True, null=True)),
-                ('is_system', models.BooleanField(db_index=True, default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='communities', to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='AstroCommunitySummary',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('avg_score', models.FloatField(default=0)),
-                ('post_count', models.IntegerField(default=0)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('community', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='astro_summary', to='core.community')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='CommunityBaseline',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('p95_votes_5m', models.FloatField(default=0)),
-                ('p95_votes_15m', models.FloatField(default=0)),
-                ('p10_comments_per_100_upvotes', models.FloatField(default=0)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('community', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='baseline', to='core.community')),
             ],
         ),
         migrations.CreateModel(
@@ -90,7 +55,7 @@ class Migration(migrations.Migration):
                 ('domain_weight', models.FloatField(default=1.0)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('community', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to='core.community')),
+                ('community', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to='communities.community')),
                 ('deleted_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -133,7 +98,7 @@ class Migration(migrations.Migration):
                 ('severity', models.FloatField(default=0)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='astro_scores', to=settings.AUTH_USER_MODEL)),
-                ('community', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='astro_scores', to='core.community')),
+                ('community', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='astro_scores', to='communities.community')),
                 ('post', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='astro_score', to='core.post')),
             ],
         ),
@@ -208,10 +173,6 @@ class Migration(migrations.Migration):
                 ('value', models.SmallIntegerField()),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
-        ),
-        migrations.AddConstraint(
-            model_name='community',
-            constraint=models.UniqueConstraint(django.db.models.functions.text.Lower('name'), name='uniq_community_name_ci'),
         ),
         migrations.AddIndex(
             model_name='post',

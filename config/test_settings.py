@@ -20,3 +20,5 @@ STORAGES = {
 
 MEDIA_ROOT = BASE_DIR / "test-media"
 
+ALLOWED_HOSTS = ["*"]
+

@@ -43,8 +43,8 @@ from django.utils.cache import patch_cache_control
 from django.contrib.contenttypes.models import ContentType
 from django_ratelimit.core import is_ratelimited
 from django.urls import reverse
-from .forms import PostForm, CommunityCreateForm
-from .models import Community, Post, RecoveryCode, Report
+from .forms import PostForm
+from .models import Post, RecoveryCode, Report
 from comments.models import Comment
 from .pagination import PAGE_SIZE
 from .services.astro import compute_post_signals, compute_user_post_summary
@@ -645,99 +645,6 @@ def post_submit(request):
     return render(request, "core/submit.html", {"form": form})
 
 
-@require_GET
-def communities_index(request):
-    """List available communities."""
-    sort = request.GET.get("sort", "hot")
-    if sort not in TAB_ORDER:
-        sort = "hot"
-
-    t = request.GET.get("t")
-    allowed = {"24h", "7d", "all"}
-    if sort != "top" or t not in allowed:
-        t = None
-    if sort == "top" and t is None:
-        t = "all"
-
-    communities = [
-        {"slug": "news", "name": "News"},
-        {"slug": "brisbane", "name": "Brisbane"},
-        {"slug": "history", "name": "History"},
-        {"slug": "politics", "name": "Politics"},
-        {"slug": "social", "name": "Social"},
-    ]
-
-    qs = ""
-    if sort != "hot":
-        qs = f"?sort={sort}"
-        if sort == "top" and t and t != "all":
-            qs += f"&t={t}"
-
-    ctx = {"communities": communities, "qs": qs, "sort": sort, "t": t}
-    return render(request, "core/communities_index.html", ctx)
-
-
-def community(request, slug):
-    """Display posts for a specific community."""
-    try:
-        community = Community.objects.get(slug=slug)
-    except Community.DoesNotExist:
-        return redirect("/")
-    sort = request.GET.get("sort", "hot")
-    if sort not in TAB_ORDER:
-        sort = "hot"
-
-    t = request.GET.get("t")
-    allowed = {"24h", "7d", "all"}
-    if sort != "top" or t not in allowed:
-        t = None
-    if sort == "top" and t is None:
-        t = "all"
-
-    page_param = request.GET.get("page", "1")
-    try:
-        requested = int(page_param)
-    except (TypeError, ValueError):
-        messages.error(request, "Invalid page number.")
-        return redirect(request.path)
-    if requested < 1:
-        messages.error(request, "Invalid page number.")
-        return redirect(request.path)
-
-    base_qs = community.posts.filter(is_deleted=False).select_related("author")
-    qs = feed_queryset(sort, t, base_qs=base_qs)
-
-    paginator = Paginator(qs, PAGE_SIZE)
-    page = max(1, min(requested, paginator.num_pages))
-    try:
-        page_obj = paginator.page(page)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
-    posts = list(page_obj.object_list)
-    next_page = page_obj.next_page_number() if page_obj.has_next() else None
-
-    sort_query = ""
-    if sort and sort != "hot":
-        sort_query += f"&sort={sort}"
-    if sort == "top" and t:
-        sort_query += f"&t={t}"
-
-    if request.headers.get("HX-Request") == "true":
-        return _render_posts(request, posts, next_page, sort_query=sort_query)
-
-    context = {
-        "community": community,
-        "community_slug": community.slug,
-        "posts": posts,
-        "next_page": next_page,
-        "sort_query": sort_query,
-        "sort": sort,
-        "t": t,
-        "sort_tabs": SORT_TABS,
-    }
-    return render(request, "core/community.html", context)
-
-
 
 
 def post_detail(request, community, pk, slug):
@@ -863,8 +770,6 @@ def post_detail_id(request, pk):
     return render(request, "core/post_detail.html", context)
 
 
-@login_required
-@require_http_methods(["GET", "POST"])
 def post_edit(request, pk):
     post = get_object_or_404(Post.objects.filter(is_deleted=False), pk=pk)
     if _is_banned(request.user):
@@ -1058,14 +963,6 @@ def report_list(request):
     return render(request, "core/report_list.html", {"reports": reports})
 
 
-def community_wiki(request, slug):
-    """Render the community wiki if available, otherwise show a stub."""
-
-    community = get_object_or_404(Community, slug=slug)
-    context = {"community": community}
-    return render(request, "core/community_wiki.html", context)
-
-
 def _get_profile_user(username):
     """Return the user object for the given username or 404."""
 
@@ -1170,26 +1067,3 @@ def unban_user(request, username):
     user.profile.is_banned = False
     user.profile.save(update_fields=["is_banned"])
     return redirect("user_overview", username=username)
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-@ratelimit(key="user", rate="5/m", method=["POST"], block=False)
-def create_community(request):
-    if not request.user.is_staff:
-        from django.core.exceptions import PermissionDenied
-        raise PermissionDenied
-    if _is_banned(request.user):
-        return HttpResponseForbidden("Account banned")
-    if request.method == "POST":
-        if is_ratelimited(request, group="community-create", key="user", rate="5/m", method=["POST"], increment=True):
-            return HttpResponse(status=429)
-        form = CommunityCreateForm(request.POST)
-        if form.is_valid():
-            community = form.save(commit=False)
-            community.created_by = request.user
-            community.save()
-            return redirect("community", slug=community.slug)
-    else:
-        form = CommunityCreateForm()
-    return render(request, "communities/create.html", {"form": form})

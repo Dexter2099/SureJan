@@ -4,7 +4,8 @@ from django.test import override_settings
 from django.urls import reverse
 
 from config import settings as conf_settings
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 
 
 @pytest.mark.django_db

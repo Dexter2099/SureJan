@@ -4,7 +4,8 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 from votes.services import cast_vote_post_once
 
 

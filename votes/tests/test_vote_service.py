@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
 
-from core.models import Community, Post, get_points
+from communities.models import Community
+from core.models import Post, get_points
 from comments.models import Comment
 from votes.services import cast_vote_post_once, cast_vote_comment_once, AlreadyVoted
 

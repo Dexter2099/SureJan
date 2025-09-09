@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community
+from communities.models import Community
 from core.views import SORT_TABS
 
 
