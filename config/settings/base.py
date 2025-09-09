@@ -9,7 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 # -----------------------------------------------------------------------------
 # Base
 # -----------------------------------------------------------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # -----------------------------------------------------------------------------
 # Security / Debug
@@ -158,6 +158,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "csp",   # django-csp
     "storages",
+    "communities",
     "core",
     "comments",
     "votes",

@@ -3,12 +3,8 @@ from django.utils import timezone
 from datetime import timedelta
 from math import floor, ceil
 
-from core.models import (
-    Community,
-    Post,
-    EngagementEvent,
-    CommunityBaseline,
-)
+from communities.models import Community, CommunityBaseline
+from core.models import Post, EngagementEvent
 
 
 def percentile(data, pct):

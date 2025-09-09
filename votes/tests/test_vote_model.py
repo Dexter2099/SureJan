@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.test import TestCase
 
-from core.models import Community, Post
+from communities.models import Community
+from core.models import Post
 from votes.models import Vote
 from comments.models import Comment
 
