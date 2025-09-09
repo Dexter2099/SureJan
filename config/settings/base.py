@@ -33,42 +33,33 @@ if dsn := os.getenv("SENTRY_DSN"):
     )
 
 # -----------------------------------------------------------------------------
-# Hosts / CSRF (Fly + optional Render) with env overrides
+# Hosts / CSRF with env overrides
 # -----------------------------------------------------------------------------
 FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "surejan")
+ALLOW_FLY = os.environ.get("SUREJAN_ALLOW_FLY", "") in ("1", "true", "True")
 
-DEFAULT_HOSTS = [
-    "localhost",
-    "127.0.0.1",
+LIVE_HOSTS = [
     "surejan.onrender.com",
-    f"{FLY_APP_NAME}.fly.dev",
-    ".fly.dev",
     "surejan.app",
     "www.surejan.app",
 ]
+if ALLOW_FLY:
+    LIVE_HOSTS.append(f"{FLY_APP_NAME}.fly.dev")
 
-_env_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
-if _env_hosts:
-    ALLOWED_HOSTS = ["*"] if _env_hosts == "*" else [h.strip() for h in _env_hosts.split(",") if h.strip()]
+_extra = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
+if _extra:
+    ALLOWED_HOSTS = ["*"] if _extra == "*" else [h.strip() for h in _extra.split(",") if h.strip()]
 else:
-    ALLOWED_HOSTS = DEFAULT_HOSTS
+    ALLOWED_HOSTS = LIVE_HOSTS.copy()
 
-ALLOWED_HOSTS = list(
-    sorted(
-        set(ALLOWED_HOSTS)
-        | {"surejan.app", "www.surejan.app"}
-    )
-)
+if ALLOWED_HOSTS != ["*"]:
+    ALLOWED_HOSTS = list(sorted(set(ALLOWED_HOSTS) | {"surejan.app", "www.surejan.app"}))
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://surejan.onrender.com",
-    f"https://{FLY_APP_NAME}.fly.dev",
-    "https://surejan.app",
-    "https://www.surejan.app",
-]
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in LIVE_HOSTS]
 _extra_csrf = os.environ.get("DJANGO_CSRF_TRUSTED", "").strip()
 if _extra_csrf:
     CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_csrf.split(",") if o.strip()]
+CSRF_TRUSTED_ORIGINS = list(sorted(set(CSRF_TRUSTED_ORIGINS)))
 
 # --- Dev proxy defaults (only in DEBUG) ---
 if DEBUG:
@@ -80,6 +71,9 @@ if DEBUG:
         "http://localhost:8888", "http://127.0.0.1:8888",
     }
     CSRF_TRUSTED_ORIGINS = list(sorted(set(CSRF_TRUSTED_ORIGINS + list(_dev_csrf))))
+elif ALLOW_FLY:
+    # Fly health checks send Host: localhost
+    ALLOWED_HOSTS = list(sorted(set(ALLOWED_HOSTS + ["localhost"])))
 
 # Respect Fly proxy for secure detection
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -255,6 +249,8 @@ STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 WHITENOISE_MANIFEST_STRICT = True
 
 # Required envs
+MEDIA_URL_RAW = os.getenv("MEDIA_URL", "")
+MEDIA_URL = MEDIA_URL_RAW.rstrip("/") + "/"
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
@@ -267,7 +263,7 @@ required = {
     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
     "AWS_S3_ENDPOINT_URL": AWS_S3_ENDPOINT_URL,
-    "MEDIA_URL": os.getenv("MEDIA_URL", ""),
+    "MEDIA_URL": MEDIA_URL_RAW,
 }
 
 # Basic placeholder detection so sample values like "your-bucket" don't enable S3
@@ -285,7 +281,6 @@ has_placeholders = any(
 
 USE_S3 = os.getenv("USE_S3", "1") in ("1", "true", "True")
 if USE_S3 and all(required.values()) and not has_placeholders and not IS_BUILD:
-    MEDIA_URL = required["MEDIA_URL"]
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_ADDRESSING_STYLE = "virtual"
