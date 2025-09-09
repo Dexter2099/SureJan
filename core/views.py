@@ -41,7 +41,6 @@ from django.core.cache import cache
 from django.utils.cache import patch_cache_control
 
 from django.contrib.contenttypes.models import ContentType
-from django_ratelimit.core import is_ratelimited
 from django.urls import reverse
 from .forms import PostForm
 from .models import Post, RecoveryCode, Report
@@ -51,6 +50,14 @@ from .services.astro import compute_post_signals, compute_user_post_summary
 from .services.feed import TAB_ORDER, RANGE_MAP, feed_queryset
 from . import mod
 from .http import login_required_htmx
+from .utils.view_helpers import (
+    _is_banned,
+    _find_offending_field,
+    _render_posts,
+    is_new_user,
+    limit_or_429,
+    SORT_TABS,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -98,43 +105,6 @@ def request_too_big(request, exception: RequestDataTooBig | None = None):
     return render(request, _error_template(request, 413), status=413)
 
 
-def _is_banned(user):
-    return getattr(getattr(user, "profile", None), "is_banned", False)
-
-
-def is_new_user(u):
-    if not u.is_authenticated:
-        return True
-    return (timezone.now() - u.date_joined) < timedelta(hours=24)
-
-
-def limit_or_429(request, group, rate):
-    return is_ratelimited(
-        request,
-        group=group,
-        key="user",
-        rate=rate,
-        method=["POST"],
-        increment=True,
-    )
-
-
-def _find_offending_field(form):
-    for name, field in form.fields.items():
-        value = form.data.get(name)
-        if value is None:
-            continue
-        try:
-            length = len(value)
-        except TypeError:
-            continue
-        maxlen = getattr(field, "max_length", None)
-        if maxlen and length > maxlen:
-            return name, length
-        for validator in field.validators:
-            if isinstance(validator, MaxLengthValidator) and length > validator.limit_value:
-                return name, length
-    return "unknown", 0
 
 
 markdown_renderer = mistune.create_markdown()
@@ -462,30 +432,6 @@ def regenerate_recovery_codes(request):
     _store_codes(request.user, codes)
     request.session["new_recovery_codes"] = codes
     return redirect("recovery_codes")
-
-
-SORT_TABS = [
-    ("hot", "HOT"),
-    ("new", "NEW"),
-    ("top", "TOP"),
-    ("wiki", "WIKI"),
-]
-
-
-def _render_posts(request, posts, next_page, show_community=False, sort_query=""):
-    """Render a list of posts and optional pagination link."""
-
-    html = render_to_string(
-        "core/partials/post_list.html",
-        {
-            "posts": posts,
-            "show_community": show_community,
-            "next_page": next_page,
-            "sort_query": sort_query,
-        },
-        request=request,
-    )
-    return HttpResponse(html)
 
 
 @require_GET

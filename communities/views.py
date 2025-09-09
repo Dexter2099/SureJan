@@ -9,7 +9,7 @@ from .forms import CommunityCreateForm
 from .models import Community
 from core.pagination import PAGE_SIZE
 from core.services.feed import TAB_ORDER, feed_queryset
-from core.views import SORT_TABS, _is_banned
+from core.utils.view_helpers import SORT_TABS, _is_banned
 
 
 @require_GET
@@ -90,7 +90,7 @@ def community(request, slug):
         sort_query += f"&t={t}"
 
     if request.headers.get("HX-Request") == "true":
-        from core.views import _render_posts
+        from core.utils.view_helpers import _render_posts
 
         return _render_posts(request, posts, next_page, sort_query=sort_query)
 

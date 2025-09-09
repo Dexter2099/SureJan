@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from communities.models import Community
-from core.views import SORT_TABS
+from core.utils.view_helpers import SORT_TABS
 
 
 class HistoryCommunityRoutingTests(TestCase):
