@@ -1,4 +1,3 @@
-from django.db.models import F
 from django.utils import timezone
 
 from core.models import Post
@@ -19,7 +18,6 @@ def create_comment(*, post: Post, author, body: str, parent: Comment | None = No
         body=body,
         path=path,
     )
-    Post.objects.filter(pk=post.pk).update(comment_count=F("comment_count") + 1)
     return comment
 
 

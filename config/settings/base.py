@@ -162,7 +162,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "csp",   # django-csp
     "storages",
-    "core",
+    "core.apps.CoreConfig",
     "communities",   # needed because core.0001 depends on communities.0001
     "posts",
     "comments",
