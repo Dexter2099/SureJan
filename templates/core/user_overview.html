@@ -14,7 +14,7 @@
 {% include "core/partials/user_tab_bar.html" %}
 {% for item in activity %}
   {% if item.type == 'post' %}
-    {% include "core/partials/post_row.html" with post=item.obj show_vote_widget=False %}
+    {% include "posts/partials/post_row.html" with post=item.obj show_vote_widget=False %}
   {% else %}
     {% include "comments/comment_row.html" with comment=item.obj request=request user=request.user show_vote_widget=False %}
   {% endif %}

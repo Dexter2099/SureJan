@@ -78,7 +78,7 @@ def preview_markdown(request):
     text = request.GET.get("body", "").strip() or request.GET.get("caption", "").strip()
     html = markdown_renderer(text)
     clean = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
-    return render(request, "core/partials/preview.html", {"html": mark_safe(clean)})
+    return render(request, "posts/partials/preview.html", {"html": mark_safe(clean)})
 
 
 @require_GET
@@ -92,7 +92,7 @@ def markdown_preview(request):
 
 
 def mission(request):
-    return render(request, "core/mission.html")
+    return render(request, "posts/mission.html")
 
 
 def anti_astroturf(request):
@@ -134,7 +134,7 @@ def render_preview(request):
         html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True
     )
     return render(
-        request, "core/partials/preview.html", {"html": mark_safe(clean)}
+        request, "posts/partials/preview.html", {"html": mark_safe(clean)}
     )
 
 
@@ -178,10 +178,10 @@ def feed_list(request):
             "tab": tab,
             "t": t,
         }
-        return render(request, "core/partials/feed_list.html", ctx)
+        return render(request, "posts/partials/feed_list.html", ctx)
 
     ctx = {"tab": tab, "t": t}
-    return render(request, "core/feed.html", ctx)
+    return render(request, "posts/feed.html", ctx)
 
 
 @require_GET
@@ -223,7 +223,7 @@ def home(request):
         "t": t,
         "sort_tabs": SORT_TABS,
     }
-    return render(request, "core/home.html", ctx)
+    return render(request, "posts/home.html", ctx)
 
 
 @ratelimit(key="user", rate="5/m", method=["POST"], block=False)
@@ -252,7 +252,7 @@ def post_submit(request):
             form.add_error(
                 None, "You're posting too fast. Please wait before trying again."
             )
-            return render(request, "core/submit.html", {"form": form}, status=429)
+            return render(request, "posts/submit.html", {"form": form}, status=429)
         if form.is_valid():
             post_type = form.cleaned_data["post_type"]
             post = Post(
@@ -279,7 +279,7 @@ def post_submit(request):
                 form.add_error(
                     None, "One or more fields exceed the allowed length."
                 )
-                return render(request, "core/submit.html", {"form": form}, status=400)
+                return render(request, "posts/submit.html", {"form": form}, status=400)
             messages.success(request, "Post submitted")
             return redirect(
                 "post_detail",
@@ -292,7 +292,7 @@ def post_submit(request):
     else:
         form = PostForm(initial=initial)
 
-    return render(request, "core/submit.html", {"form": form})
+    return render(request, "posts/submit.html", {"form": form})
 
 
 def post_detail(request, community, pk, slug):
@@ -354,7 +354,7 @@ def post_detail(request, community, pk, slug):
         "severity": severity,
         "severity_band": band,
     }
-    return render(request, "core/post_detail.html", context)
+    return render(request, "posts/post_detail.html", context)
 
 
 def post_detail_id(request, pk):
@@ -415,7 +415,7 @@ def post_detail_id(request, pk):
         "severity": severity,
         "severity_band": band,
     }
-    return render(request, "core/post_detail.html", context)
+    return render(request, "posts/post_detail.html", context)
 
 
 def post_edit(request, pk):
@@ -443,7 +443,7 @@ def post_edit(request, pk):
         form = PostForm(instance=post)
 
     context = {"form": form, "community": post.community, "post": post}
-    return render(request, "core/post_form.html", context)
+    return render(request, "posts/post_form.html", context)
 
 
 @require_POST

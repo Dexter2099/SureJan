@@ -27,7 +27,7 @@
     <a href="{{ detail_url }}#comments">{{ post.comment_count }} comments</a>
     {% with s=post.astro_score.score|default:'' %}
       {% if s %}
-        {% include "core/partials/astro_chip_inline.html" with score=s %}
+        {% include "posts/partials/astro_chip_inline.html" with score=s %}
       {% endif %}
     {% endwith %}
   </div>

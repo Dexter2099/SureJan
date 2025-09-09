@@ -1,0 +1,43 @@
+<article id="post-{{ post.pk }}" class="post-card" data-testid="post-card">
+  {% with detail_url=post.get_absolute_url %}
+    <div class="post-meta">
+      <a href="{% url 'community' post.community.slug %}">c/{{ post.community.slug }}</a> ·
+      {% if post.author %}
+      <a href="{% url 'user_overview' post.author.username %}">{{ post.author.username }}</a>
+      {% else %}[deleted]{% endif %} · {{ post.created_at|timesince }} ago
+    </div>
+    <h3 class="post-title"><a href="{{ detail_url }}">{{ post.title }}</a></h3>
+    {% if post.excerpt %}
+    <p class="post-excerpt">{{ post.excerpt }}</p>
+    {% endif %}
+    {% if post.post_type == "link" %}
+    {% include "partials/post_thumbnail.html" with post=post %}
+    {% elif post.image %}
+    <div class="thumb">
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" width="320" height="180" loading="lazy" decoding="async">
+    </div>
+    {% endif %}
+    <div class="post-actions">
+      {% if show_vote_widget is not False %}
+        {% include "votes/partials/vote_widget.html" with post=post user=user request=request only %}
+      {% else %}
+        <span id="post-{{ post.pk }}-score" class="score">{{ post.score }}</span>
+      {% endif %}
+      <a href="{{ post.get_absolute_url }}#comments">{{ post.comment_count }} comments</a>
+      {% with s=post.astro_score.score|default:'' %}
+        {% if s %}
+          {% include "posts/partials/astro_chip_inline.html" with score=s %}
+        {% endif %}
+      {% endwith %}
+      {% if not post.is_deleted %}
+        {% if request.user == post.author or request.user.is_staff %}
+          <form method="post" action="{% url 'post_delete_owner' post.pk %}" style="display:inline"
+                hx-post="{% url 'post_delete_owner' post.pk %}" hx-target="#post-{{ post.pk }}" hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete" aria-label="Delete post">&times;</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+  {% endwith %}
+</article>
