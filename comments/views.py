@@ -16,7 +16,12 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.db import DataError, IntegrityError
 
-from core.views import _is_banned, is_new_user, limit_or_429, _find_offending_field
+from core.utils.view_helpers import (
+    _find_offending_field,
+    _is_banned,
+    is_new_user,
+    limit_or_429,
+)
 from core.pagination import PAGE_SIZE
 from core.models import Post
 from core.http import login_required_htmx
