@@ -29,6 +29,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Run Django checks
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings
+          DJANGO_SECRET_KEY: ci-secret-key
+          DATABASE_URL: sqlite:///db.sqlite3
+          MEDIA_URL: https://example.com/media/
+        run: |
+          set -o pipefail
+          python manage.py check_env 2>&1 | tee check_env.log
+          python manage.py check
+          python manage.py makemigrations --check
+          python manage.py migrate --noinput
+          python manage.py check_schema 2>&1 | tee check_schema.log
+      - name: Summarize check results
+        run: |
+          echo "### check_env" >> $GITHUB_STEP_SUMMARY
+          cat check_env.log >> $GITHUB_STEP_SUMMARY
+          echo "### check_schema" >> $GITHUB_STEP_SUMMARY
+          cat check_schema.log >> $GITHUB_STEP_SUMMARY
       - name: Run tests
         env: { DJANGO_SETTINGS_MODULE: config.settings }
         run: pytest -q
