@@ -115,7 +115,14 @@ class Post(models.Model):
         recompute = kwargs.pop("recompute_hot", True)
 
         if not self.slug:
-            self.slug = slugify(self.title)[:191]
+            base = slugify(self.title)[:191]
+            slug = base
+            counter = 1
+            while Post.objects.filter(community=self.community, slug=slug).exclude(pk=self.pk).exists():
+                suffix = f"-{counter}"
+                slug = f"{base[:191 - len(suffix)]}{suffix}"
+                counter += 1
+            self.slug = slug
 
         if self.content_url:
             self.link_domain = urlparse(self.content_url).netloc.lower().lstrip("www.")
