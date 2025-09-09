@@ -17,7 +17,7 @@ primary_region = "syd"
   DATABASE_URL = "postgres://<user>:<pass>@surejan-db-green.internal:5432/surejan"
 
 [deploy]
-  # release_command = "python manage.py migrate --noinput"
+  release_command = "python manage.py migrate --noinput"
 
 [http_service]
   internal_port = 8000
