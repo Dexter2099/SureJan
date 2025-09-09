@@ -19,7 +19,7 @@
     {% endif %}
     <div class="post-actions">
       {% if show_vote_widget is not False %}
-        {% include "core/partials/vote_widget.html" with post=post user=user request=request only %}
+        {% include "votes/partials/vote_widget.html" with post=post user=user request=request only %}
       {% else %}
         <span id="post-{{ post.pk }}-score" class="score">{{ post.score }}</span>
       {% endif %}

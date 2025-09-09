@@ -5,8 +5,9 @@ from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
-from core.models import Community, Post, Vote
-from core.services.votes import cast_vote_post_once
+from core.models import Community, Post
+from votes.models import Vote
+from votes.services import cast_vote_post_once
 
 
 class PostDeleteOwnerTests(TestCase):

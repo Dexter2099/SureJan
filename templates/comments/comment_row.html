@@ -18,7 +18,7 @@
 
     <div class="comment-actions">
         {% if show_vote_widget is not False %}
-          {% include "core/partials/vote_widget.html" with comment=comment user=user request=request tag='div' only %}
+          {% include "votes/partials/vote_widget.html" with comment=comment user=user request=request tag='div' only %}
         {% else %}
           <span id="comment-{{ comment.pk }}-score" class="score">{{ comment.score }}</span>
         {% endif %}

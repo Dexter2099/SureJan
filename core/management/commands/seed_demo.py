@@ -11,7 +11,8 @@ import random
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from core.models import Community, Post, Vote
+from core.models import Community, Post
+from votes.models import Vote
 from comments.models import Comment
 from core.ranking import recompute_post_ranks
 

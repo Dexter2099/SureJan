@@ -3,16 +3,12 @@ from datetime import timedelta
 from django.db import transaction
 from django.db.models import Sum, F
 from django.utils import timezone
-from ..models import (
-    Vote,
-    Post,
-    UserProfile,
-    EngagementEvent,
-    PostBurstState,
-)
+
+from .models import Vote
+from core.models import Post, UserProfile, EngagementEvent, PostBurstState
 from comments.models import Comment
 
-from ..ranking import recompute_post_ranks
+from core.ranking import recompute_post_ranks
 
 
 class AlreadyVoted(Exception):

@@ -5,7 +5,8 @@ from django.core.cache import cache
 
 from django.utils import timezone
 
-from ..models import CommunityBaseline, Post, Vote, AstroScore, AstroUserSummary, AstroCommunitySummary
+from ..models import CommunityBaseline, Post, AstroScore, AstroUserSummary, AstroCommunitySummary
+from votes.models import Vote
 from django.db.models import Avg, Count
 
 

@@ -160,6 +160,7 @@ INSTALLED_APPS = [
     "storages",
     "core",
     "comments",
+    "votes",
 ]
 # explicitly lock the project to Django's built-in user
 AUTH_USER_MODEL = "auth.User"

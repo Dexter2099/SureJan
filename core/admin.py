@@ -5,7 +5,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     Community,
     Post,
-    Vote,
     UserProfile,
     Report,
     EngagementEvent,
@@ -89,11 +88,6 @@ class PostAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "post", "author", "score", "created_at")
     readonly_fields = ("score",)
-
-
-@admin.register(Vote)
-class VoteAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "target_type", "target_id", "value")
 
 
 class UserProfileInline(admin.StackedInline):

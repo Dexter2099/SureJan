@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 
 from core.models import Community, Post
-from core.services.votes import cast_vote_post_once
+from votes.services import cast_vote_post_once
 
 
 class HotRankTests(TestCase):
