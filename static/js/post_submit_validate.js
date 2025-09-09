@@ -9,9 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const image = form.querySelector('#id_image');
   const postBtn = document.querySelector('#post-btn');
   const postTypeRadios = form.querySelectorAll('input[name="post_type"]');
+  const imageRow = document.getElementById('row-image');
 
   const getType = () =>
     form.querySelector('input[name="post_type"]:checked')?.value;
+
+  // NEW: show/hide the image row without inline JS (CSP-safe)
+  const toggleImageRow = () => {
+    if (!imageRow) return;
+    imageRow.style.display = (getType() === 'image') ? '' : 'none';
+  };
 
   const validate = () => {
     const type = getType();
@@ -30,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (postBtn) postBtn.disabled = !ok;
+    toggleImageRow();
   };
 
   [title, body, contentUrl, image].forEach((el) => {
@@ -38,6 +46,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   postTypeRadios.forEach((el) => el.addEventListener('change', validate));
 
-  validate();
+  validate(); // also initializes visibility
 });
-
