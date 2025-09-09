@@ -3,7 +3,7 @@
 
 {% block content %}
 <h1>Create Post</h1>
-<form method="post" action="{% url 'post_submit' %}" class="post-form" enctype="multipart/form-data">
+<form method="post" action="{% url 'post_submit' %}" class="post-form" id="post-form" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="draft-pill" hidden></div>
   {{ form.non_field_errors }}
@@ -51,12 +51,11 @@
     {{ form.content_url.errors }}
   </div>
 
-  {% if form.post_type.value == "image" %}
-  <div class="form-row">
-    {{ form.image.label_tag }} {{ form.image }}
+  <div class="form-row" id="row-image" style="display:none">
+    {{ form.image.label_tag }}
+    <input type="file" name="image" id="id_image" accept="image/jpeg,image/png,image/webp">
     {{ form.image.errors }}
   </div>
-  {% endif %}
 
   <div class="form-actions">
     <button class="button" type="submit">Submit<span class="spinner" hidden aria-hidden="true"></span></button>
@@ -67,10 +66,21 @@
     {% endif %}
   </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const imgRow = document.getElementById('row-image');
+  const radios = document.querySelectorAll('input[name="post_type"]');
+  function toggle() {
+    const val = document.querySelector('input[name="post_type"]:checked')?.value;
+    imgRow.style.display = (val === 'image') ? '' : 'none';
+  }
+  radios.forEach(r => r.addEventListener('change', toggle));
+  toggle(); // initialize on load
+});
+</script>
 {% endblock %}
 
 {% block scripts %}
 {{ block.super }}
 <script src="{% static 'js/editor.js' %}" defer></script>
 {% endblock %}
-

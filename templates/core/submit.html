@@ -1,1 +1,16 @@
 {% include "posts/submit.html" %}
+
+{# Ensure image row toggles if included template lacks script #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const imgRow = document.getElementById('row-image');
+  const radios = document.querySelectorAll('input[name="post_type"]');
+  if (!imgRow || radios.length === 0) return;
+  function toggle() {
+    const val = document.querySelector('input[name="post_type"]:checked')?.value;
+    imgRow.style.display = (val === 'image') ? '' : 'none';
+  }
+  radios.forEach(r => r.addEventListener('change', toggle));
+  toggle();
+});
+</script>
