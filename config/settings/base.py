@@ -250,8 +250,12 @@ STORAGES = {"staticfiles": {"BACKEND": STATICFILES_STORAGE}}
 WHITENOISE_MANIFEST_STRICT = True
 
 # Required envs
-MEDIA_URL_RAW = os.getenv("MEDIA_URL", "")
-MEDIA_URL = MEDIA_URL_RAW.rstrip("/") + "/"
+MEDIA_URL_RAW = os.getenv("MEDIA_URL")
+if MEDIA_URL_RAW:
+    MEDIA_URL = MEDIA_URL_RAW.rstrip("/") + "/"
+else:
+    # Dev fallback only when env var absent
+    MEDIA_URL = "/media/"
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
@@ -264,7 +268,7 @@ required = {
     "AWS_ACCESS_KEY_ID": AWS_ACCESS_KEY_ID,
     "AWS_SECRET_ACCESS_KEY": AWS_SECRET_ACCESS_KEY,
     "AWS_S3_ENDPOINT_URL": AWS_S3_ENDPOINT_URL,
-    "MEDIA_URL": MEDIA_URL_RAW,
+    "MEDIA_URL": MEDIA_URL,  # expose the effective URL to templates
 }
 
 # Basic placeholder detection so sample values like "your-bucket" don't enable S3
@@ -293,7 +297,7 @@ else:
     # serve media from /media/.
     DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
     MEDIA_ROOT = BASE_DIR / "media"
-    MEDIA_URL = "/media/"
+    # Do NOT override MEDIA_URL here; keep the env value if provided.
 
 # Ensure STORAGES['default'] points to the active storage backend
 STORAGES["default"] = {"BACKEND": DEFAULT_FILE_STORAGE}
