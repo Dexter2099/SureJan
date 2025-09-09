@@ -41,7 +41,6 @@ DEFAULT_HOSTS = [
     "localhost",
     "127.0.0.1",
     "surejan.onrender.com",
-    "surejan.fly.dev",
     f"{FLY_APP_NAME}.fly.dev",
     ".fly.dev",
     "surejan.app",
@@ -63,7 +62,6 @@ ALLOWED_HOSTS = list(
 
 CSRF_TRUSTED_ORIGINS = [
     "https://surejan.onrender.com",
-    "https://surejan.fly.dev",
     f"https://{FLY_APP_NAME}.fly.dev",
     "https://surejan.app",
     "https://www.surejan.app",
@@ -74,7 +72,7 @@ if _extra_csrf:
 
 # --- Dev proxy defaults (only in DEBUG) ---
 if DEBUG:
-    _dev_allowed = {"localhost", "127.0.0.1", "surejan.internal", "surejan.fly.dev"}
+    _dev_allowed = {"localhost", "127.0.0.1", "surejan.internal"}
     ALLOWED_HOSTS = list(sorted(set(ALLOWED_HOSTS) | _dev_allowed))
     # allow HTTP localhost origins for forms while using the proxy
     _dev_csrf = {
@@ -318,7 +316,7 @@ else:
     EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "0") in ("1", "true", "True")
     EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0") in ("1", "true", "True")
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@surejan.fly.dev")
+DEFAULT_FROM_EMAIL = "no-reply@surejan.app"
 
 # -----------------------------------------------------------------------------
 # Misc
