@@ -3,6 +3,8 @@
 import hashlib
 import json
 import logging
+import os
+from io import BytesIO
 
 import bleach
 import mistune
@@ -12,6 +14,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.paginator import EmptyPage, Paginator
+from django.core.files.base import ContentFile
 from django.db import DataError, IntegrityError
 from django.db.models import F
 from django.http import (
@@ -32,6 +35,7 @@ from django.views.decorators.http import (
     require_http_methods,
 )
 from django_ratelimit.decorators import ratelimit
+from PIL import Image, UnidentifiedImageError
 
 from .forms import PostForm
 from core.models import Post
@@ -264,9 +268,42 @@ def post_submit(request):
             )
 
             if post_type == "image":
-                image = form.cleaned_data.get("image")
-                if image:
-                    post.image = image
+                uploaded = form.cleaned_data.get("image")
+                if uploaded:
+                    # Verify the uploaded image with Pillow
+                    try:
+                        Image.open(uploaded).verify()
+                    except UnidentifiedImageError:
+                        form.add_error("image", "Uploaded file is not a valid image.")
+                        return render(request, "posts/submit.html", {"form": form}, status=400)
+
+                    # Reset pointer after verify()
+                    try:
+                        uploaded.seek(0)
+                    except Exception:
+                        pass
+
+                    # Save original
+                    post.image = uploaded
+
+                    # Create a lightweight JPEG thumbnail (~480px width)
+                    try:
+                        uploaded.seek(0)
+                    except Exception:
+                        pass
+                    img = Image.open(uploaded).convert("RGB")
+                    w, h = img.size
+                    max_w = 480
+                    if w > max_w:
+                        new_h = int(h * (max_w / float(w)))
+                        img = img.resize((max_w, new_h), Image.LANCZOS)
+
+                    buf = BytesIO()
+                    img.save(buf, format="JPEG", quality=80, optimize=True)
+                    thumb_file = ContentFile(buf.getvalue())
+
+                    base = os.path.splitext(os.path.basename(uploaded.name))[0]
+                    post.image_thumb.save(f"thumb_{base}.jpg", thumb_file, save=False)
                 else:
                     post.content_url = form.cleaned_data.get("content_url", "")
             elif post_type == "link":
