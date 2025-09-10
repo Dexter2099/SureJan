@@ -1,5 +1,7 @@
 @import "tokens.css";
 
+html { font-size: 90%; }
+
 /* Light theme variables */
 :root{
   --color-bg:#ffffff;
