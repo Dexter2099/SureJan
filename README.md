@@ -2,7 +2,7 @@
 
 SureJan is a lightweight, local-first forum inspired by old Reddit, built with Django + HTMX + Postgres, deployed on Fly.io. It relies on Django's built-in authentication system and default `auth.User` model.
 
-Status: live at surejan.app
+Status: live at https://surejan.app/mission
 
 ## Anti-astroturfing
 
