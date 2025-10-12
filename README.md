@@ -1,28 +1,49 @@
 # SureJan
 
-SureJan is a lightweight, local-first forum inspired by old Reddit, built with Django + HTMX + Postgres, deployed on Fly.io. It relies on Django's built-in authentication system and default `auth.User` model.
+SureJan is an independent, local-first forum inspired by old Reddit — built with **Django + HTMX + Postgres**, deployed on **Fly.io**.  
+It’s designed to give real communities a place to speak freely, without interference from algorithms, astroturfing, or corporate manipulation.
 
-Status: live at https://surejan.app/mission
+**Status:** Live at [https://surejan.app/mission](https://surejan.app/mission)
 
-## Anti-astroturfing
+---
 
-SureJan includes a built‑in defence against coordinated manipulation:
+## 🌱 Mission: Real Voices, Not Manufactured Consensus
 
-- Early votes are analysed in 30‑second buckets and grouped over 300 seconds.
-- Votes from new accounts are weighted differently to limit sockpuppet impact.
-- A threshold-based flagging system slows posts when the risk score rises, placing them in slowmode for review.
-- Only aggregate patterns are reviewed; personal data is never stored.
+SureJan was created to fight **astroturfing** — the practice of disguising coordinated influence operations as “grassroots” opinion.  
+Our goal is to restore authenticity to online discussion by building transparent guardrails around how influence spreads.
 
-## Run locally
+We believe in:
+
+- **Local-first design** – built for Brisbane, open for all.  
+- **Transparency and fairness** – visible moderation and public rules.  
+- **Privacy by default** – no tracking, no algorithmic feeds.  
+- **Authenticity over astroturf** – protection against coordinated manipulation.  
+- **Simplicity and speed** – old-school forums that load instantly and last.
+
+---
+
+## 🛡️ Anti-Astroturfing Engine
+
+SureJan includes a built-in defence layer that detects and slows coordinated manipulation:
+
+- Votes are bucketed into **30-second intervals** and analysed over **300-second windows**.
+- **New account votes** are weighted differently to reduce sockpuppet power.
+- A **threshold-based slowmode** activates when risk scores rise.
+- Only **aggregate patterns** are stored — never personal data.
+
+These systems aim to make human conversation resilient against synthetic consensus.
+
+---
+
+## ⚙️ Run Locally
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env   # Or create manually on Windows
+copy .env.example .env
 python manage.py migrate
 python manage.py runserver
-```
 
 ### Environment variables
 
