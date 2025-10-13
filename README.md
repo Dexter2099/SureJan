@@ -1,6 +1,6 @@
 🧩 The Problem
 
-Online discussions are increasingly distorted by astroturfing — coordinated influence disguised as public opinion.
+Online discussions are increasingly distorted by astroturfing, or coordinated influence disguised as public opinion.
 A clear symptom of this manipulation can be seen in posts that receive hundreds of comments but almost no votes.
 This unnatural ratio suggests the presence of brigading, mass-comment bots, or hidden moderation bias, where engagement is artificially inflated to shape perception rather than reflect genuine community sentiment.
 SureJan exists to expose and counteract these patterns by restoring authentic, organic discourse to community spaces.
