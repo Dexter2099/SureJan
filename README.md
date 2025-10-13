@@ -1,3 +1,13 @@
+🧩 The Problem
+
+Online discussions are increasingly distorted by astroturfing — coordinated influence disguised as public opinion.
+A clear symptom of this manipulation can be seen in posts that receive hundreds of comments but almost no votes.
+This unnatural ratio suggests the presence of brigading, mass-comment bots, or hidden moderation bias, where engagement is artificially inflated to shape perception rather than reflect genuine community sentiment.
+SureJan exists to expose and counteract these patterns by restoring authentic, organic discourse to community spaces.
+
+<img width="913" height="1032" alt="ScreenShot Tool -20251011084525" src="https://github.com/user-attachments/assets/2c33e390-b4cb-41be-a517-7f7382486712" />
+
+
 # SureJan
 
 SureJan is an independent, local-first forum inspired by old Reddit — built with **Django + HTMX + Postgres**, deployed on **Fly.io**.  
