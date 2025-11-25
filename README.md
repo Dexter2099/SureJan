@@ -13,7 +13,7 @@ SureJan exists to expose and counteract these patterns by restoring authentic, o
 SureJan is an independent, local-first forum inspired by old Reddit — built with **Django + HTMX + Postgres**, deployed on **Fly.io**.  
 It’s designed to give real communities a place to speak freely, without interference from algorithms, astroturfing, or corporate manipulation.
 
-**Status:** currently not live. [https://surejan.app/mission](https://surejan.app/mission)
+**Status:** live at [https://surejan.app/mission](https://surejan.app/mission)
 
 ---
 
